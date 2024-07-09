@@ -134,7 +134,7 @@ namespace ProjectProgressManagementSystem.Services.Implementations
         // create a new user
         public async Task<UserViewModel> CreateAsync(UserCreateViewModel user)
         {
-            var existingUser = await _context.Users.AnyAsync(u => u.DateDeleted == null && (u.EmpId == user.EmpId || u.Email == user.Email));
+            var existingUser = await _context.Users.AnyAsync(u => u.DateDeleted == null && ((user.EmpId != null && u.EmpId == user.EmpId) || u.Email == user.Email));
             if (existingUser)
             {
                 throw new DuplicateEntityException("User already exists");

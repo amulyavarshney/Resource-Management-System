@@ -134,7 +134,7 @@ namespace ProjectProgressManagementSystem.Maps.ModelMappers
 
         public static PasswordViewModel ToEntity(User user, string? oldPassword, string newPassword)
         {
-            if (!VerifyPasswordHash(oldPassword, user.PasswordHash, user.PasswordSalt))
+            if (oldPassword != null && !VerifyPasswordHash(oldPassword, user.PasswordHash, user.PasswordSalt))
             {
                 throw new PasswordMismatchException();
             }

@@ -6,7 +6,7 @@ namespace ProjectProgressManagementSystem.ViewModels.User
     {
         [Required]
         [EmailAddress]
-        [RegularExpression("^[a-zA-Z0-9._%+-]+@zeiss\\.com$")]
+        [RegularExpression("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$")]
         public string Email { get; set; }
 
         [MinLength(8)]

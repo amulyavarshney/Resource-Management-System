@@ -19,9 +19,9 @@ export default function ChangePassword({ user }: ChangePasswordProps) {
 			if (user) {
 				await userService.changePassword(
 					user.id,
-					oldPassword,
 					newPassword,
-					confirmPassword
+					confirmPassword,
+					oldPassword
 				);
 				setOldPassword("");
 				setNewPassword("");

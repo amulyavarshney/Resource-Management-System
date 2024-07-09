@@ -18,7 +18,7 @@ namespace ProjectProgressManagementSystem.Extensions
         {
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Development"), providerOptions => { providerOptions.EnableRetryOnFailure(); })
+                options.UseSqlServer(builder.Configuration.GetConnectionString("RMS_Production"), providerOptions => { providerOptions.EnableRetryOnFailure(); })
                 .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Infrastructure.Name });
             });
 

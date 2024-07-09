@@ -203,9 +203,9 @@ class UserService {
 
 	async changePassword(
 		id: number,
-		oldPassword: string,
 		newPassword: string,
-		confirmPassword: string
+		confirmPassword: string,
+		oldPassword?: string,
 	) {
 		try {
 			if (newPassword !== confirmPassword) {

@@ -1,10 +1,10 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import MailService from "@/app/api/mail/mail";
+import userService from "@/app/api/services/user";
+import toast from "react-hot-toast";
 
 export default function ResetPassword() {
 	const [email, setEmail] = useState("");
@@ -16,14 +16,18 @@ export default function ResetPassword() {
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		const user = await userService.getUserByEmail(email);
+		const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL;
+		const url = `${baseUrl}/auth/changePassword/${user.id}`;
+		console.log("url: ", url);
 		const message =
-			`<div>
-			<h1>Have you forgotten your password?</h1>
-			<p>Your request for password change is successful. Please <a href="#" style="color: blue; text-decoration: underline;">click here</a> to reset your password.</p>
-			<p>This is a system generated mail, please do not respond. For any queries, please write to <a href="mailto:amulya.varshney@rms.com" style="color: blue;">amulya.varshney@rms.com</a>.</p>
-			<p>Regards,<br>Team RMS</p>
-			</div>`;
-
+    		`<div>
+    		<h1>Have you forgotten your password?</h1>
+    		<p>Your request for password change is successful. Please <a href=${`${baseUrl}/auth/changePassword/${user.id}`} style="color: blue; text-decoration: underline;">click here</a> to reset your password.</p>
+    		<p>This is a system generated mail, please do not respond. For any queries, please write to <a href="mailto:amulya.varshney@rms.com" style="color: blue;">amulya.varshney@rms.com</a>.</p>
+    		<p>Regards,<br>Team RMS</p>
+    		</div>`;
+		console.log(message);
 		// Call your mail service's send method
 		MailService.send(
 			`Forgot your password?`,
@@ -34,6 +38,7 @@ export default function ResetPassword() {
 			[],
 			[],
 		);
+		toast.success("Password reset mail sent successfully.");
 	};
 
 	return (

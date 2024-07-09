@@ -6,6 +6,7 @@ import { Department, Region, Role } from "@/nextauth.d";
 import CredentialProvider from "next-auth/providers/credentials";
 // import authService from "@/app/api/services/auth";
 import userService, { User } from "@/app/api/services/user";
+import authService from "@/app/api/services/auth";
 
 // const prisma = new PrismaClient();
 
@@ -79,14 +80,21 @@ const authOptions: NextAuthOptions = {
 					};
 					return { ...developer, name: userService.getFullName(developer) };
 				}
-				const user = await userService.getUserByEmail(credentials.email);
+				// const user = await userService.getUserByEmail(credentials.email);
 				// sessionStorage[user.id] = user;
 
-				if (!user || credentials.password !== "CarlZeiss") {
-					throw new Error(`Either Email or Password is incorrect.`);
+				// if (!user || credentials.password !== "Amulya@123") {
+				// 	throw new Error(`Either Email or Password is incorrect.`);
+				// }
+
+				// return { ...user, name: userService.getFullName(user) };
+
+				const token = await authService.login(credentials);
+				if(token) {
+					const user = await userService.getUserByEmail(credentials.email);
+					return { ...user, name: userService.getFullName(user) };
 				}
-				// const jwtToken = await authService.login(credentials);
-				return { ...user, name: userService.getFullName(user) };
+				return null;
 			},
 		}),
 	],

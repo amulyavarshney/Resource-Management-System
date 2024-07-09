@@ -12,7 +12,7 @@ using ProjectProgressManagementSystem.DataAccess;
 namespace ProjectProgressManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240628102419_InitialCreate")]
+    [Migration("20240709054039_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

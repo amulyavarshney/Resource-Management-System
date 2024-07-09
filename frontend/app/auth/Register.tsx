@@ -3,7 +3,8 @@ import { Department, Region, Role } from "@/nextauth.d";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import userService, { UserCreateViewModel } from "@/app/api/services/user";
+import { UserCreateViewModel } from "@/app/api/services/user";
+import authService from "../api/services/auth";
 
 type RegisterProps = {
 	updateIsLogin: () => void;
@@ -20,13 +21,13 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 		firstName: "",
 		lastName: "",
 		email: "",
-		department: Department.None,
+		department: Department.D1,
 		region: Region.India,
-		role: Role.Employee,
+		role: Role.Developer,
 		workHoursPerDay: 8,
 		password: "",
 		confirmPassword: "",
-		parentId: 0,
+		parentId: 1,
 	});
 
 	const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,9 +41,8 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 			return;
 		}
 		try {
-			await userService.addUser(user);
-			toast.success(`User is registered successfully`);
-			router.push("/profile");
+			await authService.register(user);
+			// router.push("/profile");
 		} catch (error) {
 			toast.error(`Failed to registered: ${error}`);
 		}
@@ -66,7 +66,7 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 				<form className="dark:[color-scheme:dark] space-y-4" onSubmit={registerUser}>
 					{/* <div>
 						<label
-							htmlFor="name"
+							htmlFor="userName"
 							className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
 						>
 							User Name
@@ -85,6 +85,48 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 							/>
 						</div>
 					</div> */}
+					<div>
+						<label
+							htmlFor="firstName"
+							className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+						>
+							First Name
+						</label>
+						<div className="mt-2">
+							<input
+								id="firstName"
+								name="firstName"
+								type="text"
+								value={user.firstName}
+								autoComplete="name"
+								required
+								className="block px-3 w-full rounded-md border-0 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								placeholder="Enter your First Name"
+								onChange={handleChange}
+							/>
+						</div>
+					</div>
+					<div>
+						<label
+							htmlFor="lastName"
+							className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+						>
+							Last Name
+						</label>
+						<div className="mt-2">
+							<input
+								id="lastName"
+								name="lastName"
+								type="text"
+								value={user.lastName}
+								autoComplete="name"
+								required
+								className="block px-3 w-full rounded-md border-0 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								placeholder="Enter your Last Name"
+								onChange={handleChange}
+							/>
+						</div>
+					</div>
 					<div>
 						<label
 							htmlFor="email"

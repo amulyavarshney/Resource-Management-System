@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 // import { ReactComponent as BrandIcon } from './brand-icon.svg'; // replace this with the path of your brand icon
 
