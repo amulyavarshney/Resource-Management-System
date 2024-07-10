@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Department, Region, Role } from "@/nextauth.d";
 import userService, {
@@ -50,7 +50,8 @@ export default function AddUsers() {
 		setUser({ ...user, [e.target.name]: e.target.value });
 	};
 
-	const handleAdd = async () => {
+	const handleAdd = async (e: FormEvent) => {
+		e.preventDefault();
 		await userService.addUser(user);
 	};
 

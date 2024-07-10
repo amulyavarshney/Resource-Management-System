@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Department, Region } from "@/nextauth.d";
 import projectService, {
@@ -35,7 +35,8 @@ export default function AddProjects() {
 		setProject({ ...project, [e.target.name]: e.target.value });
 	};
 
-	const handleAdd = async () => {
+	const handleAdd = async (e: FormEvent) => {
+		e.preventDefault();
 		await projectService.addProject(project);
 	};
 

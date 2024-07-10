@@ -46,9 +46,19 @@ export default function Login({ updateIsLogin }: LoginProps) {
 				<h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-gray-100">
 					Sign in to your account
 				</h2>
+				<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
+					To test, login using email address:{" "}
+					<span className="font-bold">developer@rms.com</span>
+				</h3>
+				<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
+					password: <span className="font-bold">Developer</span>
+				</h3>
 			</div>
 			<div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-				<form className="dark:[color-scheme:dark] space-y-4" onSubmit={handleSignIn}>
+				<form
+					className="dark:[color-scheme:dark] space-y-4"
+					onSubmit={handleSignIn}
+				>
 					<div>
 						<label
 							htmlFor="email"
@@ -110,7 +120,10 @@ export default function Login({ updateIsLogin }: LoginProps) {
 					</div>
 					<div className="flex items-center justify-between text-sm">
 						<div className="flex items-center gap-1">
-							<input type="checkbox" className=" border border-gray-900 dark:border-gray-100 leading-loose" />
+							<input
+								type="checkbox"
+								className=" border border-gray-900 dark:border-gray-100 leading-loose"
+							/>
 							<label
 								htmlFor="remember"
 								className="font-medium text-gray-900 dark:text-gray-100"
@@ -136,15 +149,16 @@ export default function Login({ updateIsLogin }: LoginProps) {
 				</form>
 
 				<div className="mt-10 text-center text-sm text-gray-500">
-                    <div className="h-0 my-2 border border-solid border-gray-300 dark:border-gray-600" />
-                    Not a member?
-                    <button type="button"
-                        className="px-3 font-semibold leading-6 text-indigo-600 hover:text-indigo-500 cursor-pointer"
-                        onClick={updateIsLogin}
-                    >
-                        Register Now
-                    </button>
-                </div>
+					<div className="h-0 my-2 border border-solid border-gray-300 dark:border-gray-600" />
+					Not a member?
+					<button
+						type="button"
+						className="px-3 font-semibold leading-6 text-indigo-600 hover:text-indigo-500 cursor-pointer"
+						onClick={updateIsLogin}
+					>
+						Register Now
+					</button>
+				</div>
 			</div>
 		</div>
 	);

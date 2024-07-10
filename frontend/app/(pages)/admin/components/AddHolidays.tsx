@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import ImportFromExcel, { AddField } from "./ImportFromExcel";
 import holidayService, {
 	HolidayBase,
@@ -14,7 +14,8 @@ export default function AddHolidays() {
 		type: HolidayType.Compulsory,
 	});
 
-	const handleAdd = async () => {
+	const handleAdd = async (e: FormEvent) => {
+		e.preventDefault();
 		await holidayService.addHoliday(holiday, undefined, session?.user.region);
 	};
 

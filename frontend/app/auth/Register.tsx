@@ -27,7 +27,7 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 		workHoursPerDay: 8,
 		password: "",
 		confirmPassword: "",
-		parentId: 1,
+		parentId: 0,
 	});
 
 	const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +42,8 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 		}
 		try {
 			await authService.register(user);
-			// router.push("/profile");
+			toast.success("User is registered successfully!");
+			updateIsLogin();
 		} catch (error) {
 			toast.error(`Failed to registered: ${error}`);
 		}

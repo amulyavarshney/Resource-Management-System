@@ -141,7 +141,7 @@ namespace ProjectProgressManagementSystem.Services.Implementations
             }
 
             var parent = await _context.Users.AnyAsync(u => u.Id == user.ParentId);
-            if (!parent)
+            if (user.ParentId != 0 && !parent)
             {
                 throw new OperationNotSupportedException("Parent does not exists");
             }
