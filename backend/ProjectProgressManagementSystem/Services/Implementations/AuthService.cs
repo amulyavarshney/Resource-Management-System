@@ -67,7 +67,6 @@ namespace ProjectProgressManagementSystem.Services.Implementations
                 new Claim(ClaimTypes.Email, userDb.Email),
                 new Claim("Role", userDb.Role.ToString()),
             };
-            Console.WriteLine(claims[1].ToString());
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSecret));
             var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

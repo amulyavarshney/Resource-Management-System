@@ -5,7 +5,7 @@ import { Department, Region, Role } from "@/nextauth.d";
 // import EmailProvider from "next-auth/providers/email";
 import CredentialProvider from "next-auth/providers/credentials";
 // import authService from "@/app/api/services/auth";
-import userService, { User } from "@/app/api/services/user";
+import userService from "@/app/api/services/user";
 import authService from "@/app/api/services/auth";
 
 // const prisma = new PrismaClient();
@@ -35,7 +35,7 @@ const authOptions: NextAuthOptions = {
 					placeholder: "Password",
 				},
 			},
-			async authorize(credentials) {
+            async authorize(credentials) {
 				// if (Cookies.get('rememberMe')) {
 				// 	credentials = JSON.parse(Cookies.get('rememberMe'));
 				// }
@@ -45,41 +45,7 @@ const authOptions: NextAuthOptions = {
 				// else if (!credentials.email.endsWith("@rms.com")) {
 				// 	credentials.email += "@rms.com";
 				// }
-
-				if (
-					credentials.email === "developer@rms.com" &&
-					credentials.password === "Developer"
-				) {
-					const department = Object.values(Department).reduce(
-						(acc, value) => acc | Department[value as keyof typeof Department],
-						0
-					);
-					const region = Object.values(Region).reduce(
-						(acc, value) => acc | Region[value as keyof typeof Region],
-						0
-					);
-					const developer: User = {
-						id: 0,
-						empId: 0,
-						userName: "Developer",
-						firstName: "Amulya",
-						lastName: "Varshney",
-						email: "developer@rms.com",
-						isExternal: false,
-						department: department,
-						region: region,
-						role: Role.Developer,
-						workHoursPerDay: 8,
-						parentId: 0,
-						lastSavedTime: new Date(),
-						week1Hours: 0,
-						week2Hours: 0,
-						week3Hours: 0,
-						week4Hours: 0,
-						week5Hours: 0,
-					};
-					return { ...developer, name: userService.getFullName(developer) };
-				}
+                
 				// const user = await userService.getUserByEmail(credentials.email);
 				// sessionStorage[user.id] = user;
 
@@ -89,11 +55,15 @@ const authOptions: NextAuthOptions = {
 
 				// return { ...user, name: userService.getFullName(user) };
 
-				const token = await authService.login(credentials);
-				if(token) {
-					const user = await userService.getUserByEmail(credentials.email);
-					return { ...user, name: userService.getFullName(user) };
-				}
+                const token = await authService.login(credentials);
+                if (token && typeof document !== "undefined") {
+                    // Persist backend token for axios interceptor
+                    document.cookie = `backendToken=${token}; path=/; max-age=${60 * 60 * 2}; SameSite=Lax`;
+                }
+                if (token) {
+                    const user = await userService.getUserByEmail(credentials.email);
+                    return { ...user, name: userService.getFullName(user) } as any;
+                }
 				return null;
 			},
 		}),

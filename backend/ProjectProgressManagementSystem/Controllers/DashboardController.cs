@@ -6,7 +6,7 @@ using ProjectProgressManagementSystem.ViewModels.Dashboard;
 
 namespace ProjectProgressManagementSystem.Controllers
 {
-    //[Authorize(Policy = "AdminOnly")]
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class DashboardController : ControllerBase

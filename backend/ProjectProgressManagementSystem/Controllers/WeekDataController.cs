@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProjectProgressManagementSystem.Models;
 using ProjectProgressManagementSystem.Services.Interfaces;
 using ProjectProgressManagementSystem.ViewModels;
@@ -7,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProjectProgressManagementSystem.Controllers
 {
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class WeekDataController : ControllerBase

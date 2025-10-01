@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProjectProgressManagementSystem.Controllers
 {
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class ProjectController : ControllerBase

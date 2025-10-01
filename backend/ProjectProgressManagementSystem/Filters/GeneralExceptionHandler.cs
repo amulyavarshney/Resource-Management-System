@@ -10,28 +10,33 @@ namespace ProjectProgressManagementSystem.Filters
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            if (context.Exception is RecordNotFoundException || context.Exception is DomainInvariantException)
+            if (context.Exception == null)
             {
-                context.Result = new ObjectResult(new
-                {
-                    context.Exception.Message
-                })
-                {
-                    StatusCode = 400
-                };
-                context.ExceptionHandled = true;
+                return;
             }
-            if (!context.ExceptionHandled && context.Exception != null)
+
+            var exception = context.Exception;
+            ProblemDetails problem = new ProblemDetails
             {
-                context.Result = new OkObjectResult(new
-                {
-                    context.Exception.Message
-                })
-                {
-                    StatusCode = 503
-                };
-                context.ExceptionHandled = true;
+                Title = "An error occurred while processing your request.",
+                Detail = exception.Message
+            };
+
+            int statusCode = 500;
+            if (exception is RecordNotFoundException)
+            {
+                statusCode = 404;
+                problem.Title = "Resource not found";
             }
+            else if (exception is DomainInvariantException)
+            {
+                statusCode = 400;
+                problem.Title = "Invalid request";
+            }
+
+            problem.Status = statusCode;
+            context.Result = new ObjectResult(problem) { StatusCode = statusCode };
+            context.ExceptionHandled = true;
         }
         public void OnActionExecuting(ActionExecutingContext context)
         {
