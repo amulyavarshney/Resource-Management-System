@@ -1,79 +1,138 @@
-## Resource Management System
+# Resource Management System
 
-This repository contains the source code for a web application designed to track project progress and manage resources efficiently. Key features include user authentication, session management, timesheet management, interactive dashboards, dedicated admin controls, and leave and holiday management.
+A full-stack web application for tracking project progress and managing employee resources. It covers timesheet entry, leave and holiday management, interactive dashboards, and admin controls — all secured behind JWT-based authentication.
+
+## Repository Structure
+
+```
+Resource-Management-System/
+├── backend/ProjectProgressManagementSystem/   # ASP.NET Core 6 Web API
+└── frontend/                                  # Next.js 14 application
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | .NET 6, ASP.NET Core Web API, Entity Framework Core 7 |
+| Database | SQL Server (Code-First migrations) |
+| Frontend | Next.js 14 (App Router), React 18, TypeScript 5 |
+| Styling | Tailwind CSS 3 |
+| Auth | JWT Bearer (backend) · NextAuth.js 4 (frontend) |
+| Containerisation | Docker |
+
+## Features
+
+- **Timesheet management** — employees log hours per project per week; timesheets can be locked by period
+- **Leave management** — apply for, view, and delete leave records with type and session (full/half day)
+- **Holiday management** — company-wide and personal holiday overrides by region
+- **Interactive dashboards** — project and user analytics with FTE / external breakdowns
+- **Admin panel** — full CRUD for users, projects and holidays; bulk import from Excel; lock/unlock timesheets; consolidated reporting
+- **User profiles** — update personal details, change or remove password
+- **Role-based access** — Employee · Management · Executive · Admin · Developer
+
+## Quick Start
+
+### Prerequisites
+
+| Tool | Minimum version |
+|------|----------------|
+| .NET SDK | 6.0 |
+| SQL Server | 2019 (local) or Azure SQL |
+| Node.js | 18 LTS |
+| npm | 9 |
 
 ### Backend
 
-The backend is built using .NET 6 Core Web Application with Entity Framework following the code-first approach. The backend architecture adheres to good coding practices and design principles. Key features include:
-
-- **Entity Framework Code-First Approach:** Utilizes Entity Framework for database operations with a code-first methodology.
-- **SQL Database:** Structured SQL database to store all application data, accessible via db context.
-- **Docker Support:** Containerization support for ease of deployment and environment consistency.
-- **Swagger Documentation:** Integrated Swagger for API documentation, facilitating ease of testing and development.
-
-### Frontend
-
-The frontend is developed using React with the Next.js framework, TypeScript, and Tailwind CSS. The application is a multipage setup with the following pages:
-
-- **Home:** The landing page of the application.
-- **Timesheet:** Allows users to fill in their timesheets for the current month.
-- **View:** Provides views of past timesheets and other data.
-- **Holidays:** Displays the list of holidays for the year.
-- **Dashboard:** An interactive dashboard for comprehensive analysis and tracking.
-- **Profile:** Allows users to update their profile and change their passwords.
-- **Admin:** A dedicated admin page to manage users, projects, holidays, etc.
-
-### Security
-
-User authentication and authorization are implemented using NextAuth.js. This provides secure login functionality, session management, and token-based authentication.
-
-### Features
-
-- **Timesheet Management:** Users can fill in and view their monthly timesheets.
-- **Leave Management:** Users can apply for leaves and view holiday schedules.
-- **Interactive Dashboard:** Comprehensive analytics and data visualization for project tracking and resource management.
-- **Admin Controls:** Admins can add, update, or delete users, projects, and holidays.
-- **User Profile Management:** Users can update their profile details and change their passwords.
-
-### Installation
-
-To set up the application locally, follow these steps:
-
-#### Backend
-
-1. Clone the repository.
-2. Navigate to the `backend` directory.
-3. Ensure you have .NET 6 SDK installed.
-4. Run the following commands to set up the database and start the application:
 ```sh
+cd backend/ProjectProgressManagementSystem
+
+# 1. Set your connection string in appsettings.json → ConnectionStrings:Development
+# 2. Set a strong JwtSecret in appsettings.json → AppSettings:JwtSecret
+
 dotnet restore
 dotnet ef database update
 dotnet run
+# API available at https://localhost:5000
+# Swagger UI at https://localhost:5000/swagger
 ```
 
-#### Frontend
-1. Navigate to the frontend directory.
-2. Ensure you have Node.js and npm installed.
-3. Run the following commands to install dependencies and start the application:
+### Frontend
+
 ```sh
+cd frontend
+
+# Copy the dev env template and fill in values
+cp .env.development .env.local
+# Required variables:
+#   NEXTAUTH_URL          = http://localhost:3000
+#   NEXTAUTH_SECRET       = <random string>
+#   NEXT_PUBLIC_BACKEND_API = http://localhost:5000/api/v1
+
 npm install
 npm run dev
+# App available at http://localhost:3000
 ```
 
-### Docker Support
-To run the application using Docker, ensure you have Docker installed and run the following commands from the project root:
+## Environment Variables
+
+### Frontend (`.env.development` / `.env.production`)
+
+| Variable | Description |
+|----------|-------------|
+| `NEXTAUTH_URL` | Canonical URL of the frontend app |
+| `NEXTAUTH_SECRET` | Secret used to sign NextAuth.js JWTs |
+| `NEXT_PUBLIC_FRONTEND_URL` | Public frontend base URL |
+| `NEXT_PUBLIC_BACKEND_API` | Backend API base URL (`/api/v1`) |
+
+### Backend (`appsettings.json`)
+
+| Key | Description |
+|-----|-------------|
+| `ConnectionStrings:Development` | SQL Server connection string for local development |
+| `ConnectionStrings:Stage` | Connection string for staging environment |
+| `ConnectionStrings:Production` | Connection string for production environment |
+| `AppSettings:JwtSecret` | Secret key used to sign JWT tokens |
+| `AllowedOrigins` | CORS-allowed frontend origins |
+
+## Docker
 
 ```sh
-docker-compose build
-docker-compose up
+# Build and run the backend container
+cd backend
+docker build -t rms-api .
+docker run -p 5000:80 rms-api
 ```
 
-### Contributing
-Contributions are welcomed to enhance the functionality and fix any issues. Please follow the standard GitHub workflow for contributions:
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Commit your changes and push the branch to your forked repository.
-4. Create a pull request with a detailed description of your changes.
+## API Reference
 
-### License
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+Full interactive docs are available at `/swagger` when running the backend in Development mode.
+
+| Controller | Base path | Description |
+|-----------|-----------|-------------|
+| Auth | `/api/v1/auth` | Login and registration |
+| User | `/api/v1/user` | User CRUD, password management |
+| Project | `/api/v1/project` | Project CRUD, bulk import |
+| WeekData | `/api/v1/weekdata` | Timesheet entries |
+| Dashboard | `/api/v1/dashboard` | Analytics and metrics |
+| Holiday | `/api/v1/holiday` | Company and personal holidays |
+| Leave | `/api/v1/leave` | Leave records |
+| Lock | `/api/v1/lock` | Lock / unlock timesheet periods |
+
+See [`backend/README.md`](backend/ProjectProgressManagementSystem/README.md) for the full endpoint list.
+
+## Project READMEs
+
+- [Backend README](backend/ProjectProgressManagementSystem/README.md)
+- [Frontend README](frontend/README.md)
+
+## Contributing
+
+1. Fork the repository.
+2. Create a branch: `git checkout -b feature/your-feature`.
+3. Commit your changes with a clear message.
+4. Push and open a pull request against `main`.
+
+## License
+
+MIT License. See `LICENSE` for details.

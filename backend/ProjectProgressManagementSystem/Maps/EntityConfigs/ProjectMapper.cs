@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectProgressManagementSystem.Maps.Base;
 using ProjectProgressManagementSystem.Models;
 
-namespace ProjectProgressManagementSystem.Maps
+namespace ProjectProgressManagementSystem.Maps.EntityConfigs
 {
     public class ProjectMapper : EntityMapBase<Project>
     {

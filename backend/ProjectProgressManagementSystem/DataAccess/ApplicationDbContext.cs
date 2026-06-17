@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProjectProgressManagementSystem.Extensions;
-using ProjectProgressManagementSystem.Maps;
+using ProjectProgressManagementSystem.Maps.EntityConfigs;
 using ProjectProgressManagementSystem.Models;
+using ProjectProgressManagementSystem.Utilities;
 
 namespace ProjectProgressManagementSystem.DataAccess
 {

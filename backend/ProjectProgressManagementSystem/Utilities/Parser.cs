@@ -1,7 +1,7 @@
-﻿using ProjectProgressManagementSystem.Models;
+using ProjectProgressManagementSystem.Models;
 using System.Data;
 
-namespace ProjectProgressManagementSystem.Extensions
+namespace ProjectProgressManagementSystem.Utilities
 {
     public class Parser
     {

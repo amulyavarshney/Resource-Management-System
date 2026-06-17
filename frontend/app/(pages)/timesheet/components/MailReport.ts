@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { utils, write } from "xlsx-js-style";
-import mailService from "@/app/api/mail/mail";
+import mailService from "@/app/api/services/mail";
 import leaveService, { LeaveSession } from "@/app/api/services/leave";
 import projectService, { Project } from "@/app/api/services/project";
 import userService, { User } from "@/app/api/services/user";

@@ -1,6 +1,6 @@
-﻿using ProjectProgressManagementSystem.Models;
+using ProjectProgressManagementSystem.Models;
 
-namespace ProjectProgressManagementSystem.ViewModels
+namespace ProjectProgressManagementSystem.ViewModels.Leave
 {
     public class LeaveCreateViewModel
     {

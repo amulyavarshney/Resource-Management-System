@@ -1,5 +1,6 @@
 ﻿using ProjectProgressManagementSystem.Models;
 using ProjectProgressManagementSystem.ViewModels;
+using ProjectProgressManagementSystem.ViewModels.WeekData;
 
 namespace ProjectProgressManagementSystem.Services.Interfaces
 {

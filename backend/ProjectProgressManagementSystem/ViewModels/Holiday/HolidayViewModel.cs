@@ -1,6 +1,6 @@
-﻿using ProjectProgressManagementSystem.Models;
+using ProjectProgressManagementSystem.Models;
 
-namespace ProjectProgressManagementSystem.ViewModels
+namespace ProjectProgressManagementSystem.ViewModels.Holiday
 {
     public class HolidayViewModel
     {

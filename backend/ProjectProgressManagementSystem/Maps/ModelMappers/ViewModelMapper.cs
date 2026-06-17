@@ -1,5 +1,7 @@
 ﻿using ProjectProgressManagementSystem.Models;
 using ProjectProgressManagementSystem.ViewModels;
+using ProjectProgressManagementSystem.ViewModels.WeekData;
+using ProjectProgressManagementSystem.ViewModels.Holiday;
 using ProjectProgressManagementSystem.ViewModels.Project;
 using ProjectProgressManagementSystem.ViewModels.User;
 

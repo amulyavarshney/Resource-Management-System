@@ -1,4 +1,4 @@
-using ProjectProgressManagementSystem.Extensions;
+using ProjectProgressManagementSystem.Infrastructure;
 
 namespace ProjectProgressManagementSystem
 {

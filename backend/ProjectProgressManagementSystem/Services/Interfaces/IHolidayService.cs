@@ -1,5 +1,6 @@
 ﻿using ProjectProgressManagementSystem.Models;
 using ProjectProgressManagementSystem.ViewModels;
+using ProjectProgressManagementSystem.ViewModels.Holiday;
 
 namespace ProjectProgressManagementSystem.Services.Interfaces
 {

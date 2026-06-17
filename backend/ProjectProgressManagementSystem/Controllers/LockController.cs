@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using ProjectProgressManagementSystem.Models;
 using ProjectProgressManagementSystem.ViewModels;
@@ -19,9 +19,6 @@ namespace ProjectProgressManagementSystem.Controllers
         [HttpGet]
         public ActionResult<bool> GetLock(Department? department, Region? region)
         {
-            //byte[] isLockedBytes = new byte[1];
-            //HttpContext.Session.TryGetValue("lock", out isLockedBytes);
-            //byte[] isLockedBytes = HttpContext.Session.Get("lock");
             var isLockedBytes = _cache.Get($"lockTimesheet-{department}-{region}");
             if (isLockedBytes == null)
             {
@@ -35,7 +32,6 @@ namespace ProjectProgressManagementSystem.Controllers
         public ActionResult<MessageViewModel> SetLock(bool isLocked, Department? department, Region? region)
         {
             byte[] isLockedBytes = BitConverter.GetBytes(isLocked);
-            //HttpContext.Session.Set("lock", isLockedBytes);
             _cache.Set($"lockTimesheet-{department}-{region}", isLockedBytes);
             return Ok(new MessageViewModel { Message = $"Lock changed to {isLocked}" });
         }

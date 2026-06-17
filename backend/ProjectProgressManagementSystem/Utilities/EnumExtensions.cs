@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 
-namespace ProjectProgressManagementSystem.Extensions
+namespace ProjectProgressManagementSystem.Utilities
 {
     public static class EnumExtensions
     {

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -7,6 +7,7 @@ using ProjectProgressManagementSystem.DataAccess;
 using ProjectProgressManagementSystem.Filters;
 using ProjectProgressManagementSystem.Services.Implementations;
 using ProjectProgressManagementSystem.Services.Interfaces;
+using ProjectProgressManagementSystem.Utilities;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -14,7 +15,7 @@ using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace ProjectProgressManagementSystem.Extensions
+namespace ProjectProgressManagementSystem.Infrastructure
 {
     public static class Startup
     {
@@ -53,7 +54,7 @@ namespace ProjectProgressManagementSystem.Extensions
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            }); ;
+            });
 
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -95,11 +96,10 @@ namespace ProjectProgressManagementSystem.Extensions
             {
                 config.SwaggerDoc("v1.0.0", new OpenApiInfo
                 {
-                    Title = "Project Progress Management System API Documentation",
+                    Title = "Resource Management System API",
                     Version = "v1.0.0",
                 });
                 config.SchemaFilter<EnumSchemaFilter>();
-                // Add JWT Bearer token security definition
                 config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'",
@@ -109,7 +109,6 @@ namespace ProjectProgressManagementSystem.Extensions
                     Scheme = "bearer",
                     BearerFormat = "JWT"
                 });
-
                 config.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
@@ -129,17 +128,14 @@ namespace ProjectProgressManagementSystem.Extensions
                 });
             });
 
-            // Response compression
             builder.Services.AddResponseCompression();
 
-            // Health checks
             var envName = builder.Environment.EnvironmentName;
             var connName = envName switch { "Development" => "Development", "Staging" => "Stage", _ => "Production" };
             var connString = builder.Configuration.GetConnectionString(connName);
             builder.Services.AddHealthChecks()
                 .AddSqlServer(connString, name: "sql", tags: new[] { "ready" });
 
-            // Basic correlation id propagation via TraceIdentifier
             builder.Services.AddHttpContextAccessor();
 
             return builder;
@@ -152,11 +148,10 @@ namespace ProjectProgressManagementSystem.Extensions
                 app.UseSwagger();
                 app.UseSwaggerUI(config =>
                 {
-                    config.SwaggerEndpoint("/swagger/v1.0.0/swagger.json", "Project Progress Management System");
+                    config.SwaggerEndpoint("/swagger/v1.0.0/swagger.json", "Resource Management System");
                 });
             }
 
-            // middleware configuration
             if (!app.Environment.IsDevelopment())
             {
                 app.UseHsts();
@@ -165,7 +160,6 @@ namespace ProjectProgressManagementSystem.Extensions
             app.UseResponseCompression();
             app.UseCors("App_Cors_Policy");
 
-            // Correlation ID: add TraceIdentifier header for responses
             app.Use(async (context, next) =>
             {
                 context.Response.Headers["X-Correlation-ID"] = context.TraceIdentifier;
@@ -176,7 +170,6 @@ namespace ProjectProgressManagementSystem.Extensions
             app.UseAuthorization();
             app.MapControllers();
 
-            // Health checks endpoints
             app.MapHealthChecks("/health/live");
             app.MapHealthChecks("/health/ready", new HealthCheckOptions
             {

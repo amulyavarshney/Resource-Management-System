@@ -2,7 +2,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import MailService from "@/app/api/mail/mail";
+import MailService from "@/app/api/services/mail";
 import userService from "@/app/api/services/user";
 import toast from "react-hot-toast";
 

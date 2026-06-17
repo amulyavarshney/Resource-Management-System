@@ -1,7 +1,8 @@
 ﻿using ProjectProgressManagementSystem.Exceptions;
-using ProjectProgressManagementSystem.Extensions;
+using ProjectProgressManagementSystem.Utilities;
 using ProjectProgressManagementSystem.Models;
 using ProjectProgressManagementSystem.ViewModels;
+using ProjectProgressManagementSystem.ViewModels.WeekData;
 using ProjectProgressManagementSystem.ViewModels.Project;
 using ProjectProgressManagementSystem.ViewModels.User;
 using System.Data;
