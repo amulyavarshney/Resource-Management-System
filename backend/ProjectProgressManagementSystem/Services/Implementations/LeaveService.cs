@@ -46,7 +46,6 @@ namespace ProjectProgressManagementSystem.Services.Implementations
                 throw new ArgumentException($"Invalid LeaveSession: {leave.Session}");
             }
 
-            //DateTime leave.Date = TimeZoneInfo.ConvertTimeFromUtc(leave.Date, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
             if (leave.Date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
             {
                 throw new OperationNotSupportedException("Invalid Day: Can't apply leave on Weekend.");
@@ -70,15 +69,10 @@ namespace ProjectProgressManagementSystem.Services.Implementations
             if (leaveExists)
             {
                 var existingLeave = await _context.Leaves.FirstAsync(l => l.Date.Date == leave.Date.Date && l.UserId == leave.UserId);
-                if (existingLeave == entity)
-                {
-                    throw new DuplicateEntityException("Leave already exists");
-                }
-
                 existingLeave.Type = entity.Type;
                 existingLeave.Session = entity.Session;
                 await _context.SaveChangesAsync();
-                return entity;
+                return existingLeave;
             }
 
             await _context.Leaves.AddAsync(entity);
@@ -239,8 +233,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
 
         private async Task<Leave> FromKey(DateTime date, int userId)
         {
-            var entity = await _context.Leaves.FirstAsync(l => l.Date.Date == date.Date && l.UserId == userId);
-            return entity ?? throw new RecordNotFoundException($"Could not find any leave with date {date.Date} and userId {userId}.");
+            return await _context.Leaves.FirstOrDefaultAsync(l => l.Date.Date == date.Date && l.UserId == userId)
+                ?? throw new RecordNotFoundException($"Could not find any leave with date {date.Date} and userId {userId}.");
         }
     }
 }

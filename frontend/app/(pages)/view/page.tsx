@@ -21,7 +21,7 @@ import Header from "./components/Header";
 
 export default function Timesheet() {
 	const router = useRouter();
-	const { data: session, status } = useSession();
+	const { data: session } = useSession();
 	const { weeks, setWeeks } = useWeeks();
 	const { search } = useSearch();
 	const [sortConfig, setSortConfig] = useState<{

@@ -67,7 +67,7 @@ export default function LeaveCalendar({
 						.concat(
 							days.map((day) => {
 								const leave = savedLeaves.find(
-									(leave) => new Date(leave.date) === new Date(year, month, day)
+									(leave) => new Date(leave.date).toDateString() === new Date(year, month, day).toDateString()
 								);
 								return (
 									<button

@@ -1,11 +1,9 @@
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import holidayService, { Holiday } from "@/app/api/services/holiday";
 import weeksList from "@/app/api/services/weeksList";
 import HeaderLink from "@/app/components/HeaderLink";
 
 export default function HolidaysThisMonth() {
-	const router = useRouter();
 	const year = new Date().getFullYear();
 	const month = new Date().getMonth() + 1;
 	const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -22,7 +20,6 @@ export default function HolidaysThisMonth() {
 		<>
 			<div id="Holidays" className="overflow-x-auto">
 				<div className="min-w-fit max-w-xs m-3 p-5 bg-white dark:bg-gray-700 border hover:border-1.5 border-gray-200 dark:border-gray-400 rounded-lg shadow-sm hover:shadow-lg">
-					{/* <div className="min-w-fit max-w-xs bg-white transition-colors transform bg-gradient-to-br from-indigo-200 to-indigo-50 shadow-sm hover:shadow-lg border hover:border-1.5 border-gray-300 rounded-lg m-3 p-5"> */}
 					<HeaderLink href="/holidays" title="Holidays this month" className="text-lg" />
 					{holidays.length > 0 ? (
 						<ul className="list-none">

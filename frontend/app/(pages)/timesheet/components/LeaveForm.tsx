@@ -36,7 +36,7 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 
 	useEffect(() => {
 		const newLeave = savedLeaves.find(
-			(item) => new Date(item.date) === new Date(year, month, day)
+			(item) => new Date(item.date).toDateString() === new Date(year, month, day).toDateString()
 		);
 		const date = new Date();
 		const newDate = new Date(
@@ -115,12 +115,6 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 							<select
 								id="type"
 								key={leave.type}
-								// value={Object.values(LeaveType).find(
-								// 	(value) =>
-								// 		value ===
-								// 		leave.type
-								// )}
-								// defaultValue="Select Leave Type"
 								value={Object.keys(LeaveType).find(
 									(key) =>
 										LeaveType[key as keyof typeof LeaveType] ===
@@ -153,12 +147,6 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 							<select
 								id="session"
 								key={leave.session}
-								// value={Object.values(LeaveSession).find(
-								// 	(value) =>
-								// 		value ===
-								// 		leave.session
-								// )}
-								// defaultValue="Select Session"
 								value={Object.keys(LeaveSession).find(
 									(key) =>
 										LeaveSession[key as keyof typeof LeaveSession] ===

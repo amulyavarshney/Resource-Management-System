@@ -7,7 +7,6 @@ namespace ProjectProgressManagementSystem.Models
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        //public bool IsDeleted { get; set; } = false;
         public DateTime DateCreated { get; set; }
         public DateTime? DateModified { get; set; }
         public DateTime? DateDeleted { get; set; }

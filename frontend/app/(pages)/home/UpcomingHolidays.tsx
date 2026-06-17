@@ -20,7 +20,6 @@ export default function UpcomingHolidays() {
 		<>
 			<div id="Holidays" className="overflow-x-auto">
 				<div className="min-w-fit max-w-xs bg-white shadow-sm hover:shadow-lg border hover:border-1.5 border-gray-200 rounded-lg m-3 p-5">
-					{/* <div className="min-w-fit max-w-xs bg-white transition-colors transform bg-gradient-to-br from-indigo-200 to-indigo-50 shadow-sm hover:shadow-lg border hover:border-1.5 border-gray-300 rounded-lg m-3 p-5">*/}
 					<div
 						className="flex justify-between items-center cursor-pointer"
 						onClick={() => router.push("/holidays")}

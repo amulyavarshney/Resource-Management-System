@@ -93,8 +93,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
                     }
                     else
                     {
-                        var holiday = holidays.First(h => h.Date == personalHoliday.Date && h.Region == personalHoliday.User.Region);
-                        holidays.Remove(holiday);
+                        var holiday = holidays.FirstOrDefault(h => h.Date == personalHoliday.Date && h.Region == personalHoliday.User.Region);
+                        if (holiday != null) holidays.Remove(holiday);
                     }
                 }
             }
@@ -224,8 +224,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
         public async Task<HolidayViewModel> UpdateHolidayAsync(DateTime date, Region region, HolidayUpdateViewModel holiday)
         {
             var entity = await _context.Holidays
-                .AsNoTracking()
-                .FirstAsync(h => h.Date.Date == date.Date && (region & h.Region) > 0);
+                .FirstOrDefaultAsync(h => h.Date.Date == date.Date && (region & h.Region) > 0)
+                ?? throw new RecordNotFoundException($"Could not find any holiday with date: {date.Date}");
             entity.Name = holiday.Name ?? entity.Name;
             entity.Type = holiday.Type ?? entity.Type;
             entity.Region = holiday.Region ?? entity.Region;
@@ -237,8 +237,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
         public async Task<HolidayViewModel> UpdatePersonalHolidayAsync(DateTime date, int userId, HolidayUpdateViewModel holiday)
         {
             var entity = await _context.PersonalHolidays
-                .AsNoTracking()
-                .FirstAsync(ph => ph.Date.Date == date.Date && ph.UserId == userId);
+                .FirstOrDefaultAsync(ph => ph.Date.Date == date.Date && ph.UserId == userId)
+                ?? throw new RecordNotFoundException($"Could not find any personal holiday with date: {date.Date} for user {userId}");
             entity.Name = holiday.Name ?? entity.Name;
             entity.Type = holiday.Type ?? entity.Type;
             entity.UserId = holiday.UserId ?? entity.UserId;
@@ -394,6 +394,9 @@ namespace ProjectProgressManagementSystem.Services.Implementations
                 }
                 else
                 {
+                    if (holiday == null)
+                        throw new RecordNotFoundException($"Could not find any holiday with date: {date.Date}");
+
                     await _context.PersonalHolidays.AddAsync(new PersonalHoliday
                     {
                         Date = holiday.Date,

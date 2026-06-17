@@ -100,7 +100,7 @@ export default function Dashboard() {
 										id="dashbardValues"
 										className="px-6 py-4 text-center whitespace-nowrap border"
 									>
-										{eval(`data?.${item.value}`)}
+										{data?.[item.value as keyof typeof data]}
 									</td>
 								</tr>
 							))}
@@ -112,9 +112,9 @@ export default function Dashboard() {
 						<StatItem
 							key={index}
 							label={item.label}
-							value={eval(`data?.${item.value}`)}
-							fteValue={eval(`data?.${item.fteValue}`)}
-							extValue={eval(`data?.${item.extValue}`)}
+							value={data?.[item.value as keyof typeof data]}
+							fteValue={item.fteValue ? data?.[item.fteValue as keyof typeof data] : undefined}
+							extValue={item.extValue ? data?.[item.extValue as keyof typeof data] : undefined}
 							href={item.href}
 							icon={item.icon}
 						/>

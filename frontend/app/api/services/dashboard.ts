@@ -80,7 +80,6 @@ class DashboardService {
 			data.totalIntWorkHours = data.totalWorkHours - data.totalExtWorkHours;
 			return data;
 		} catch (error) {
-			console.error("Error while fetching Dashboard", error);
 			throw error;
 		}
 	}

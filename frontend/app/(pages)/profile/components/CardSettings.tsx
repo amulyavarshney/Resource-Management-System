@@ -177,7 +177,7 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 									name="workHoursPerDay"
 									placeholder="Name"
 									value={userData.workHoursPerDay}
-									onChange={(e) => handleChange}
+									onChange={handleChange}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"
 									defaultValue={user?.workHoursPerDay}
 								/>

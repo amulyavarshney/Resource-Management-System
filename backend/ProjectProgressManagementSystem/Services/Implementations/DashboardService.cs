@@ -65,8 +65,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
 
         public async Task<ProjectDashboardViewModel> GetProjectDashboardAsync(int projectId)
         {
-            var projectData = await _context.Projects.FirstAsync(project => project.Id == projectId);
-            if (projectData == null) throw new RecordNotFoundException($"Could not find any Project with id: {projectId}");
+            var projectData = await _context.Projects.FirstOrDefaultAsync(project => project.Id == projectId)
+                ?? throw new RecordNotFoundException($"Could not find any Project with id: {projectId}");
 
             var projectWeekData = await _context.WeekData.Where(wd => wd.ProjectId == projectId).ToListAsync();
             var projectUserWeekData = await _context.WeekData.Include(wd => wd.User)
@@ -103,8 +103,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
             var firstDayOfNextMonth = new DateTime(year, month, 1).AddMonths(1);
 
             var projectData = await _context.Projects
-                .FirstAsync(project => (project.DateDeleted == null || project.DateDeleted >= firstDayOfNextMonth) && project.DateCreated < firstDayOfNextMonth && project.Id == projectId);
-            if (projectData == null) throw new RecordNotFoundException($"Could not find any Project with id: {projectId}");
+                .FirstOrDefaultAsync(project => (project.DateDeleted == null || project.DateDeleted >= firstDayOfNextMonth) && project.DateCreated < firstDayOfNextMonth && project.Id == projectId)
+                ?? throw new RecordNotFoundException($"Could not find any Project with id: {projectId}");
 
             var weekData = await _context.WeekData.Where(wd => wd.Year == year && wd.Month == month).ToListAsync();
             var projectUserWeekData = await _context.WeekData.Include(wd => wd.User)
@@ -171,9 +171,7 @@ namespace ProjectProgressManagementSystem.Services.Implementations
                 {
                     Id = project.Id
                 })
-                //.Select(project => GetProjectDashboardAsync(year, month, project.Id))
                 .ToListAsync();
-            //return projects;
 
             List<ProjectDashboardViewModel> projectsDashboard = new List<ProjectDashboardViewModel>();
 
@@ -188,8 +186,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
 
         public async Task<UserDashboardViewModel> GetUserDashboardAsync(int userId)
         {
-            var userData = await _context.Users.FirstAsync(user => user.Id == userId);
-            if (userData == null) throw new RecordNotFoundException($"Could not find any User with id: {userId}");
+            var userData = await _context.Users.FirstOrDefaultAsync(user => user.Id == userId)
+                ?? throw new RecordNotFoundException($"Could not find any User with id: {userId}");
 
             var userWeekData = await _context.WeekData.Where(wd => wd.UserId == userId).ToListAsync();
             var totalProjects = userWeekData.Select(wd => wd.ProjectId).Distinct().Count();
@@ -230,10 +228,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
             var firstDayOfNextMonth = new DateTime(year, month, 1).AddMonths(1);
 
             var userData = await _context.Users
-                .FirstAsync(user => (user.DateDeleted == null || user.DateDeleted >= DateTime.Now) && user.DateCreated < firstDayOfNextMonth && user.Id == userId);
-            if (userData == null) throw new RecordNotFoundException($"Could not find any User with id: {userId}");
-
-            //var userData = await _context.Users.FirstAsync(user => user.Id == userId);
+                .FirstOrDefaultAsync(user => (user.DateDeleted == null || user.DateDeleted >= DateTime.Now) && user.DateCreated < firstDayOfNextMonth && user.Id == userId)
+                ?? throw new RecordNotFoundException($"Could not find any User with id: {userId}");
 
             var weekData = await _context.WeekData.Where(wd => wd.Year == year && wd.Month == month).ToListAsync();
             var userProjectWeekData = await _context.WeekData.Include(wd => wd.Project)
@@ -373,7 +369,7 @@ namespace ProjectProgressManagementSystem.Services.Implementations
             var weekDataToRemove = new List<WeekData>();
             foreach (var data in weekData)
             {
-                if (data is { Week1: 0, Week2: 0, Week3: 0 and 0, Week4: 0, Week5: null or 0 })
+                if (data is { Week1: 0, Week2: 0, Week3: 0, Week4: 0, Week5: null or 0 })
                 {
                     weekDataToRemove.Add(data);
                 }

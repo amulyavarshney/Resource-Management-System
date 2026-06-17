@@ -200,8 +200,6 @@ namespace ProjectProgressManagementSystem.Services.Implementations
             userEntity.FirstName = user.FirstName ?? userEntity.FirstName;
             userEntity.LastName = user.LastName ?? userEntity.LastName;
             userEntity.Email = user.Email ?? userEntity.Email;
-            userEntity.PasswordHash = userEntity.PasswordHash;
-            userEntity.PasswordSalt = userEntity.PasswordSalt;
             userEntity.IsExternal = user.Email?.Contains("ext") ?? userEntity.IsExternal;
             userEntity.Department = user.Department ?? userEntity.Department;
             userEntity.Region = user.Region ?? userEntity.Region;
@@ -297,8 +295,8 @@ namespace ProjectProgressManagementSystem.Services.Implementations
 
         private async Task<User> FromId(int id)
         {
-            var userDb = await _context.Users.FirstAsync(user => (user.DateDeleted == null || user.DateDeleted >= DateTime.Now) && user.Id == id);
-            return userDb ?? throw new RecordNotFoundException($"Could not find any User with id: {id}");
+            return await _context.Users.FirstOrDefaultAsync(user => (user.DateDeleted == null || user.DateDeleted >= DateTime.Now) && user.Id == id)
+                ?? throw new RecordNotFoundException($"Could not find any User with id: {id}");
         }
     }
 }

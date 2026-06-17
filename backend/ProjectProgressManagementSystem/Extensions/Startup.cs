@@ -79,11 +79,8 @@ namespace ProjectProgressManagementSystem.Extensions
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Role", "Admin"));
-                // options.AddPolicy("AdminPolicy", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == "Role" && c.Value == Role.Admin.ToString())));
-                // options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
             });
 
-            //builder.Services.AddSession();
             builder.Services.AddDistributedMemoryCache();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -102,30 +99,6 @@ namespace ProjectProgressManagementSystem.Extensions
                     Version = "v1.0.0",
                 });
                 config.SchemaFilter<EnumSchemaFilter>();
-                // ======================================================================================================================
-                /*// Add JWT Bearer Token Authorization Functionality In Swagger
-                config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
-                });
-                config.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
-                            }
-                        },
-                        new string[] { }
-                    }
-                });*/
                 // Add JWT Bearer token security definition
                 config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -154,7 +127,6 @@ namespace ProjectProgressManagementSystem.Extensions
                         new List<string>()
                     }
                 });
-                // =======================================================================================================================
             });
 
             // Response compression

@@ -3,9 +3,9 @@ import HeaderLink from "@/app/components/HeaderLink";
 
 interface StatItemProps {
 	label: string;
-	value: number;
-	fteValue: number;
-	extValue: number;
+	value: number | undefined;
+	fteValue: number | undefined;
+	extValue: number | undefined;
 	icon: JSX.Element;
 	href: string;
 }
@@ -21,7 +21,7 @@ const StatItem: React.FC<StatItemProps> = ({
 	<div>
 		<div
 			className={`p-5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-400 dark:border-gray-500 shadow-md hover:shadow-xl ${
-				fteValue >= 0 && extValue >= 0 ? "rounded-t-lg" : "rounded-lg"
+				fteValue != null && extValue != null ? "rounded-t-lg" : "rounded-lg"
 			}`}
 		>
 			<div className="flex flex-col justify-center items-center">
@@ -40,7 +40,7 @@ const StatItem: React.FC<StatItemProps> = ({
 			)}
 		</div>
 		<div className="flex">
-			{fteValue >= 0 && (
+			{fteValue != null && (
 				<div className="p-5 w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-400 dark:border-gray-500 shadow-md hover:shadow-xl rounded-bl-lg">
 					<dt className="text-sm font-medium text-gray-800 dark:text-gray-200">
 						FTE
@@ -50,7 +50,7 @@ const StatItem: React.FC<StatItemProps> = ({
 					</dd>
 				</div>
 			)}
-			{extValue >= 0 && (
+			{extValue != null && (
 				<div className="p-5 w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-400 dark:border-gray-500 shadow-md hover:shadow-xl rounded-br-lg">
 					<dt className="text-sm font-medium text-gray-800 dark:text-gray-200">
 						EXT

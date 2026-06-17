@@ -120,11 +120,11 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 										"week5Hours",
 									].map(
 										(week, index) =>
-											eval(`value.${week} !== null`) && (
+											(value[week as keyof typeof value] as number | null) !== null && (
 												<div key={index}>
 													<div className="flex flex-col items-center justify-center w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-500 to-gray-150 border border-gray-400 dark:border-gray-600 rounded sm:rounded-full shadow-lg">
 														<div className="font-bold text-lg">
-															{eval(`value.${week}`)}
+															{value[week as keyof typeof value] as number}
 														</div>
 													</div>
 													<div className="mt-1 text-xs text-center">{`${
