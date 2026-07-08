@@ -86,7 +86,7 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `NEXTAUTH_URL` | Yes | Canonical URL of this app (e.g. `http://localhost:3000`) |
 | `NEXTAUTH_SECRET` | Yes | Secret for signing NextAuth JWTs — generate with `openssl rand -base64 32` |
 | `NEXT_PUBLIC_FRONTEND_URL` | Yes | Public base URL of this app |
-| `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL (e.g. `http://localhost:5000/api/v1`) |
+| `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL (e.g. `http://localhost:8000/api/v1`) |
 
 ## Authentication
 
