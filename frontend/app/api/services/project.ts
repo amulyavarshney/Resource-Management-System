@@ -16,7 +16,7 @@ export type ProjectUpdateViewModel = Partial<ProjectCreateViewModel>;
 export type Project = ProjectCreateViewModel & {
 	[key: string]: number | string;
 	id: number;
-	workingHours: number;
+	working_hours: number;
 };
 
 class ProjectService {
@@ -104,7 +104,7 @@ class ProjectService {
 	async removeProject(id: number, deleteNow?: boolean) {
 		try {
 			const response = await http.delete<Project>(
-				`/project/${id}${deleteNow ? `?deleteNow=${deleteNow}` : ""}`
+				`/project/${id}${deleteNow ? `?delete_now=${deleteNow}` : ""}`
 			);
 			return response.data;
 		} catch (error) {

@@ -16,18 +16,18 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 	const [user, setUser] = useState<
 		UserCreateViewModel & { password: string; confirmPassword: string }
 	>({
-		empId: undefined,
-		userName: "",
-		firstName: "",
-		lastName: "",
+		emp_id: undefined,
+		user_name: "",
+		first_name: "",
+		last_name: "",
 		email: "",
 		department: Department.D1,
 		region: Region.India,
 		role: Role.Developer,
-		workHoursPerDay: 8,
+		work_hours_per_day: 8,
 		password: "",
 		confirmPassword: "",
-		parentId: 0,
+		parent_id: 0,
 	});
 
 	const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,17 +88,17 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 					</div> */}
 					<div>
 						<label
-							htmlFor="firstName"
+							htmlFor="first_name"
 							className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
 						>
 							First Name
 						</label>
 						<div className="mt-2">
 							<input
-								id="firstName"
-								name="firstName"
+								id="first_name"
+								name="first_name"
 								type="text"
-								value={user.firstName}
+								value={user.first_name}
 								autoComplete="name"
 								required
 								className="block px-3 w-full rounded-md border-0 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -109,17 +109,17 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 					</div>
 					<div>
 						<label
-							htmlFor="lastName"
+							htmlFor="last_name"
 							className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
 						>
 							Last Name
 						</label>
 						<div className="mt-2">
 							<input
-								id="lastName"
-								name="lastName"
+								id="last_name"
+								name="last_name"
 								type="text"
-								value={user.lastName}
+								value={user.last_name}
 								autoComplete="name"
 								required
 								className="block px-3 w-full rounded-md border-0 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"

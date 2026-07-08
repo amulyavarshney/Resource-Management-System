@@ -18,7 +18,7 @@ export type Holiday = HolidayBase & {
 };
 
 export type PersonalHoliday = HolidayBase & {
-	userId: number;
+	user_id: number;
 	show: boolean;
 };
 
@@ -38,7 +38,7 @@ class HolidayService {
 	async getAllPersonalHolidays(userId?: number, region?: Region) {
 		try {
 			const response = await http.get<Holiday[]>(
-				`/holiday/personal?${userId ? `userId=${userId}&` : ""}${
+				`/holiday/personal?${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
 				}`.replace(/[?&]$/, "")
 			);
@@ -53,7 +53,7 @@ class HolidayService {
 		try {
 			let holidays: Array<Holiday[]> = Array.from({ length: 12 }, () => []);
 			const response = await http.get<Holiday[]>(
-				`/holiday/${year}?${userId ? `userId=${userId}&` : ""}${
+				`/holiday/${year}?${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
 				}`.replace(/[?&]$/, "")
 			);
@@ -79,7 +79,7 @@ class HolidayService {
 			const currentDate = new Date();
 			currentDate.setHours(0, 0, 0, 0);
 			const response = await http.get<Holiday[]>(
-				`/holiday/${year}?${userId ? `userId=${userId}&` : ""}${
+				`/holiday/${year}?${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
 				}`.replace(/[?&]$/, "")
 			);
@@ -102,7 +102,7 @@ class HolidayService {
 	) {
 		try {
 			const response = await http.get<Holiday[]>(
-				`/holiday/${year}/${month}?${userId ? `userId=${userId}&` : ""}${
+				`/holiday/${year}/${month}?${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
 				}`.replace(/[?&]$/, "")
 			);
@@ -131,7 +131,7 @@ class HolidayService {
 		try {
 			const formattedDate = date.toDateString();
 			const response = await http.get<Holiday>(
-				`/holiday?date=${formattedDate}&${userId ? `userId=${userId}&` : ""}${
+				`/holiday?date=${formattedDate}&${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
 				}`.replace(/[?&]$/, "")
 			);
@@ -145,7 +145,7 @@ class HolidayService {
 	async addHoliday(holiday: HolidayBase, userId?: number, region?: Region) {
 		try {
 			const response = await http.post<Holiday>(
-				`/holiday?${userId ? `userId=${userId}&` : ""}${
+				`/holiday?${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
 				}`.replace(/[?&]$/, ""),
 				holiday
@@ -164,7 +164,7 @@ class HolidayService {
 	async addHolidays(holidays: Holiday[], userId?: number) {
 		try {
 			const response = await http.post<Holiday[]>(
-				`/holiday?${userId ? `userId=${userId}&` : ""}`.replace(/[?&]$/, ""),
+				`/holiday?${userId ? `user_id=${userId}&` : ""}`.replace(/[?&]$/, ""),
 				holidays
 			);
 			return response.data;
@@ -246,7 +246,7 @@ class HolidayService {
 			const formattedDate = date.toDateString();
 			const response = await http.delete<Holiday>(
 				`/holiday/?date=${encodeURIComponent(formattedDate)}&${
-					userId ? `userId=${encodeURIComponent(userId)}&` : ""
+					userId ? `user_id=${encodeURIComponent(userId)}&` : ""
 				}${region ? `region=${encodeURIComponent(region)}&` : ""}`.replace(
 					/[?&]$/,
 					""

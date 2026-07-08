@@ -94,12 +94,12 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 								</label>
 								<input
 									type="text"
-									name="userName"
+									name="user_name"
 									placeholder="User Name"
-									value={userData.userName}
+									value={userData.user_name}
 									onChange={handleChange}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"
-									defaultValue={user?.userName}
+									defaultValue={user?.user_name}
 								/>
 							</div>
 						</div>
@@ -110,12 +110,12 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 								</label>
 								<input
 									type="text"
-									name="empId"
+									name="emp_id"
 									placeholder="Emp Id"
-									value={userData.empId}
+									value={userData.emp_id}
 									onChange={handleChange}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"
-									defaultValue={user?.empId}
+									defaultValue={user?.emp_id}
 								/>
 							</div>
 						</div>
@@ -126,12 +126,12 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 								</label>
 								<input
 									type="text"
-									name="firstName"
+									name="first_name"
 									placeholder="First Name"
-									value={userData.firstName}
+									value={userData.first_name}
 									onChange={handleChange}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"
-									defaultValue={user?.firstName}
+									defaultValue={user?.first_name}
 								/>
 							</div>
 						</div>
@@ -142,12 +142,12 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 								</label>
 								<input
 									type="text"
-									name="lastName"
+									name="last_name"
 									placeholder="Last Name"
-									value={userData.lastName}
+									value={userData.last_name}
 									onChange={handleChange}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"
-									defaultValue={user?.lastName}
+									defaultValue={user?.last_name}
 								/>
 							</div>
 						</div>
@@ -174,12 +174,12 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 								</label>
 								<input
 									type="number"
-									name="workHoursPerDay"
+									name="work_hours_per_day"
 									placeholder="Name"
-									value={userData.workHoursPerDay}
+									value={userData.work_hours_per_day}
 									onChange={handleChange}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"
-									defaultValue={user?.workHoursPerDay}
+									defaultValue={user?.work_hours_per_day}
 								/>
 							</div>
 						</div>
@@ -212,11 +212,11 @@ export default function CardSettings({ user, setUser }: CardSettingsProps) {
 									Reporting Manager
 								</label>
 								<select
-									value={user.parentId}
+									value={user.parent_id}
 									onChange={(e) =>
 										setUser({
 											...user,
-											parentId: Number(e.target.value),
+											parent_id: Number(e.target.value),
 										})
 									}
 									className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300 placeholder-gray-600 dark:placeholder-gray-300 transition-all duration-150"

@@ -100,9 +100,9 @@ export default function UpdateUsers() {
 							Emp Id
 							<input
 								type="text"
-								name="empId"
+								name="emp_id"
 								placeholder="Emp Id"
-								value={user.empId}
+								value={user.emp_id}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -111,9 +111,9 @@ export default function UpdateUsers() {
 							User Name
 							<input
 								type="text"
-								name="userName"
+								name="user_name"
 								placeholder="User Name"
-								value={user.userName}
+								value={user.user_name}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -122,9 +122,9 @@ export default function UpdateUsers() {
 							First Name
 							<input
 								type="text"
-								name="firstName"
+								name="first_name"
 								placeholder="First Name"
-								value={user.firstName}
+								value={user.first_name}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -133,9 +133,9 @@ export default function UpdateUsers() {
 							Last Name
 							<input
 								type="text"
-								name="lastName"
+								name="last_name"
 								placeholder="Last Name"
-								value={user.lastName}
+								value={user.last_name}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -242,9 +242,9 @@ export default function UpdateUsers() {
 							Work Hours / Day
 							<input
 								type="number"
-								name="workHoursPerDay"
+								name="work_hours_per_day"
 								placeholder="Work Hours / Day"
-								value={user.workHoursPerDay}
+								value={user.work_hours_per_day}
 								min={0}
 								max={16}
 								onChange={handleChange}
@@ -254,9 +254,9 @@ export default function UpdateUsers() {
 						<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 							Reporting Manager
 							<select
-								value={user.parentId}
+								value={user.parent_id}
 								onChange={(e) =>
-									setUser({ ...user, parentId: Number(e.target.value) })
+									setUser({ ...user, parent_id: Number(e.target.value) })
 								}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							>

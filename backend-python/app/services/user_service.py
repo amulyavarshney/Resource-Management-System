@@ -27,8 +27,8 @@ class UserService:
         stmt = (
             select(User)
             .where(
-                (department is None) | ((User.department.op("&")(int(department))) > 0) if department else True,
-                (region is None) | ((User.region.op("&")(int(region))) > 0) if region else True,
+                (User.department.op("&")(int(department))) > 0 if department is not None else True,
+                (User.region.op("&")(int(region))) > 0 if region is not None else True,
                 (User.date_deleted.is_(None)) | (User.date_deleted >= datetime.now(timezone.utc)),
             )
         )
@@ -39,8 +39,8 @@ class UserService:
         stmt = (
             select(User)
             .where(
-                (department is None) | ((User.department.op("&")(int(department))) > 0) if department else True,
-                (region is None) | ((User.region.op("&")(int(region))) > 0) if region else True,
+                (User.department.op("&")(int(department))) > 0 if department is not None else True,
+                (User.region.op("&")(int(region))) > 0 if region is not None else True,
                 (User.date_deleted.is_(None)) | (User.date_deleted >= datetime.now(timezone.utc)),
                 User.role.notin_([Role.Employee, Role.Developer]),
             )
@@ -60,8 +60,8 @@ class UserService:
 
         next_month = first_day_of_next_month(year, month)
         stmt = select(User).where(
-            (department is None) | ((User.department.op("&")(int(department))) > 0) if department else True,
-            (region is None) | ((User.region.op("&")(int(region))) > 0) if region else True,
+            (User.department.op("&")(int(department))) > 0 if department is not None else True,
+            (User.region.op("&")(int(region))) > 0 if region is not None else True,
             (User.date_deleted.is_(None)) | (User.date_deleted >= next_month),
             User.date_created < next_month,
         )

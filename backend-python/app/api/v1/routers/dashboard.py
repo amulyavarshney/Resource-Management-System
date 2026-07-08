@@ -7,6 +7,19 @@ from app.services.dashboard_service import DashboardService
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"], dependencies=[AllAuthenticated])
 
+# ── Static-prefix routes MUST come before parametric /{year}/{month} routes ──
+
+@router.get("/project/{project_id}", response_model=ProjectDashboardResponse)
+async def get_project_dashboard(project_id: int, db: DbSession) -> ProjectDashboardResponse:
+    return await DashboardService(db).get_project_dashboard(project_id)
+
+
+@router.get("/user/{user_id}", response_model=UserDashboardResponse)
+async def get_user_dashboard(user_id: int, db: DbSession) -> UserDashboardResponse:
+    return await DashboardService(db).get_user_dashboard(user_id)
+
+
+# ── Parametric /{year}/{month} routes ─────────────────────────────────────────
 
 @router.get("/{year}/{month}", response_model=DashboardResponse)
 async def get_dashboard(
@@ -17,11 +30,6 @@ async def get_dashboard(
     region: Region | None = Query(default=None),
 ) -> DashboardResponse:
     return await DashboardService(db).get_dashboard(year, month, department, region)
-
-
-@router.get("/project/{project_id}", response_model=ProjectDashboardResponse)
-async def get_project_dashboard(project_id: int, db: DbSession) -> ProjectDashboardResponse:
-    return await DashboardService(db).get_project_dashboard(project_id)
 
 
 @router.get("/{year}/{month}/project", response_model=list[ProjectDashboardResponse])
@@ -40,11 +48,6 @@ async def get_project_dashboard_for_period(
     year: int, month: int, project_id: int, db: DbSession
 ) -> ProjectDashboardResponse:
     return await DashboardService(db).get_project_dashboard_for_period(year, month, project_id)
-
-
-@router.get("/user/{user_id}", response_model=UserDashboardResponse)
-async def get_user_dashboard(user_id: int, db: DbSession) -> UserDashboardResponse:
-    return await DashboardService(db).get_user_dashboard(user_id)
 
 
 @router.get("/{year}/{month}/user", response_model=list[UserDashboardResponse])

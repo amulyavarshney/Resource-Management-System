@@ -30,7 +30,7 @@ const DashboardReport = ({ year, month }: ExportFileProps) => {
 				session?.user.region
 			);
 			projectDashboard.sort((a, b) =>
-				a.projectTitle.localeCompare(b.projectTitle)
+				a.project_title.localeCompare(b.project_title)
 			);
 			let userDashboard = await dashboardService.getUserDashboard(
 				year,
@@ -45,24 +45,24 @@ const DashboardReport = ({ year, month }: ExportFileProps) => {
 
 			for (const projectData of projectDashboard) {
 				const {
-					projectNumber,
-					projectTitle,
-					totalIntUsers,
-					totalExtUsers,
-					totalUsers,
-					totalIntWorkHours,
-					totalExtWorkHours,
-					totalWorkHours,
+					project_number,
+					project_title,
+					total_int_users,
+					total_ext_users,
+					total_users,
+					total_int_work_hours,
+					total_ext_work_hours,
+					total_work_hours,
 				} = projectData;
 				projectDashboardReport.push({
-					projectNumber,
-					projectTitle,
-					totalIntUsers,
-					totalExtUsers,
-					totalUsers,
-					totalIntWorkHours,
-					totalExtWorkHours,
-					totalWorkHours,
+					projectNumber: project_number,
+					projectTitle: project_title,
+					totalIntUsers: total_int_users,
+					totalExtUsers: total_ext_users,
+					totalUsers: total_users,
+					totalIntWorkHours: total_int_work_hours,
+					totalExtWorkHours: total_ext_work_hours,
+					totalWorkHours: total_work_hours,
 				});
 			}
 
@@ -75,37 +75,37 @@ const DashboardReport = ({ year, month }: ExportFileProps) => {
 			};
 
 			for (const userData of userDashboard) {
-				const { userId, email, isExternal, projects, ...userMetrics } =
+				const { user_id, email, is_external, projects, ...userMetrics } =
 					userData;
 				const name = dashboardService.getFullName(userData);
-				userMetrics.type = isExternal ? "EXT" : "FTE";
+				userMetrics.type = is_external ? "EXT" : "FTE";
 				const {
 					type,
-					totalProjects,
-					totalWeek1Hours,
-					totalWeek2Hours,
-					totalWeek3Hours,
-					totalWeek4Hours,
-					totalWeek5Hours,
+					total_projects,
+					total_week1_hours,
+					total_week2_hours,
+					total_week3_hours,
+					total_week4_hours,
+					total_week5_hours,
 					totalHours,
 				} = userMetrics;
 				userDashboardReport.push({
 					name,
 					type,
-					totalProjects,
-					totalWeek1Hours,
-					totalWeek2Hours,
-					totalWeek3Hours,
-					totalWeek4Hours,
-					totalWeek5Hours,
+					totalProjects: total_projects,
+					totalWeek1Hours: total_week1_hours,
+					totalWeek2Hours: total_week2_hours,
+					totalWeek3Hours: total_week3_hours,
+					totalWeek4Hours: total_week4_hours,
+					totalWeek5Hours: total_week5_hours,
 					totalHours,
 				});
 
-				weekTotal.week1 += totalWeek1Hours;
-				weekTotal.week2 += totalWeek2Hours;
-				weekTotal.week3 += totalWeek3Hours;
-				weekTotal.week4 += totalWeek4Hours;
-				weekTotal.week5 += totalWeek5Hours;
+				weekTotal.week1 += total_week1_hours;
+				weekTotal.week2 += total_week2_hours;
+				weekTotal.week3 += total_week3_hours;
+				weekTotal.week4 += total_week4_hours;
+				weekTotal.week5 += total_week5_hours;
 			}
 
 			const header: Header = {
@@ -210,9 +210,9 @@ const DashboardReport = ({ year, month }: ExportFileProps) => {
 						"",
 						"",
 						"",
-						dashboard.totalIntWorkHours,
-						dashboard.totalExtWorkHours,
-						dashboard.totalWorkHours,
+						dashboard.total_int_work_hours,
+						dashboard.total_ext_work_hours,
+						dashboard.total_work_hours,
 					],
 				],
 				"User Dashboard": [
@@ -225,7 +225,7 @@ const DashboardReport = ({ year, month }: ExportFileProps) => {
 						weekTotal.week3,
 						weekTotal.week4,
 						weekTotal.week5,
-						dashboard.totalWorkHours,
+						dashboard.total_work_hours,
 					],
 				],
 			};

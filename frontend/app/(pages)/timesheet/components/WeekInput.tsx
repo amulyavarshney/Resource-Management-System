@@ -27,8 +27,8 @@ const WeekInput = ({
 
 	useEffect(() => {
 		const key: WeekDataKey = {
-			userId,
-			projectId,
+			user_id: userId,
+			project_id: projectId,
 			year,
 			month,
 		};

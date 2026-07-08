@@ -3,16 +3,16 @@ import { Department, Region, Role } from "@/nextauth.d";
 import http from "./httpInstance";
 
 export type UserCreateViewModel = {
-	empId?: number;
-	userName: string;
-	firstName: string;
-	lastName: string;
+	emp_id?: number;
+	user_name: string;
+	first_name: string;
+	last_name: string;
 	email: string;
 	department: Department;
 	region: Region;
 	role: Role;
-	workHoursPerDay: number;
-	parentId: number;
+	work_hours_per_day: number;
+	parent_id: number;
 };
 
 export type UserUpdateViewModel = Partial<UserCreateViewModel>;
@@ -20,18 +20,18 @@ export type UserUpdateViewModel = Partial<UserCreateViewModel>;
 export type User = UserCreateViewModel & {
 	[key: string]: number | string | boolean | Date;
 	id: number;
-	isExternal: boolean;
-	lastSavedTime: Date;
-	week1Hours: number;
-	week2Hours: number;
-	week3Hours: number;
-	week4Hours: number;
-	week5Hours: number;
+	is_external: boolean;
+	last_saved_time: Date;
+	week1_hours: number;
+	week2_hours: number;
+	week3_hours: number;
+	week4_hours: number;
+	week5_hours: number;
 };
 
 class UserService {
 	getFullName(user: User) {
-		return `${user.firstName} ${user.lastName}`;
+		return `${user.first_name} ${user.last_name}`;
 	}
 
 	async getUsers(department?: Department, region?: Region) {
@@ -119,7 +119,7 @@ class UserService {
 	async getUserByEmpId(empId: number) {
 		try {
 			const allUsers = await this.getUsers();
-			const user = allUsers.find((user) => user.empId === empId);
+			const user = allUsers.find((user) => user.emp_id === empId);
 			if (user) return user;
 			throw new Error(`User with empId ${empId} not found`);
 		} catch (error) {
@@ -128,10 +128,13 @@ class UserService {
 		}
 	}
 
-	async getUserByEmail(email: string) {
+	async getUserByEmail(email: string, backendToken?: string) {
 		try {
-			const allUsers = await this.getUsers();
-			const user = allUsers.find((user) => user.email === email);
+			const headers = backendToken
+				? { Authorization: `Bearer ${backendToken}` }
+				: undefined;
+			const response = await http.get<User[]>("/user", { headers });
+			const user = response.data.find((u) => u.email === email);
 			if (user) return user;
 			throw new Error(`User with email ${email} not found`);
 		} catch (error) {
@@ -178,10 +181,10 @@ class UserService {
 
 	async updateLastSavedTime(id: number) {
 		try {
-			const user = {
-				lastSavedTime: new Date(),
-			};
-			const response = await http.patch<User>(`/user/${id}`, user);
+			const last_saved_time = new Date().toISOString();
+			const response = await http.patch<User>(
+				`/user/${id}/lastSavedTime?last_saved_time=${encodeURIComponent(last_saved_time)}`
+			);
 			return response.data;
 		} catch (error) {
 			console.error(`Error while updating User with id ${id}`, error);
@@ -192,7 +195,7 @@ class UserService {
 	async removeUser(id: number, deleteNow?: boolean) {
 		try {
 			const response = await http.delete<User>(
-				`/user/${id}${deleteNow ? `?deleteNow=${deleteNow}` : ""}`
+				`/user/${id}${deleteNow ? `?delete_now=${deleteNow}` : ""}`
 			);
 			return response.data;
 		} catch (error) {
@@ -212,8 +215,8 @@ class UserService {
 				throw Error(`Error: Password Mismatch`);
 			}
 			const password = oldPassword
-				? { oldPassword: oldPassword, newPassword: newPassword }
-				: { newPassword: newPassword };
+				? { old_password: oldPassword, new_password: newPassword }
+				: { new_password: newPassword };
 			const response = await http.patch<User>(
 				`/user/${id}/changePassword`,
 				password

@@ -44,25 +44,25 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 		data && (
 			<div className="min-h-max dark:bg-gray-900">
 				<h2 className="text-2xl sm:text-3xl md:text-4xl p-3 font-bold text-center tracking-tight text-gray-700 dark:text-gray-200">
-					{data.projectNumber}
+					{data.project_number}
 				</h2>
 				<h1 className="text-3xl sm:text-4xl md:text-6xl p-3 font-bold text-center tracking-tight text-gray-900 dark:text-gray-100">
-					{data.projectTitle}
+					{data.project_title}
 				</h1>
 				<div className="px-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 					{[
-						{ title: "Total Internal Users", value: data.totalIntUsers },
-						{ title: "Total External Users", value: data.totalExtUsers },
-						{ title: "Total Users", value: data.totalUsers },
+						{ title: "Total Internal Users", value: data.total_int_users },
+						{ title: "Total External Users", value: data.total_ext_users },
+						{ title: "Total Users", value: data.total_users },
 						{
 							title: "Total Internal Working Hours",
-							value: data.totalIntWorkHours,
+							value: data.total_int_work_hours,
 						},
 						{
 							title: "Total External Working Hours",
-							value: data.totalExtWorkHours,
+							value: data.total_ext_work_hours,
 						},
-						{ title: "Total Working Hours", value: data.totalWorkHours },
+						{ title: "Total Working Hours", value: data.total_work_hours },
 					].map((item, index) => (
 						<div
 							key={index}
@@ -90,7 +90,7 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 							key={index}
 							className="m-2 sm:m-4 bg-gray-200 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 shadow-lg rounded-lg overflow-hidden relative"
 						>
-							{value.isExternal && (
+							{value.is_external && (
 								<div className="absolute top-0 right-0 w-10 h-10 pt-1 pr-0.5 text-center text-sm font-bold italic bg-gradient-to-br from-indigo-500 to-indigo-200 rounded-bl-full">
 									ext
 								</div>
@@ -113,11 +113,11 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 								</div>
 								<div className="py-2 flex justify-between items-center gap-2">
 									{[
-										"week1Hours",
-										"week2Hours",
-										"week3Hours",
-										"week4Hours",
-										"week5Hours",
+										"week1_hours",
+										"week2_hours",
+										"week3_hours",
+										"week4_hours",
+										"week5_hours",
 									].map(
 										(week, index) =>
 											(value[week as keyof typeof value] as number | null) !== null && (
@@ -140,11 +140,11 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 									<div className="flex-col">
 										<div className="flex flex-col items-center justify-center w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-500 to-gray-150 border border-gray-400 dark:border-gray-600 rounded sm:rounded-full shadow-lg">
 											<div className="font-bold text-md">
-												{value.week1Hours +
-													value.week2Hours +
-													value.week3Hours +
-													value.week4Hours +
-													value.week5Hours}
+												{value.week1_hours +
+													value.week2_hours +
+													value.week3_hours +
+													value.week4_hours +
+													value.week5_hours}
 											</div>
 										</div>
 										<div className="mt-1 text-xs text-center">Total</div>

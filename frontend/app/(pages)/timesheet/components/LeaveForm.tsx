@@ -17,7 +17,7 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 		date: new Date(year, month, day),
 		type: LeaveType.Casual,
 		session: LeaveSession.FullDay,
-		userId: session?.user.id ?? 0,
+		user_id: session?.user.id ?? 0,
 	});
 	const [savedLeaves, setSavedLeaves] = useState<Leave[]>([]);
 
@@ -68,7 +68,7 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 
 	const handleDelete = async (e: React.FormEvent) => {
 		e.preventDefault();
-		await leaveService.removeLeave(leave.date, leave.userId);
+		await leaveService.removeLeave(leave.date, leave.user_id);
 		setDay(day + 1);
 	};
 

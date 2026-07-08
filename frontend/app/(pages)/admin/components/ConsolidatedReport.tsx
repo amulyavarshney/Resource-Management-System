@@ -30,7 +30,7 @@ export default function ConsolidatedReport({ year, month }: ExportFileProps) {
 				session?.user.region
 			);
 			projectDashboard.sort((a, b) =>
-				a.projectTitle.localeCompare(b.projectTitle)
+				a.project_title.localeCompare(b.project_title)
 			);
 			const consolidatedReport = [];
 			const consolidatedTimingReport = [];
@@ -38,53 +38,53 @@ export default function ConsolidatedReport({ year, month }: ExportFileProps) {
 				totalIntHours = 0;
 			for (const projectData of projectDashboard) {
 				const {
-					projectNumber,
-					projectTitle,
+					project_number,
+					project_title,
 					business,
 					department,
-					totalIntWorkHours,
-					totalExtWorkHours,
-					totalWorkHours,
+					total_int_work_hours,
+					total_ext_work_hours,
+					total_work_hours,
 					users: projectUsers,
 				} = projectData;
 				for (const user of projectUsers) {
 					const {
-						isExternal,
-						week1Hours,
-						week2Hours,
-						week3Hours,
-						week4Hours,
-						week5Hours,
+						is_external,
+						week1_hours,
+						week2_hours,
+						week3_hours,
+						week4_hours,
+						week5_hours,
 					} = user;
 					const fullName = userService.getFullName(user);
 					let extHours = 0,
 						intHours = 0;
-					if (isExternal) {
+					if (is_external) {
 						extHours =
-							week1Hours + week2Hours + week3Hours + week4Hours + week5Hours;
+							week1_hours + week2_hours + week3_hours + week4_hours + week5_hours;
 						totalExtHours += extHours;
 					} else {
 						intHours =
-							week1Hours + week2Hours + week3Hours + week4Hours + week5Hours;
+							week1_hours + week2_hours + week3_hours + week4_hours + week5_hours;
 						totalIntHours += intHours;
 					}
 					consolidatedReport.push({
-						projectNumber,
-						projectTitle,
+						projectNumber: project_number,
+						projectTitle: project_title,
 						business: business ?? department,
 						fullName,
-						type: isExternal ? "EXT" : "FTE",
+						type: is_external ? "EXT" : "FTE",
 						intHours,
 						extHours,
 					});
 				}
 				consolidatedTimingReport.push({
-					projectNumber,
-					projectTitle,
+					projectNumber: project_number,
+					projectTitle: project_title,
 					business: business ?? department,
-					totalIntWorkHours,
-					totalExtWorkHours,
-					totalWorkHours,
+					totalIntWorkHours: total_int_work_hours,
+					totalExtWorkHours: total_ext_work_hours,
+					totalWorkHours: total_work_hours,
 				});
 			}
 			const header: Header = {
@@ -136,13 +136,13 @@ export default function ConsolidatedReport({ year, month }: ExportFileProps) {
 						"",
 						"",
 						"TOTAL",
-						dashboard.totalIntWorkHours,
-						dashboard.totalExtWorkHours,
-						dashboard.totalWorkHours,
+						dashboard.total_int_work_hours,
+						dashboard.total_ext_work_hours,
+						dashboard.total_work_hours,
 					],
-					// ["", "Total Hours", dashboard.totalWorkHours],
-					// ["", "Total Internal Hours", dashboard.totalIntWorkHours],
-					// ["", "Total External Hours", dashboard.totalExtWorkHours],
+					// ["", "Total Hours", dashboard.total_work_hours],
+					// ["", "Total Internal Hours", dashboard.total_int_work_hours],
+					// ["", "Total External Hours", dashboard.total_ext_work_hours],
 				],
 			};
 

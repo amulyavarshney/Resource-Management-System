@@ -47,13 +47,13 @@ const DashboardTable = ({
 	const headings: { title: string; field: string }[] = [
 		{ title: "Name", field: "name" },
 		// { title: "Email", field: "email" },
-		{ title: "Employee Type", field: "isExternal" },
-		{ title: "Total Projects", field: "totalProjects" },
-		{ title: "Week 1 Hours", field: "totalWeek1Hours" },
-		{ title: "Week 2 Hours", field: "totalWeek2Hours" },
-		{ title: "Week 3 Hours", field: "totalWeek3Hours" },
-		{ title: "Week 4 Hours", field: "totalWeek4Hours" },
-		{ title: numWeeks == 5 ? "Week 5 Hours" : "", field: "totalWeek5Hours" },
+		{ title: "Employee Type", field: "is_external" },
+		{ title: "Total Projects", field: "total_projects" },
+		{ title: "Week 1 Hours", field: "total_week1_hours" },
+		{ title: "Week 2 Hours", field: "total_week2_hours" },
+		{ title: "Week 3 Hours", field: "total_week3_hours" },
+		{ title: "Week 4 Hours", field: "total_week4_hours" },
+		{ title: numWeeks == 5 ? "Week 5 Hours" : "", field: "total_week5_hours" },
 		{ title: "Total Hours", field: "totalHours" },
 	];
 
@@ -109,31 +109,31 @@ const DashboardTable = ({
 		() => (
 			<>
 				{userData.map((data) => (
-					<tr key={data.userId} className="text-center whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
+					<tr key={data.user_id} className="text-center whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
 						<td className="px-3 py-2 text-left font-semibold text-blue-500 whitespace-nowrap border dark:border-gray-600">
-							<Link href={`user/${data.userId}`}>{dashboardService.getFullName(data)}</Link>
+							<Link href={`user/${data.user_id}`}>{dashboardService.getFullName(data)}</Link>
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.isExternal ? "EXT" : "FTE"}
+							{data.is_external ? "EXT" : "FTE"}
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.totalProjects}
+							{data.total_projects}
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.totalWeek1Hours}
+							{data.total_week1_hours}
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.totalWeek2Hours}
+							{data.total_week2_hours}
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.totalWeek3Hours}
+							{data.total_week3_hours}
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.totalWeek4Hours}
+							{data.total_week4_hours}
 						</td>
 						{numWeeks === 5 && (
 							<td className="px-3 py-2 border dark:border-gray-600">
-								{data.totalWeek5Hours}
+								{data.total_week5_hours}
 							</td>
 						)}
 						<td className="px-3 py-2 border dark:border-gray-600">

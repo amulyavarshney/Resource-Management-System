@@ -18,8 +18,8 @@ class ProjectService:
 
     async def get_all(self, department: Department | None, region: Region | None) -> list[ProjectResponse]:
         stmt = select(Project).where(
-            (department is None) | ((Project.department.op("&")(int(department))) > 0) if department else True,
-            (region is None) | ((Project.region.op("&")(int(region))) > 0) if region else True,
+            (Project.department.op("&")(int(department))) > 0 if department is not None else True,
+            (Project.region.op("&")(int(region))) > 0 if region is not None else True,
             (Project.date_deleted.is_(None)) | (Project.date_deleted >= datetime.now(timezone.utc)),
         )
         projects = (await self._db.execute(stmt)).scalars().all()
@@ -34,8 +34,8 @@ class ProjectService:
     ) -> list[ProjectResponse]:
         next_month = first_day_of_next_month(year, month)
         stmt = select(Project).where(
-            (department is None) | ((Project.department.op("&")(int(department))) > 0) if department else True,
-            (region is None) | ((Project.region.op("&")(int(region))) > 0) if region else True,
+            (Project.department.op("&")(int(department))) > 0 if department is not None else True,
+            (Project.region.op("&")(int(region))) > 0 if region is not None else True,
             (Project.date_deleted.is_(None)) | (Project.date_deleted >= next_month),
             Project.date_created < next_month,
         )

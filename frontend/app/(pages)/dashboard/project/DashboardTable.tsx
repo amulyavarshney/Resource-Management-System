@@ -13,14 +13,14 @@ type DashboardTableProps = {
 };
 
 const headings: { title: string; field: string }[] = [
-	{ title: "Project Number", field: "projectNumber" },
-	{ title: "Project Title", field: "projectTitle" },
-	{ title: "FTE Users", field: "totalIntUsers" },
-	{ title: "EXT Users", field: "totalExtUsers" },
-	{ title: "Total Users", field: "totalUsers" },
-	{ title: "FTE Work Hours", field: "totalIntWorkHours" },
-	{ title: "EXT Work Hours", field: "totalExtWorkHours" },
-	{ title: "Total Work Hours", field: "totalWorkHours" },
+	{ title: "Project Number", field: "project_number" },
+	{ title: "Project Title", field: "project_title" },
+	{ title: "FTE Users", field: "total_int_users" },
+	{ title: "EXT Users", field: "total_ext_users" },
+	{ title: "Total Users", field: "total_users" },
+	{ title: "FTE Work Hours", field: "total_int_work_hours" },
+	{ title: "EXT Work Hours", field: "total_ext_work_hours" },
+	{ title: "Total Work Hours", field: "total_work_hours" },
 ];
 
 const DashboardTable = ({
@@ -61,19 +61,19 @@ const DashboardTable = ({
 		() => (
 			<>
 				{projectData.map((data) => (
-					<tr key={data.projectId} className="text-center whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
+					<tr key={data.project_id} className="text-center whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
 						<td className="px-3 py-2 border dark:border-gray-600">
-							{data.projectNumber}
+							{data.project_number}
 						</td>
 						<td className="px-3 py-2 text-left font-semibold text-blue-500 whitespace-nowrap border dark:border-gray-600">
-							<Link href={`project/${data.projectId}`}>{data.projectTitle}</Link>
+							<Link href={`project/${data.project_id}`}>{data.project_title}</Link>
 						</td>
-						<td className="px-3 py-2 border dark:border-gray-600">{data.totalIntUsers}</td>
-						<td className="px-3 py-2 border dark:border-gray-600">{data.totalExtUsers}</td>
-						<td className="px-3 py-2 border dark:border-gray-600">{data.totalUsers}</td>
-						<td className="px-3 py-2 border dark:border-gray-600">{data.totalIntWorkHours}</td>
-						<td className="px-3 py-2 border dark:border-gray-600">{data.totalExtWorkHours}</td>
-						<td className="px-3 py-2 border dark:border-gray-600">{data.totalWorkHours}</td>
+						<td className="px-3 py-2 border dark:border-gray-600">{data.total_int_users}</td>
+						<td className="px-3 py-2 border dark:border-gray-600">{data.total_ext_users}</td>
+						<td className="px-3 py-2 border dark:border-gray-600">{data.total_users}</td>
+						<td className="px-3 py-2 border dark:border-gray-600">{data.total_int_work_hours}</td>
+						<td className="px-3 py-2 border dark:border-gray-600">{data.total_ext_work_hours}</td>
+						<td className="px-3 py-2 border dark:border-gray-600">{data.total_work_hours}</td>
 					</tr>
 				))}
 			</>

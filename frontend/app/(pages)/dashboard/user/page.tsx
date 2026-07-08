@@ -65,11 +65,11 @@ export default function Dashboard() {
 			totalHours: 0,
 		};
 		filteredDashboard.forEach((data) => {
-			total.week1Hours += data.totalWeek1Hours;
-			total.week2Hours += data.totalWeek2Hours;
-			total.week3Hours += data.totalWeek3Hours;
-			total.week4Hours += data.totalWeek4Hours;
-			total.week5Hours += data.totalWeek5Hours;
+			total.week1Hours += data.total_week1_hours;
+			total.week2Hours += data.total_week2_hours;
+			total.week3Hours += data.total_week3_hours;
+			total.week4Hours += data.total_week4_hours;
+			total.week5Hours += data.total_week5_hours;
 			total.totalHours += data.totalHours;
 		});
 		setTotals(total);

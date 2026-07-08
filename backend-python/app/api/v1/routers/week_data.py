@@ -5,7 +5,7 @@ from app.schemas.common import MessageResponse
 from app.schemas.week_data import WeekDataResponse, WeekDataUpdate
 from app.services.week_data_service import WeekDataService
 
-router = APIRouter(prefix="/weekdata", tags=["weekdata"], dependencies=[AllAuthenticated])
+router = APIRouter(prefix="/weekData", tags=["weekdata"], dependencies=[AllAuthenticated])
 
 
 @router.get("", response_model=list[WeekDataResponse])

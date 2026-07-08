@@ -4,29 +4,29 @@ import { Project } from "./project";
 import { User } from "./user";
 
 export type DashboardViewModel = {
-	totalProjects: number;
-	totalUsers: number;
-	totalIntUsers: number;
-	totalExtUsers: number;
-	totalWorkHours: number;
-	totalIntWorkHours: number;
-	totalExtWorkHours: number;
+	total_projects: number;
+	total_users: number;
+	total_int_users: number;
+	total_ext_users: number;
+	total_work_hours: number;
+	total_int_work_hours: number;
+	total_ext_work_hours: number;
 };
 
 export type ProjectDashboardMetrics = {
 	[key: string]: number | string;
-	projectId: number;
-	projectNumber: string;
-	projectTitle: string;
+	project_id: number;
+	project_number: string;
+	project_title: string;
 	business: string;
 	department: Department;
 	region: Region;
-	totalIntUsers: number;
-	totalExtUsers: number;
-	totalUsers: number;
-	totalIntWorkHours: number;
-	totalExtWorkHours: number;
-	totalWorkHours: number;
+	total_int_users: number;
+	total_ext_users: number;
+	total_users: number;
+	total_int_work_hours: number;
+	total_ext_work_hours: number;
+	total_work_hours: number;
 };
 
 export type ProjectDashboardViewModel = ProjectDashboardMetrics & {
@@ -35,19 +35,19 @@ export type ProjectDashboardViewModel = ProjectDashboardMetrics & {
 
 export type UserDashboardMetrics = {
 	[key: string]: number | string | boolean;
-	userId: number;
-	userName: string;
-	firstName: string;
-	lastName: string;
+	user_id: number;
+	user_name: string;
+	first_name: string;
+	last_name: string;
 	email: string;
-	isExternal: boolean;
-	parentId: number;
-	totalProjects: number;
-	totalWeek1Hours: number;
-	totalWeek2Hours: number;
-	totalWeek3Hours: number;
-	totalWeek4Hours: number;
-	totalWeek5Hours: number;
+	is_external: boolean;
+	parent_id: number;
+	total_projects: number;
+	total_week1_hours: number;
+	total_week2_hours: number;
+	total_week3_hours: number;
+	total_week4_hours: number;
+	total_week5_hours: number;
 	totalHours: number;
 };
 
@@ -57,7 +57,7 @@ export type UserDashboardViewModel = UserDashboardMetrics & {
 
 class DashboardService {
 	getFullName(user: UserDashboardViewModel) {
-		return `${user.firstName} ${user.lastName}`;
+		return `${user.first_name} ${user.last_name}`;
 	}
 
 	async getDashboard(
@@ -76,8 +76,8 @@ class DashboardService {
 				)
 			);
 			const data = response.data;
-			data.totalIntUsers = data.totalUsers - data.totalExtUsers;
-			data.totalIntWorkHours = data.totalWorkHours - data.totalExtWorkHours;
+			data.total_int_users = data.total_users - data.total_ext_users;
+			data.total_int_work_hours = data.total_work_hours - data.total_ext_work_hours;
 			return data;
 		} catch (error) {
 			throw error;
@@ -165,11 +165,11 @@ class DashboardService {
 			dashboardData.map(
 				(data) =>
 					(data.totalHours =
-						data.totalWeek1Hours +
-						data.totalWeek2Hours +
-						data.totalWeek3Hours +
-						data.totalWeek4Hours +
-						data.totalWeek5Hours)
+						data.total_week1_hours +
+						data.total_week2_hours +
+						data.total_week3_hours +
+						data.total_week4_hours +
+						data.total_week5_hours)
 			);
 			return dashboardData;
 		} catch (error) {
@@ -187,11 +187,11 @@ class DashboardService {
 			);
 			const data = response.data;
 			data.totalHours =
-				data.totalWeek1Hours +
-				data.totalWeek2Hours +
-				data.totalWeek3Hours +
-				data.totalWeek4Hours +
-				data.totalWeek5Hours;
+				data.total_week1_hours +
+				data.total_week2_hours +
+				data.total_week3_hours +
+				data.total_week4_hours +
+				data.total_week5_hours;
 			return data;
 		} catch (error) {
 			console.error(
@@ -209,11 +209,11 @@ class DashboardService {
 			);
 			const data = response.data;
 			data.totalHours =
-				data.totalWeek1Hours +
-				data.totalWeek2Hours +
-				data.totalWeek3Hours +
-				data.totalWeek4Hours +
-				data.totalWeek5Hours;
+				data.total_week1_hours +
+				data.total_week2_hours +
+				data.total_week3_hours +
+				data.total_week4_hours +
+				data.total_week5_hours;
 			return data;
 		} catch (error) {
 			console.error(

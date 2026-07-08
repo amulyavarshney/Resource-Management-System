@@ -17,7 +17,7 @@ export type Leave = {
 	date: Date;
 	type: LeaveType;
 	session: LeaveSession;
-	userId: Number;
+	user_id: Number;
 };
 
 class LeaveService {

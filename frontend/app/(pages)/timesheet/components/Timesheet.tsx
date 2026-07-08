@@ -39,7 +39,7 @@ export default function Table({
 
 	const [maxHours, setMaxHours] = useState<number>(8);
 	const fetchMaxWorkHours = async () => {
-		const max_hours = (await userService.getUser(userId)).workHoursPerDay;
+		const max_hours = (await userService.getUser(userId)).work_hours_per_day;
 		setMaxHours(max_hours);
 	};
 	useEffect(() => {
@@ -142,8 +142,8 @@ export default function Table({
 			await Promise.all(
 				Array.from(weeklyDataRef.current, ([projectId, projectWeeklyData]) => {
 					const key: WeekDataKey = {
-						userId: userId,
-						projectId: projectId,
+						user_id: userId,
+						project_id: projectId,
 						year,
 						month,
 					};

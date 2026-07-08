@@ -79,8 +79,8 @@ export const generateReport = async (
 
 			for (const project of projects) {
 				const key: WeekDataKey = {
-					userId,
-					projectId: project.id,
+					user_id: userId,
+					project_id: project.id,
 					year,
 					month,
 				};

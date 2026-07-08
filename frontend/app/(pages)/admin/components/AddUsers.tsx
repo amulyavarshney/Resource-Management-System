@@ -23,16 +23,16 @@ export default function AddUsers() {
 		// .map((value) => value.trim())
 		.reduce((acc, value) => acc | Region[value as keyof typeof Region], 0);
 	const [user, setUser] = useState<UserCreateViewModel>({
-		empId: undefined,
-		userName: "",
-		firstName: "",
-		lastName: "",
+		emp_id: undefined,
+		user_name: "",
+		first_name: "",
+		last_name: "",
 		email: "",
 		department: department ?? Department.None,
 		region: region ?? Region.None,
 		role: Role.Employee,
-		workHoursPerDay: Number(process.env.NEXT_PUBLIC_MAX_HOURS),
-		parentId: 0,
+		work_hours_per_day: Number(process.env.NEXT_PUBLIC_MAX_HOURS),
+		parent_id: 0,
 	});
 	const [users, setUsers] = useState<User[]>([]);
 
@@ -70,9 +70,9 @@ export default function AddUsers() {
 						EmpId
 						<input
 							type="text"
-							name="empId"
+							name="emp_id"
 							placeholder="Emp Id"
-							value={user.empId}
+							value={user.emp_id}
 							onChange={handleChange}
 							className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 						/>
@@ -81,9 +81,9 @@ export default function AddUsers() {
 						First Name
 						<input
 							type="text"
-							name="firstName"
+							name="first_name"
 							placeholder="First Name"
-							value={user.firstName}
+							value={user.first_name}
 							onChange={handleChange}
 							className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 						/>
@@ -92,9 +92,9 @@ export default function AddUsers() {
 						Last Name
 						<input
 							type="text"
-							name="lastName"
+							name="last_name"
 							placeholder="Last Name"
-							value={user.lastName}
+							value={user.last_name}
 							onChange={handleChange}
 							className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 						/>
@@ -192,9 +192,9 @@ export default function AddUsers() {
 						Work Hours / Day
 						<input
 							type="number"
-							name="workHoursPerDay"
+							name="work_hours_per_day"
 							placeholder="Work Hours / Day"
-							value={user.workHoursPerDay}
+							value={user.work_hours_per_day}
 							min={0}
 							max={16}
 							onChange={handleChange}
@@ -204,9 +204,9 @@ export default function AddUsers() {
 					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Reporting Manager
 						<select
-							value={user.parentId}
+							value={user.parent_id}
 							onChange={(e) =>
-								setUser({ ...user, parentId: Number(e.target.value) })
+								setUser({ ...user, parent_id: Number(e.target.value) })
 							}
 							className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 						>

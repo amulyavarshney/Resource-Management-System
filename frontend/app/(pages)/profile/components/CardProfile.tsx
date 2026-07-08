@@ -35,7 +35,7 @@ export default function CardProfile({ user }: CardProfileProps) {
 		userData && (
 			<div className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg">
 				<div className="ml-auto top-0 right-0 w-16 h-16 pt-4 text-center text-sm font-bold italic bg-gradient-to-br from-indigo-500 to-indigo-200 rounded-tr-lg rounded-bl-full shadow-inner">
-					{user.isExternal ? "EXT" : "FTE"}
+					{user.is_external ? "EXT" : "FTE"}
 				</div>
 				<div className="flex-col p-5 text-center">
 					<Image
@@ -70,7 +70,7 @@ export default function CardProfile({ user }: CardProfileProps) {
 							<div className="flex justify-center p-4 gap-4">
 								<div>
 									<span className="text-xl font-bold block uppercase tracking-wide text-indigo-500">
-										{userData.totalProjects}
+										{userData.total_projects}
 									</span>
 									<span className="text-sm text-indigo-600 dark:text-indigo-400">
 										Projects
@@ -93,7 +93,7 @@ export default function CardProfile({ user }: CardProfileProps) {
 							<div className="flex justify-center p-4 gap-4">
 								<div>
 									<span className="text-xl font-bold block uppercase tracking-wide text-indigo-500">
-										{userStats?.totalProjects}
+										{userStats?.total_projects}
 									</span>
 									<span className="text-sm text-indigo-600 dark:text-indigo-400">
 										Projects

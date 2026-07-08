@@ -75,19 +75,19 @@ const UserDetail = ({ params }: { params: { id: number } }) => {
 					</div>
 					<div className="flex flex-col items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-150 border-gray-400 dark:border-gray-600 rounded-full shadow-inner">
 						<h3 className="text-lg p-3 font-bold text-center tracking-tight sm:text-lg md:text-xl">
-							{data.isExternal ? "EXT" : "FTE"}
+							{data.is_external ? "EXT" : "FTE"}
 						</h3>
 					</div>
 				</div>
 				<div className="flex flex-col sm:flex-row justify-evenly items-center">
 					{[
-						{ title: "Total Projects", value: data.totalProjects },
-						{ title: "Total Week 1 Hours", value: data.totalWeek1Hours },
-						{ title: "Total Week 2 Hours", value: data.totalWeek2Hours },
-						{ title: "Total Week 3 Hours", value: data.totalWeek3Hours },
-						{ title: "Total Week 4 Hours", value: data.totalWeek4Hours },
+						{ title: "Total Projects", value: data.total_projects },
+						{ title: "Total Week 1 Hours", value: data.total_week1_hours },
+						{ title: "Total Week 2 Hours", value: data.total_week2_hours },
+						{ title: "Total Week 3 Hours", value: data.total_week3_hours },
+						{ title: "Total Week 4 Hours", value: data.total_week4_hours },
 						numWeeks == 5
-							? { title: "Total Week 5 Hours", value: data.totalWeek5Hours }
+							? { title: "Total Week 5 Hours", value: data.total_week5_hours }
 							: null,
 						{ title: "Total Hours", value: data.totalHours },
 					].map(
@@ -131,7 +131,7 @@ const UserDetail = ({ params }: { params: { id: number } }) => {
 									<div className="flex-col">
 										<div className="flex flex-col items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-150 border-gray-400 dark:border-gray-600 rounded-full shadow-inner">
 											<div className="font-bold text-lg">
-												{value.workingHours}
+												{value.working_hours}
 											</div>
 											<div className="text-xs font-medium">hours</div>
 										</div>

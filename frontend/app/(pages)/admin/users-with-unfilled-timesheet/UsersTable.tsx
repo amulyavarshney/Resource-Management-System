@@ -7,7 +7,7 @@ import CopyButton from "./CopyButton";
 const headings: { title: string; field: string; canCopy: boolean }[] = [
 	{ title: "Name", field: "name", canCopy: false },
 	{ title: "Email", field: "email", canCopy: true },
-	{ title: "Employee Type", field: "isExternal", canCopy: false },
+	{ title: "Employee Type", field: "is_external", canCopy: false },
 ];
 
 type UsersTableProps = {
@@ -21,7 +21,7 @@ export default function UsersTable({
 	sortConfig,
 	setSortConfig,
 }: UsersTableProps) {
-	const extUsers = users.filter((user) => user.isExternal).length;
+	const extUsers = users.filter((user) => user.is_external).length;
 
 	const requestSort = (column: string) => {
 		let isAscending = sortConfig.column === column && sortConfig.isAscending;
@@ -78,11 +78,11 @@ export default function UsersTable({
 				{users.map((data) => (
 					<tr key={data.id} className="hover:bg-gray-50">
 						<td className="p-2 font-semibold text-blue-700 whitespace-nowrap border">
-							<Link href={`/dashboard/user/${data.userId}`}>{userService.getFullName(data)}</Link>
+							<Link href={`/dashboard/user/${data.id}`}>{userService.getFullName(data)}</Link>
 						</td>
 						<td className="p-2 whitespace-nowrap border">{data.email}</td>
 						<td className="p-2 text-center whitespace-nowrap border">
-							{data.isExternal ? "EXT" : "FTE"}
+							{data.is_external ? "EXT" : "FTE"}
 						</td>
 					</tr>
 				))}

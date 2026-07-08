@@ -19,7 +19,7 @@ export default function UserList() {
 			session?.user.region
 		);
 		setUsers(data);
-		const filteredUsers = data.filter((user) => user.isExternal);
+		const filteredUsers = data.filter((user) => user.is_external);
 		const extCount = filteredUsers?.length ?? 0;
 		setExt(extCount);
 	};

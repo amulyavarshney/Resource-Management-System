@@ -28,7 +28,7 @@ export default function Timesheet() {
 		column: keyof TimesheetRow;
 		isAscending: boolean;
 	}>({
-		column: "projectTitle",
+		column: "project_title",
 		isAscending: true,
 	});
 	const { year, month } = useDate();
@@ -68,8 +68,8 @@ export default function Timesheet() {
 			const fetchedRowData: TimesheetRow[] = [];
 			for (const project of projects) {
 				const key: WeekDataKey = {
-					userId,
-					projectId: project.id,
+					user_id: userId,
+					project_id: project.id,
 					year,
 					month,
 				};
@@ -79,9 +79,9 @@ export default function Timesheet() {
 					0
 				);
 				fetchedRowData.push({
-					projectId: project.id,
-					projectNumber: project.number,
-					projectTitle: project.title,
+					project_id: project.id,
+					project_number: project.number,
+					project_title: project.title,
 					week1Hours: weekData.week1,
 					week2Hours: weekData.week2,
 					week3Hours: weekData.week3,
@@ -95,8 +95,8 @@ export default function Timesheet() {
 			const filteredRowData = search
 				? fetchedRowData.filter(
 						(row) =>
-							row.projectNumber.includes(search) ||
-							row.projectTitle.toLowerCase().includes(search.toLowerCase())
+							row.project_number.includes(search) ||
+							row.project_title.toLowerCase().includes(search.toLowerCase())
 				  )
 				: fetchedRowData;
 

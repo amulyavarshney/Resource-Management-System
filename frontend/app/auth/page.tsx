@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Loading from "@/app/components/Loading";
@@ -12,22 +12,22 @@ export default function Auth() {
 	const { status } = useSession();
 
 	const updateIsLogin = useCallback(() => {
-		setIsLogin(!isLogin);
-	}, [isLogin]);
+		setIsLogin((prev) => !prev);
+	}, []);
 
-	if (status == "authenticated") {
-		router.push("/home");
-	} else if (status == "loading") {
+	useEffect(() => {
+		if (status === "authenticated") {
+			router.push("/home");
+		}
+	}, [status, router]);
+
+	if (status === "loading" || status === "authenticated") {
 		return <Loading />;
-	} else {
-		return (
-			<>
-				{isLogin ? (
-					<Login updateIsLogin={updateIsLogin} />
-				) : (
-					<Register updateIsLogin={updateIsLogin} />
-				)}
-			</>
-		);
 	}
+
+	return isLogin ? (
+		<Login updateIsLogin={updateIsLogin} />
+	) : (
+		<Register updateIsLogin={updateIsLogin} />
+	);
 }

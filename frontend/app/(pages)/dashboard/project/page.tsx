@@ -15,7 +15,7 @@ export default function Dashboard() {
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState(true);
 	const [sortConfig, setSortConfig] = useState({
-		column: "projectTitle",
+		column: "project_title",
 		isAscending: true,
 	});
 	const [projectData, setProjectData] = useState<ProjectDashboardViewModel[]>(
@@ -44,15 +44,15 @@ export default function Dashboard() {
 		const filteredDashboard = search
 			? fetchedDashboard.filter(
 					(data) =>
-						data.projectNumber.includes(search) ||
-						data.projectTitle.toLowerCase().includes(search.toLowerCase())
+						data.project_number.includes(search) ||
+						data.project_title.toLowerCase().includes(search.toLowerCase())
 			  )
 			: fetchedDashboard;
 
 		let total = { extWorkHours: 0, workHours: 0 };
 		filteredDashboard.forEach((data) => {
-			total.extWorkHours += data.totalExtWorkHours;
-			total.workHours += data.totalWorkHours;
+			total.extWorkHours += data.total_ext_work_hours;
+			total.workHours += data.total_work_hours;
 		});
 		setTotals(total);
 

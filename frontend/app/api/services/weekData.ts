@@ -9,16 +9,16 @@ export type WeekData = {
 };
 
 export type WeekDataKey = {
-	userId: number;
-	projectId: number;
+	user_id: number;
+	project_id: number;
 	year: number;
 	month: number;
 };
 
 export type TimesheetRow = {
-    projectId: number;
-    projectNumber: string;
-    projectTitle: string;
+    project_id: number;
+    project_number: string;
+    project_title: string;
     week1Hours: number;
     week2Hours: number;
     week3Hours: number;
@@ -107,7 +107,7 @@ class WeekDataService {
 	}
 
 	private constructEndPoint(key: WeekDataKey) {
-		return `/weekData/${key.userId}/${key.projectId}/${key.year}/${key.month}`;
+		return `/weekData/${key.user_id}/${key.project_id}/${key.year}/${key.month}`;
 	}
 
 	private objectToArray(obj: WeekData): number[] {

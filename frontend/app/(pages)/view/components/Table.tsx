@@ -57,21 +57,21 @@ const Table = ({
 		return (
 			<tr className="text-xs sm:text-sm md:text-md lg:text-lg">
 				<th
-					onClick={() => requestSort("projectNumber")}
+					onClick={() => requestSort("project_number")}
 					className="px-3 py-1 text-center text-lg font-bold text-blue-800 dark:text-blue-500 uppercase tracking-wider border dark:border-gray-600"
 				>
 					<div className="flex justify-center items-center gap-2">
 						Project Number
-						<SortImage field="projectNumber" sortConfig={sortConfig} />
+						<SortImage field="project_number" sortConfig={sortConfig} />
 					</div>
 				</th>
 				<th
-					onClick={() => requestSort("projectTitle")}
+					onClick={() => requestSort("project_title")}
 					className="px-3 py-1 text-center text-lg font-bold text-blue-800 dark:text-blue-500 uppercase tracking-wider border dark:border-gray-600"
 				>
 					<div className="flex justify-center items-center gap-2">
 						Project Title
-						<SortImage field="projectTitle" sortConfig={sortConfig} />
+						<SortImage field="project_title" sortConfig={sortConfig} />
 					</div>
 				</th>
 				{weeks.map((week, index: number) => (
@@ -116,7 +116,7 @@ const Table = ({
 				{rowData
 					.filter((row) => isChecked || row.totalHours > 0)
 					.map((row) => (
-						<tr key={row.projectId} className="hover:bg-gray-200 dark:hover:bg-gray-600">
+						<tr key={row.project_id} className="hover:bg-gray-200 dark:hover:bg-gray-600">
 							{Object.values(row).map((data, index) =>
 								index > 0 && index <= numWeeks + 3 ? (
 									<td

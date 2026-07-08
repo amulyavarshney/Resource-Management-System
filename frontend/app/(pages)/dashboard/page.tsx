@@ -12,7 +12,7 @@ import StatItem from "./components/StatsCard";
 const headings = [
 	{
 		label: "Projects",
-		value: "totalProjects",
+		value: "total_projects",
 		href: "/dashboard/project",
 		icon: (
 			<svg
@@ -28,9 +28,9 @@ const headings = [
 	},
 	{
 		label: "Users",
-		value: "totalUsers",
-		fteValue: "totalIntUsers",
-		extValue: "totalExtUsers",
+		value: "total_users",
+		fteValue: "total_int_users",
+		extValue: "total_ext_users",
 		href: "/dashboard/user",
 		icon: (
 			<svg
@@ -46,9 +46,9 @@ const headings = [
 	},
 	{
 		label: "Working Hours",
-		value: "totalWorkHours",
-		fteValue: "totalIntWorkHours",
-		extValue: "totalExtWorkHours",
+		value: "total_work_hours",
+		fteValue: "total_int_work_hours",
+		extValue: "total_ext_work_hours",
 		href: "",
 		icon: (
 			<svg

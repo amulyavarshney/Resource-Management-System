@@ -26,6 +26,14 @@ _log = get_logger(__name__)
 async def lifespan(app: FastAPI):
     configure_logging(_settings.log_level)
     _log.info("startup", env=_settings.app_env)
+    # In development, auto-create tables so SQLite works out-of-the-box
+    # without running Alembic. Production should use `alembic upgrade head`.
+    if _settings.is_development:
+        from app.db.base import Base
+        from app.db.session import engine
+        import app.models  # register all ORM models
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     yield
     _log.info("shutdown")
 
