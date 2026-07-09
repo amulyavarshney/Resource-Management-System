@@ -145,11 +145,11 @@ the shared demo password. The script refuses to run unless
 
 | Email | Role |
 |-------|------|
-| `demo.employee@rms.local` | Employee |
-| `demo.manager@rms.local` | Management |
-| `demo.executive@rms.local` | Executive |
-| `demo.admin@rms.local` | Admin |
-| `demo.developer@rms.local` | Developer |
+| `demo.employee@rms.example` | Employee |
+| `demo.manager@rms.example` | Management |
+| `demo.executive@rms.example` | Executive |
+| `demo.admin@rms.example` | Admin |
+| `demo.developer@rms.example` | Developer |
 
 Password for all of the above: `DemoPass1!`
 

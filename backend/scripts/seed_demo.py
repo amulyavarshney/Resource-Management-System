@@ -20,12 +20,17 @@ from sqlalchemy import select
 
 DEMO_PASSWORD = "DemoPass1!"
 
+
+# `.example` is IANA-reserved for documentation (RFC 2606) and passes
+# Pydantic's EmailStr validation, unlike `.local`/`.test`/`.invalid`, which
+# it rejects as special-use domains — using one of those would make these
+# accounts unable to log in via the real API despite existing in the DB.
 DEMO_USERS = [
-    {"first_name": "Demo", "last_name": "Employee", "email": "demo.employee@rms.local", "role": Role.Employee},
-    {"first_name": "Demo", "last_name": "Manager", "email": "demo.manager@rms.local", "role": Role.Management},
-    {"first_name": "Demo", "last_name": "Executive", "email": "demo.executive@rms.local", "role": Role.Executive},
-    {"first_name": "Demo", "last_name": "Admin", "email": "demo.admin@rms.local", "role": Role.Admin},
-    {"first_name": "Demo", "last_name": "Developer", "email": "demo.developer@rms.local", "role": Role.Developer},
+    {"first_name": "Demo", "last_name": "Employee", "email": "demo.employee@rms.example", "role": Role.Employee},
+    {"first_name": "Demo", "last_name": "Manager", "email": "demo.manager@rms.example", "role": Role.Management},
+    {"first_name": "Demo", "last_name": "Executive", "email": "demo.executive@rms.example", "role": Role.Executive},
+    {"first_name": "Demo", "last_name": "Admin", "email": "demo.admin@rms.example", "role": Role.Admin},
+    {"first_name": "Demo", "last_name": "Developer", "email": "demo.developer@rms.example", "role": Role.Developer},
 ]
 
 
