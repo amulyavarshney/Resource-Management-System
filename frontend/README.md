@@ -126,6 +126,48 @@ which goes through this shared interceptor.
 
 ## Pages
 
+```mermaid
+flowchart LR
+    Root["/ (page.tsx)<br/>redirects to /auth or /home"]
+    Auth["/auth<br/>public — no session required"]
+    Guard["(pages)/layout.tsx<br/>Navbar + session guard"]
+
+    Root -->|"no session"| Auth
+    Root -->|"has session"| Guard
+
+    subgraph "All roles"
+        Home["/home"]
+        Holidays["/holidays"]
+        Profile["/profile"]
+    end
+    subgraph "Employee and above"
+        Timesheet["/timesheet"]
+        View["/view"]
+    end
+    subgraph "Management and above"
+        Dashboard["/dashboard, /dashboard/project(/[id]), /dashboard/user(/[id])"]
+    end
+    subgraph "Admin, Developer only"
+        Admin["/admin, /admin/users-with-unfilled-timesheet"]
+    end
+
+    Guard --> Home
+    Guard --> Holidays
+    Guard --> Profile
+    Guard --> Timesheet
+    Guard --> View
+    Guard --> Dashboard
+    Guard --> Admin
+```
+
+Every route under `(pages)/` shares one layout that renders the Navbar and
+redirects back to `/auth` if there's no session — role checks for
+`/admin` and `/dashboard` happen inside those pages themselves (backed by
+the equivalent server-side checks in
+[backend/README.md § Roles & Permissions](../backend/README.md#roles--permissions),
+which are the actual security boundary — the frontend gating is only a UX
+convenience).
+
 | Route | Access | Description |
 |-------|--------|-------------|
 | `/auth` | Public | Login (Credentials or Google) / Register |

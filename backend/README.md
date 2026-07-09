@@ -178,10 +178,49 @@ pip install -e ".[dev]"
 pytest -v
 ```
 
+## Roles & Permissions
+
+Every role higher up the list also satisfies every check lower down —
+`AdminOrDeveloper` is a strict superset of `ManagementAndAbove`, which is a
+strict superset of `AllAuthenticated`. `SelfOrAdmin`/`SelfOnly` are
+orthogonal to the role tiers: they compare the JWT's `id` claim against the
+`{id}` path parameter regardless of role.
+
+```mermaid
+flowchart TB
+    subgraph "AllAuthenticated (any logged-in user)"
+        Employee
+        subgraph "ManagementAndAbove"
+            Management
+            Executive
+            subgraph "AdminOrDeveloper"
+                Admin
+                Developer
+            end
+        end
+    end
+```
+
+| Dependency (`app/core/deps.py`) | Allowed roles | Used on |
+|---|---|---|
+| `AllAuthenticated` | Employee, Management, Executive, Admin, Developer | Most reads (timesheets, dashboards, holidays, own profile) |
+| `ManagementAndAbove` | Management, Executive, Admin, Developer | `POST /lock` (company-wide timesheet lock) |
+| `AdminOrDeveloper` | Admin, Developer | `POST /user`, `*/import`, `*/reset`, `DELETE /user/{id}`, `DELETE /project/{id}` |
+| `SelfOrAdmin` | Caller's own `id`, or Admin/Developer | `PATCH /user/{id}`, `PATCH /user/{id}/changePassword` |
+| `SelfOnly` | Caller's own `id` only — no admin override | `PATCH /user/{id}/removePassword` |
+
+`SelfOnly` has no admin override by design: nulling someone *else's*
+password with no recovery path would be an unrecoverable lockout, so
+removal is strictly self-service. `role` is never accepted from the
+request body at account-creation time (self-registration, Google
+sign-in) — it's always forced to `Employee` server-side; only an
+already-authenticated Admin/Developer can set a different role via
+`PATCH /user/{id}`.
+
 ## API Reference
 
 All routes are prefixed `/api/v1/`. Protected routes require `Authorization: Bearer <token>`.
-Some routes additionally require Admin/Developer (or Management+) — see below.
+Some routes additionally require Admin/Developer (or Management+) — see above.
 
 | Router | Prefix | Auth |
 |--------|--------|------|

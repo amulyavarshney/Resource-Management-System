@@ -14,9 +14,13 @@ If this project is useful to you, **star it** ⭐ — it helps others find it an
 
 ```
 Resource-Management-System/
-├── backend/    # FastAPI (Python 3.11) Web API
-└── frontend/   # Next.js 14 application
+├── backend/    # FastAPI (Python 3.11) Web API      → backend/README.md
+└── frontend/   # Next.js 14 application              → frontend/README.md
 ```
+
+Setup steps, environment variables, the full API reference, and the demo
+accounts live in each project's own README, linked throughout this file —
+this README stays focused on the big picture.
 
 ## Architecture
 
@@ -54,8 +58,14 @@ Both servers run independently — the frontend never talks to the database
 directly, and the backend never talks to Google directly. The Next.js
 server is the only thing trusted to hold `INTERNAL_AUTH_SECRET`, so Google
 identities are always verified server-side before being exchanged for an
-app JWT. See [backend/README.md](backend/README.md) for the data model and
-[frontend/README.md](frontend/README.md) for the page/route map.
+app JWT.
+
+For the request/response and login-sequence diagrams, see
+[backend/README.md](backend/README.md#authentication-flow); for the
+role/permission model and data model, see
+[backend/README.md](backend/README.md#data-model) and
+[backend/README.md](backend/README.md#roles--permissions); for the
+frontend's page map, see [frontend/README.md](frontend/README.md#pages).
 
 ## Tech Stack
 
@@ -68,6 +78,9 @@ app JWT. See [backend/README.md](backend/README.md) for the data model and
 | Auth | JWT Bearer (backend) · NextAuth.js 4 (frontend) |
 | Containerisation | Docker |
 
+Full dependency lists: [backend/README.md](backend/README.md#technology) ·
+[frontend/README.md](frontend/README.md#technology).
+
 ## Features
 
 - **Timesheet management** — employees log hours per project per week; timesheets can be locked by period
@@ -77,170 +90,22 @@ app JWT. See [backend/README.md](backend/README.md) for the data model and
 - **Admin panel** — full CRUD for users, projects and holidays; bulk import from Excel; lock/unlock timesheets; consolidated reporting
 - **User profiles** — update personal details, change or remove password
 - **Role-based access** — Employee · Management · Executive · Admin · Developer
+- **Google sign-in** — alongside email/password, via NextAuth
 
-## Quick Start
+## Getting Started
 
-### Prerequisites
-
-| Tool | Minimum version |
-|------|----------------|
-| Python | 3.11 |
-| SQL Server, PostgreSQL, or MySQL | — |
-| Node.js | 18 LTS |
-| npm | 9 |
-
-### Backend
-
-```sh
-cd backend
-
-# 1. Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-# 2. Install dependencies
-pip install -e ".[dev]"
-
-# 3. Configure environment
-cp .env.example .env
-# Edit .env — set DATABASE_URL, JWT_SECRET, ALLOWED_ORIGINS
-
-# 4. Apply database migrations
-alembic upgrade head
-
-# 5. Start the server
-uvicorn app.main:app --reload
-# API available at http://localhost:8000
-# Swagger UI at http://localhost:8000/swagger
-```
-
-### Frontend
-
-```sh
-cd frontend
-
-# Copy the dev env template and fill in values
-cp .env.development .env.local
-# Required variables:
-#   NEXTAUTH_URL          = http://localhost:3000
-#   NEXTAUTH_SECRET       = <random string>
-#   NEXT_PUBLIC_BACKEND_API = http://localhost:8000/api/v1
-
-npm install
-npm run dev
-# App available at http://localhost:3000
-```
-
-## Demo Accounts & Manual Testing
-
-Want to click around before writing any code? Seed a fixed set of demo
-accounts — one per role — and log in through the UI at
-`http://localhost:3000/auth`:
-
-```sh
-cd backend
-python -m scripts.seed_demo
-```
-
-This prints the shared demo password and creates (idempotently — safe to
-re-run) one account per role:
-
-| Email | Role |
-|-------|------|
-| `demo.employee@rms.example` | Employee |
-| `demo.manager@rms.example` | Management |
-| `demo.executive@rms.example` | Executive |
-| `demo.admin@rms.example` | Admin |
-| `demo.developer@rms.example` | Developer |
-
-The script refuses to run unless `APP_ENV=development`, so it's safe to keep
-around — it can never touch a production database. See
-[`backend/README.md`](backend/README.md#demo-accounts-local-dev-only) for
-details.
-
-### Automated tests
-
-```sh
-cd backend && pytest -q                     # backend test suite
-cd frontend && npx tsc --noEmit             # frontend type check
-```
-
-### Smoke-testing the API by hand
-
-With the backend running (`uvicorn app.main:app --reload`), a few curl
-commands cover the most security-sensitive paths — useful after touching
-auth or role checks:
-
-```sh
-# Health check
-curl http://localhost:8000/health/ready
-
-# Log in as a seeded demo user and grab a token
-TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo.employee@rms.example","password":"DemoPass1!"}' | tr -d '"')
-
-# Role-gated route should reject a plain Employee
-curl -i -X DELETE http://localhost:8000/api/v1/project/reset \
-  -H "Authorization: Bearer $TOKEN"   # expect 403
-```
-
-## Environment Variables
-
-### Frontend (`.env.development` / `.env.production`)
-
-| Variable | Description |
-|----------|-------------|
-| `NEXTAUTH_URL` | Canonical URL of the frontend app |
-| `NEXTAUTH_SECRET` | Secret used to sign NextAuth.js JWTs |
-| `NEXT_PUBLIC_FRONTEND_URL` | Public frontend base URL |
-| `NEXT_PUBLIC_BACKEND_API` | Backend API base URL (`/api/v1`) |
-
-### Backend (`.env`)
-
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | SQLAlchemy async connection string (SQL Server, PostgreSQL, or MySQL) |
-| `JWT_SECRET` | Secret key used to sign JWT tokens (min 32 chars) |
-| `JWT_ALGORITHM` | JWT signing algorithm (default `HS512`) |
-| `JWT_EXPIRE_HOURS` | Token lifetime in hours (default `2`) |
-| `ALLOWED_ORIGINS` | CORS-allowed frontend origins |
-| `APP_ENV` | `development` enables Swagger UI |
-| `LOG_LEVEL` | structlog level (default `info`) |
+1. **Backend** — follow [backend/README.md § Setup](backend/README.md#setup)
+   to get the API running at `http://localhost:8000`.
+2. **Frontend** — follow [frontend/README.md § Setup](frontend/README.md#setup)
+   to get the UI running at `http://localhost:3000`.
+3. **Try it out** — seed demo accounts and smoke-test the API with
+   [backend/README.md § Demo accounts](backend/README.md#demo-accounts-localdev-only).
 
 ## Docker
 
-```sh
-# Build and run the backend container
-cd backend
-docker build -t rms-api .
-docker run -p 8000:8000 rms-api
-
-# Or bring up the backend with its database via Docker Compose
-docker compose up --build
-```
-
-## API Reference
-
-Full interactive docs are available at `/swagger` when running the backend in development mode.
-
-| Router | Base path | Description |
-|--------|-----------|-------------|
-| Auth | `/api/v1/auth` | Login and registration |
-| Users | `/api/v1/user` | User CRUD, password management |
-| Projects | `/api/v1/project` | Project CRUD, bulk import |
-| WeekData | `/api/v1/weekData` | Timesheet entries |
-| Dashboard | `/api/v1/dashboard` | Analytics and metrics |
-| Holiday | `/api/v1/holiday` | Company and personal holidays |
-| Leave | `/api/v1/leave` | Leave records |
-| Lock | `/api/v1/lock` | Lock / unlock timesheet periods |
-
-See [`backend/README.md`](backend/README.md) for the full endpoint list and design notes.
-
-## Project READMEs
-
-- [Backend README](backend/README.md)
-- [Frontend README](frontend/README.md)
+The backend ships with a `Dockerfile` and `docker-compose.yml` — see
+[backend/README.md § Docker](backend/README.md#docker) for both the
+standalone-container and compose forms and their required variables.
 
 ## Contributing
 
@@ -249,7 +114,8 @@ just improving the docs.
 
 1. [Fork the repository](https://github.com/amulyavarshney/Resource-Management-System/fork).
 2. Create a branch: `git checkout -b feature/your-feature`.
-3. Make your changes, running the tests above as you go.
+3. Make your changes — run the backend/frontend tests documented in their
+   own READMEs as you go.
 4. Commit your changes with a clear message.
 5. Push and [open a pull request](https://github.com/amulyavarshney/Resource-Management-System/pulls) against `main`.
 
