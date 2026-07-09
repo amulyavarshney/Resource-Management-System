@@ -1,6 +1,7 @@
 from datetime import date, datetime, timezone
 
-from sqlalchemy import delete, select
+from fastapi import UploadFile
+from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
@@ -14,7 +15,8 @@ from app.models.enums import Department, Region, Role
 from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.schemas.user import PasswordChange, UserCreate, UserResponse, UserUpdate
-from app.utils.mapper import user_to_entity, user_to_response
+from app.utils.excel_utils import read_excel
+from app.utils.mapper import user_row_to_entity, user_to_entity, user_to_response
 
 
 class UserService:
@@ -84,11 +86,11 @@ class UserService:
     # ------------------------------------------------------------------ writes
 
     async def create(self, data: UserCreate) -> UserResponse:
-        stmt = select(User).where(
-            User.date_deleted.is_(None),
-            (User.emp_id == data.emp_id) | (User.email == data.email),
-        )
-        existing = (await self._db.execute(stmt)).scalar_one_or_none()
+        conditions = [User.email == data.email]
+        if data.emp_id is not None:
+            conditions.append(User.emp_id == data.emp_id)
+        stmt = select(User).where(User.date_deleted.is_(None), or_(*conditions))
+        existing = (await self._db.execute(stmt)).scalars().first()
         if existing:
             raise DuplicateEntityException("User already exists")
 
@@ -179,9 +181,8 @@ class UserService:
                 )
             today = date.today()
             user.date_deleted = first_day_of_next_month(today.year, today.month)
-        elif user.date_deleted is not None:
-            user.date_deleted = None
-        await self._db.delete(user)
+        else:
+            user.date_deleted = datetime.now(timezone.utc)
         await self._db.flush()
         return MessageResponse(message=f"User with id {user_id} is deleted successfully.")
 
@@ -189,6 +190,13 @@ class UserService:
         await self._db.execute(delete(User))
         await self._db.flush()
         return MessageResponse(message="Users table reset successfully.")
+
+    async def import_from_excel(self, file: UploadFile) -> MessageResponse:
+        rows = await read_excel(file)
+        for row in rows:
+            self._db.add(user_row_to_entity(row))
+        await self._db.flush()
+        return MessageResponse(message="Users imported successfully.")
 
     # ------------------------------------------------------------------ helpers
 

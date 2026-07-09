@@ -1,5 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 
+from fastapi import UploadFile
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -9,10 +10,13 @@ from app.core.exceptions import (
     OperationNotSupportedException,
     RecordNotFoundException,
 )
-from app.models.enums import Region
+from app.models.enums import HolidayType, Region
 from app.models.holiday import Holiday, PersonalHoliday
+from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.schemas.holiday import HolidayCreate, HolidayResponse, HolidayUpdate
+from app.utils.enum_utils import parse_by_name_or_description
+from app.utils.excel_utils import read_excel
 
 
 class HolidayService:
@@ -32,7 +36,7 @@ class HolidayService:
         if user_id is not None:
             stmt = stmt.where(PersonalHoliday.user_id == user_id)
         if region is not None:
-            stmt = stmt.join(PersonalHoliday.user).where((PersonalHoliday.user.has()))  # type: ignore[attr-defined]
+            stmt = stmt.join(PersonalHoliday.user).where((User.region.op("&")(int(region))) > 0)
         return list((await self._db.execute(stmt)).scalars().all())
 
     async def get_by_year(self, year: int, user_id: int | None, region: Region | None) -> list[Holiday]:
@@ -72,7 +76,7 @@ class HolidayService:
         stmt = select(Holiday).where(Holiday.date == dt)
         if region is not None:
             stmt = stmt.where((Holiday.region.op("&")(int(region))) > 0)
-        h = (await self._db.execute(stmt)).scalar_one_or_none()
+        h = (await self._db.execute(stmt)).scalars().first()
         if h is None:
             raise RecordNotFoundException(f"Could not find any holiday with date: {dt}")
         return HolidayResponse(date=h.date, name=h.name, type=h.type, region=h.region)
@@ -183,6 +187,33 @@ class HolidayService:
         await self._db.flush()
         return MessageResponse(message="Holidays and Personal Holidays table reset successfully.")
 
+    # ------------------------------------------------------------------ import
+
+    async def import_company_from_excel(self, file: UploadFile) -> MessageResponse:
+        rows = await read_excel(file)
+        for row in rows:
+            self._db.add(Holiday(
+                date=_parse_row_date(row["Date"]),
+                name=str(row["Name"]),
+                type=int(_parse_holiday_type(row["Type"])),
+                region=int(_parse_region(row["Region"])),
+            ))
+        await self._db.flush()
+        return MessageResponse(message="Holidays imported successfully.")
+
+    async def import_personal_from_excel(self, file: UploadFile) -> MessageResponse:
+        rows = await read_excel(file)
+        for row in rows:
+            self._db.add(PersonalHoliday(
+                date=_parse_row_date(row["Date"]),
+                name=str(row["Name"]),
+                type=int(_parse_holiday_type(row["Type"])),
+                user_id=int(row["UserId"]),
+                show=bool(row["Show"]),
+            ))
+        await self._db.flush()
+        return MessageResponse(message="Personal Holidays imported successfully.")
+
     # ------------------------------------------------------------------ helpers
 
     async def _apply_personal_overrides_year(
@@ -216,3 +247,23 @@ class HolidayService:
             else:
                 holidays = [h for h in holidays if h.date != ph.date]
         return holidays
+
+
+def _parse_row_date(value: object) -> date:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    return date.fromisoformat(str(value))
+
+
+def _parse_holiday_type(value: object) -> HolidayType:
+    if isinstance(value, int):
+        return HolidayType(value)
+    return parse_by_name_or_description(HolidayType, str(value))
+
+
+def _parse_region(value: object) -> Region:
+    if isinstance(value, int):
+        return Region(value)
+    return parse_by_name_or_description(Region, str(value))

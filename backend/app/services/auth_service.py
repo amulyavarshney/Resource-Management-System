@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import DuplicateEntityException, LoginFailedException
@@ -14,11 +14,11 @@ class AuthService:
         self._db = db
 
     async def register(self, data: UserCreate) -> MessageResponse:
-        stmt = select(User).where(
-            User.date_deleted.is_(None),
-            (User.emp_id == data.emp_id) | (User.email == data.email),
-        )
-        existing = (await self._db.execute(stmt)).scalar_one_or_none()
+        conditions = [User.email == data.email]
+        if data.emp_id is not None:
+            conditions.append(User.emp_id == data.emp_id)
+        stmt = select(User).where(User.date_deleted.is_(None), or_(*conditions))
+        existing = (await self._db.execute(stmt)).scalars().first()
         if existing:
             raise DuplicateEntityException("User already exists. Registration aborted.")
 

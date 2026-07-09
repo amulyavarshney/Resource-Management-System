@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, UploadFile
 
 from app.core.deps import AllAuthenticated, DbSession
 from app.models.enums import Region
@@ -63,6 +63,16 @@ async def get_one(
 @router.post("", response_model=HolidayResponse, status_code=201)
 async def create(body: HolidayCreate, db: DbSession) -> HolidayResponse:
     return await HolidayService(db).create(body)
+
+
+@router.post("/importHolidays", response_model=MessageResponse, status_code=201)
+async def import_holidays(excelFile: UploadFile, db: DbSession) -> MessageResponse:
+    return await HolidayService(db).import_company_from_excel(excelFile)
+
+
+@router.post("/importPersonalHolidays", response_model=MessageResponse, status_code=201)
+async def import_personal_holidays(excelFile: UploadFile, db: DbSession) -> MessageResponse:
+    return await HolidayService(db).import_personal_from_excel(excelFile)
 
 
 @router.patch("", response_model=HolidayResponse)

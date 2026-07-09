@@ -1,5 +1,6 @@
 from datetime import date, datetime, timezone
 
+from fastapi import UploadFile
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +10,8 @@ from app.models.project import Project
 from app.schemas.common import MessageResponse
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.utils.date_utils import first_day_of_next_month
-from app.utils.mapper import project_to_response
+from app.utils.excel_utils import read_excel
+from app.utils.mapper import project_row_to_entity, project_to_response
 
 
 class ProjectService:
@@ -51,7 +53,7 @@ class ProjectService:
             Project.date_deleted.is_(None),
             (Project.number == data.number) | (Project.title == data.title),
         )
-        existing = (await self._db.execute(stmt)).scalar_one_or_none()
+        existing = (await self._db.execute(stmt)).scalars().first()
         if existing:
             raise DuplicateEntityException(f"Project already exists in {data.department} department.")
 
@@ -122,9 +124,8 @@ class ProjectService:
                 )
             today = date.today()
             project.date_deleted = datetime.combine(first_day_of_next_month(today.year, today.month), datetime.min.time())
-        elif project.date_deleted is not None:
-            project.date_deleted = None
-        await self._db.delete(project)
+        else:
+            project.date_deleted = datetime.now(timezone.utc)
         await self._db.flush()
         return MessageResponse(message=f"Project with id {project_id} is deleted successfully.")
 
@@ -132,6 +133,13 @@ class ProjectService:
         await self._db.execute(delete(Project))
         await self._db.flush()
         return MessageResponse(message="Projects table reset successfully.")
+
+    async def import_from_excel(self, file: UploadFile) -> MessageResponse:
+        rows = await read_excel(file)
+        for row in rows:
+            self._db.add(project_row_to_entity(row))
+        await self._db.flush()
+        return MessageResponse(message="Projects imported successfully.")
 
     async def _from_id(self, project_id: int) -> Project:
         stmt = select(Project).where(

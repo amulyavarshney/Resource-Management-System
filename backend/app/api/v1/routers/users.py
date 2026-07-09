@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, UploadFile
 
 from app.core.deps import AllAuthenticated, DbSession
 from app.models.enums import Department, Region
@@ -60,6 +60,11 @@ async def get_user(id: int, db: DbSession) -> UserResponse:
 @router.post("", response_model=UserResponse, status_code=201)
 async def create_user(body: UserCreate, db: DbSession) -> UserResponse:
     return await UserService(db).create(body)
+
+
+@router.post("/import", response_model=MessageResponse, status_code=201)
+async def import_users(excelFile: UploadFile, db: DbSession) -> MessageResponse:
+    return await UserService(db).import_from_excel(excelFile)
 
 
 @router.patch("/{id}", response_model=UserResponse)
