@@ -87,10 +87,18 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `NEXTAUTH_SECRET` | Yes | Secret for signing NextAuth JWTs — generate with `openssl rand -base64 32` |
 | `NEXT_PUBLIC_FRONTEND_URL` | Yes | Public base URL of this app |
 | `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL (e.g. `http://localhost:8000/api/v1`) |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID — omit to disable "Sign in with Google" |
+| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
+| `INTERNAL_AUTH_SECRET` | Only if using Google sign-in | Shared secret with the backend's `INTERNAL_AUTH_SECRET`, used for the server-to-server `POST /auth/google` exchange. Server-side only — never exposed to the browser. |
 
 ## Authentication
 
-Authentication is handled by [NextAuth.js](https://next-auth.js.org/) with a Credentials provider that calls `POST /api/v1/auth/login` on the backend. On success the JWT from the backend is stored in the NextAuth session and attached to every subsequent API request via Axios.
+Authentication is handled by [NextAuth.js](https://next-auth.js.org/) with two providers:
+
+- **Credentials** — calls `POST /api/v1/auth/login` on the backend. On success the JWT from the backend is stored in the NextAuth session and attached to every subsequent API request via Axios.
+- **Google** — NextAuth's built-in Google provider verifies the identity, then the Next.js server (never the browser) exchanges it for a backend JWT via `POST /api/v1/auth/google`, authenticated with a shared `INTERNAL_AUTH_SECRET` header. New Google sign-ins are created as `Employee`-role accounts; if the email matches an existing account, it's linked.
+
+Self-registration (`/auth`, "Register Now") always creates an `Employee`-role account — there is no client-controllable way to self-serve into a privileged role. Password resets go through an Admin (no self-service "forgot password" flow).
 
 The session token carries: `id`, `email`, `role`, `department`, `region`, `empId`, `firstName`, `lastName`, `parentId`, `workHoursPerDay`.
 
@@ -98,9 +106,7 @@ The session token carries: `id`, `email`, `role`, `department`, `region`, `empId
 
 | Route | Access | Description |
 |-------|--------|-------------|
-| `/auth` | Public | Login / Register |
-| `/auth/resetPassword` | Public | Request password reset |
-| `/auth/changePassword/[id]` | Public | Set new password |
+| `/auth` | Public | Login (Credentials or Google) / Register |
 | `/home` | All roles | Landing page with upcoming holidays and timer |
 | `/timesheet` | Employee, Management, Admin, Developer | Monthly timesheet entry and leave management |
 | `/view` | Employee, Management, Admin, Developer | Read-only view of past timesheets with export |

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.core.deps import AllAuthenticated, DbSession
+from app.core.deps import AdminOrDeveloper, AllAuthenticated, DbSession
 from app.schemas.common import MessageResponse
 from app.schemas.week_data import WeekDataResponse, WeekDataUpdate
 from app.services.week_data_service import WeekDataService
@@ -40,6 +40,6 @@ async def delete(user_id: int, project_id: int, year: int, month: int, db: DbSes
     return await WeekDataService(db).delete(user_id, project_id, year, month)
 
 
-@router.delete("/reset", response_model=MessageResponse)
+@router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def reset(db: DbSession) -> MessageResponse:
     return await WeekDataService(db).reset()

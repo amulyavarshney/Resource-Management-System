@@ -208,19 +208,16 @@ class UserService {
 		id: number,
 		newPassword: string,
 		confirmPassword: string,
-		oldPassword?: string,
+		oldPassword: string,
 	) {
 		try {
 			if (newPassword !== confirmPassword) {
 				throw Error(`Error: Password Mismatch`);
 			}
-			const password = oldPassword
-				? { old_password: oldPassword, new_password: newPassword }
-				: { new_password: newPassword };
-			const response = await http.patch<User>(
-				`/user/${id}/changePassword`,
-				password
-			);
+			const response = await http.patch<User>(`/user/${id}/changePassword`, {
+				old_password: oldPassword,
+				new_password: newPassword,
+			});
 			return response.data;
 		} catch (error) {
 			console.error("Error while changing password", error);
@@ -230,9 +227,9 @@ class UserService {
 
 	async removePassword(id: number, password: string) {
 		try {
-			const response = await http.patch<User>(
-				`/user/${id}/removePassword?password=${password}`
-			);
+			const response = await http.patch<User>(`/user/${id}/removePassword`, {
+				password,
+			});
 			return response.data;
 		} catch (error) {
 			console.error("Error while removing password", error);

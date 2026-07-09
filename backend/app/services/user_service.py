@@ -106,12 +106,14 @@ class UserService:
         await self._db.refresh(user)
         return user_to_response(user)
 
-    async def update(self, user_id: int, data: UserUpdate) -> UserResponse:
+    async def update(self, user_id: int, data: UserUpdate, caller_is_admin: bool) -> UserResponse:
         user = await self._from_id(user_id)
         if user.date_deleted is not None:
             raise OperationNotSupportedException(
                 f"User with id {user_id} is scheduled to delete on {user.date_deleted}."
             )
+        if data.role is not None and not caller_is_admin:
+            raise OperationNotSupportedException("Only an Admin or Developer can change a user's role.")
         if data.emp_id is not None:
             user.emp_id = data.emp_id
         if data.user_name is not None:
@@ -147,12 +149,13 @@ class UserService:
         await self._db.refresh(user)
         return user_to_response(user)
 
-    async def change_password(self, user_id: int, data: PasswordChange) -> MessageResponse:
+    async def change_password(self, user_id: int, data: PasswordChange, is_self: bool) -> MessageResponse:
         user = await self._from_id(user_id)
-        if data.old_password is not None and not verify_password(
-            data.old_password, user.password_hash, user.password_salt
-        ):
-            raise PasswordMismatchException()
+        if is_self:
+            # Self-service: the caller must prove they know the current password.
+            if not verify_password(data.old_password, user.password_hash, user.password_salt):
+                raise PasswordMismatchException()
+        # else: admin-initiated reset for another user — no old password to check.
         if data.old_password == data.new_password:
             raise ValueError("Old and New Password are the same.")
         password_hash, password_salt = create_password_hash(data.new_password)
@@ -162,6 +165,9 @@ class UserService:
         return MessageResponse(message="Password changed successfully.")
 
     async def remove_password(self, user_id: int, current_password: str) -> MessageResponse:
+        # Self-service only (enforced by the router's SelfOrAdmin-without-admin-
+        # override dependency) — removing another user's password would leave
+        # them with no way to log back in, since passwordless login is disabled.
         user = await self._from_id(user_id)
         if not verify_password(current_password, user.password_hash, user.password_salt):
             raise PasswordMismatchException()

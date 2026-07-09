@@ -1,24 +1,36 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from tests.conftest import promote_to_role
 
 
-async def _get_token(client: AsyncClient) -> str:
+async def _get_token(client: AsyncClient, db_session: AsyncSession | None = None, email: str = "bob@example.com") -> str:
     await client.post(
         "/api/v1/auth/register",
         json={
             "first_name": "Bob", "last_name": "Jones",
-            "email": "bob@example.com", "password": "SecureP@ss1",
+            "email": email, "password": "SecureP@ss1",
             "department": 1, "region": 1, "role": 3,
             "work_hours_per_day": 8, "parent_id": 0,
         },
     )
-    resp = await client.post("/api/v1/auth/login", json={"email": "bob@example.com", "password": "SecureP@ss1"})
-    return resp.json()
+    resp = await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
+    token = resp.json()
+    if db_session is not None:
+        # Registration always creates Employee — promote directly for tests
+        # that need an Admin/Developer caller (import/delete/reset routes).
+        users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
+        uid = next(u["id"] for u in users if u["email"] == email)
+        await promote_to_role(db_session, uid, role=3)  # Admin
+        resp = await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
+        token = resp.json()
+    return token
 
 
 @pytest.mark.asyncio
-async def test_project_crud(client: AsyncClient):
-    token = await _get_token(client)
+async def test_project_crud(client: AsyncClient, db_session: AsyncSession):
+    token = await _get_token(client, db_session)
     headers = {"Authorization": f"Bearer {token}"}
 
     # Create
@@ -43,7 +55,7 @@ async def test_project_crud(client: AsyncClient):
     )
     assert resp.status_code == 200
 
-    # Delete (schedule)
+    # Delete (schedule) — requires Admin/Developer
     resp = await client.delete(f"/api/v1/project/{project_id}", headers=headers)
     assert resp.status_code == 200
 

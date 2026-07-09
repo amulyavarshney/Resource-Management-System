@@ -2,11 +2,19 @@ from datetime import datetime
 
 from fastapi import APIRouter, Query, UploadFile
 
-from app.core.deps import AllAuthenticated, DbSession
-from app.models.enums import Department, Region
+from app.core.deps import AdminOrDeveloper, AllAuthenticated, CurrentUser, DbSession, SelfOnly, SelfOrAdmin
+from app.models.enums import Department, Region, Role
 from app.schemas.common import MessageResponse
-from app.schemas.user import PasswordChange, UserCreate, UserResponse, UserUpdate
+from app.schemas.user import PasswordChange, PasswordRemove, UserCreate, UserResponse, UserUpdate
 from app.services.user_service import UserService
+
+
+def _is_admin(payload: dict) -> bool:
+    try:
+        return Role[payload.get("Role", "")] in (Role.Admin, Role.Developer)
+    except KeyError:
+        return False
+
 
 router = APIRouter(prefix="/user", tags=["users"], dependencies=[AllAuthenticated])
 
@@ -57,37 +65,38 @@ async def get_user(id: int, db: DbSession) -> UserResponse:
     return await UserService(db).get_by_id(id)
 
 
-@router.post("", response_model=UserResponse, status_code=201)
+@router.post("", response_model=UserResponse, status_code=201, dependencies=[AdminOrDeveloper])
 async def create_user(body: UserCreate, db: DbSession) -> UserResponse:
     return await UserService(db).create(body)
 
 
-@router.post("/import", response_model=MessageResponse, status_code=201)
+@router.post("/import", response_model=MessageResponse, status_code=201, dependencies=[AdminOrDeveloper])
 async def import_users(excelFile: UploadFile, db: DbSession) -> MessageResponse:
     return await UserService(db).import_from_excel(excelFile)
 
 
-@router.patch("/{id}", response_model=UserResponse)
-async def update_user(id: int, body: UserUpdate, db: DbSession) -> UserResponse:
-    return await UserService(db).update(id, body)
+@router.patch("/{id}", response_model=UserResponse, dependencies=[SelfOrAdmin])
+async def update_user(id: int, body: UserUpdate, db: DbSession, caller: CurrentUser) -> UserResponse:
+    return await UserService(db).update(id, body, caller_is_admin=_is_admin(caller))
 
 
-@router.patch("/{id}/lastSavedTime", response_model=UserResponse)
+@router.patch("/{id}/lastSavedTime", response_model=UserResponse, dependencies=[SelfOrAdmin])
 async def update_last_saved_time(id: int, last_saved_time: datetime, db: DbSession) -> UserResponse:
     return await UserService(db).update_last_saved_time(id, last_saved_time)
 
 
-@router.patch("/{id}/changePassword", response_model=MessageResponse)
-async def change_password(id: int, body: PasswordChange, db: DbSession) -> MessageResponse:
-    return await UserService(db).change_password(id, body)
+@router.patch("/{id}/changePassword", response_model=MessageResponse, dependencies=[SelfOrAdmin])
+async def change_password(id: int, body: PasswordChange, db: DbSession, caller: CurrentUser) -> MessageResponse:
+    is_self = str(caller.get("id")) == str(id)
+    return await UserService(db).change_password(id, body, is_self=is_self)
 
 
-@router.patch("/{id}/removePassword", response_model=MessageResponse)
-async def remove_password(id: int, password: str, db: DbSession) -> MessageResponse:
-    return await UserService(db).remove_password(id, password)
+@router.patch("/{id}/removePassword", response_model=MessageResponse, dependencies=[SelfOnly])
+async def remove_password(id: int, body: PasswordRemove, db: DbSession) -> MessageResponse:
+    return await UserService(db).remove_password(id, body.password)
 
 
-@router.delete("/{id}", response_model=MessageResponse)
+@router.delete("/{id}", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def delete_user(
     id: int,
     db: DbSession,
@@ -96,6 +105,6 @@ async def delete_user(
     return await UserService(db).delete(id, delete_now)
 
 
-@router.delete("/reset", response_model=MessageResponse)
+@router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def reset_users(db: DbSession) -> MessageResponse:
     return await UserService(db).reset()

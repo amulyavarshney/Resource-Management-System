@@ -126,14 +126,6 @@ export default function ChangePassword({ user }: ChangePasswordProps) {
 				>
 					Update Password
 				</button>
-				<div className="text-sm">
-					<a
-						href="/auth/resetPassword"
-						className="font-semibold text-indigo-600 hover:text-indigo-500"
-					>
-						Forgot password?
-					</a>
-				</div>
 			</div>
 		</form>
 	) : (

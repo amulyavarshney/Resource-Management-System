@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,3 +45,47 @@ def require_roles(*roles: Role):
 AdminOrDeveloper = require_roles(Role.Admin, Role.Developer)
 ManagementAndAbove = require_roles(Role.Management, Role.Executive, Role.Admin, Role.Developer)
 AllAuthenticated = Depends(get_current_user_payload)
+
+
+def require_self_or_admin(path_param: str = "id"):
+    """Factory that returns a dependency allowing the request only if the
+    caller is the user identified by the given path parameter, or an
+    Admin/Developer. Requires the JWT's "id" claim, added at token issuance.
+    """
+
+    async def _check(request: Request, payload: CurrentUser) -> dict:
+        target_id = request.path_params.get(path_param)
+        if target_id is not None and str(payload.get("id")) == str(target_id):
+            return payload
+        role_str = payload.get("Role", "")
+        try:
+            user_role = Role[role_str]
+        except KeyError:
+            user_role = None
+        if user_role not in (Role.Admin, Role.Developer):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+        return payload
+
+    return Depends(_check)
+
+
+SelfOrAdmin = require_self_or_admin("id")
+
+
+def require_self(path_param: str = "id"):
+    """Factory that returns a dependency allowing the request ONLY if the
+    caller is the user identified by the given path parameter — no admin
+    override. Use for actions where an admin acting on someone else's behalf
+    would be unsafe (e.g. removing a password with no recovery path left).
+    """
+
+    async def _check(request: Request, payload: CurrentUser) -> dict:
+        target_id = request.path_params.get(path_param)
+        if target_id is None or str(payload.get("id")) != str(target_id):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+        return payload
+
+    return Depends(_check)
+
+
+SelfOnly = require_self("id")

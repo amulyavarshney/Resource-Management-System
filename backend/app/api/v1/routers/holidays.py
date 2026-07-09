@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, Query, UploadFile
 
-from app.core.deps import AllAuthenticated, DbSession
+from app.core.deps import AdminOrDeveloper, AllAuthenticated, DbSession
 from app.models.enums import Region
 from app.schemas.common import MessageResponse
 from app.schemas.holiday import HolidayCreate, HolidayResponse, HolidayUpdate
@@ -65,12 +65,12 @@ async def create(body: HolidayCreate, db: DbSession) -> HolidayResponse:
     return await HolidayService(db).create(body)
 
 
-@router.post("/importHolidays", response_model=MessageResponse, status_code=201)
+@router.post("/importHolidays", response_model=MessageResponse, status_code=201, dependencies=[AdminOrDeveloper])
 async def import_holidays(excelFile: UploadFile, db: DbSession) -> MessageResponse:
     return await HolidayService(db).import_company_from_excel(excelFile)
 
 
-@router.post("/importPersonalHolidays", response_model=MessageResponse, status_code=201)
+@router.post("/importPersonalHolidays", response_model=MessageResponse, status_code=201, dependencies=[AdminOrDeveloper])
 async def import_personal_holidays(excelFile: UploadFile, db: DbSession) -> MessageResponse:
     return await HolidayService(db).import_personal_from_excel(excelFile)
 
@@ -105,16 +105,16 @@ async def delete(
     return await HolidayService(db).delete(date, user_id, region)
 
 
-@router.delete("/resetHolidays", response_model=MessageResponse)
+@router.delete("/resetHolidays", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def reset_holidays(db: DbSession) -> MessageResponse:
     return await HolidayService(db).reset_company()
 
 
-@router.delete("/resetPersonalHolidays", response_model=MessageResponse)
+@router.delete("/resetPersonalHolidays", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def reset_personal_holidays(db: DbSession) -> MessageResponse:
     return await HolidayService(db).reset_personal()
 
 
-@router.delete("/reset", response_model=MessageResponse)
+@router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def reset_all(db: DbSession) -> MessageResponse:
     return await HolidayService(db).reset_all()

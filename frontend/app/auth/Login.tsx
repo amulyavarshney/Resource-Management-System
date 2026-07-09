@@ -131,12 +131,6 @@ export default function Login({ updateIsLogin }: LoginProps) {
 								Remember Me
 							</label>
 						</div>
-						<a
-							href="/auth/resetPassword"
-							className="font-semibold text-indigo-600 hover:text-indigo-500"
-						>
-							Forgot password?
-						</a>
 					</div>
 					<div>
 						<button
@@ -147,6 +141,16 @@ export default function Login({ updateIsLogin }: LoginProps) {
 						</button>
 					</div>
 				</form>
+
+				<div className="mt-4">
+					<button
+						type="button"
+						onClick={() => signIn("google")}
+						className="flex w-full justify-center items-center gap-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+					>
+						Sign in with Google
+					</button>
+				</div>
 
 				<div className="mt-10 text-center text-sm text-gray-500">
 					<div className="h-0 my-2 border border-solid border-gray-300 dark:border-gray-600" />

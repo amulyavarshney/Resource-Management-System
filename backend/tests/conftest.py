@@ -44,3 +44,20 @@ async def client(db_session: AsyncSession):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
+
+
+async def promote_to_role(db_session: AsyncSession, user_id: int, role: int) -> None:
+    """Test-only helper: directly set a user's role, bypassing the API.
+
+    Self-registration always creates Employee accounts (by design — see
+    AuthService.register), so tests that need an Admin/Developer caller must
+    bootstrap one this way rather than via the API, which has no unauthenticated
+    or self-service path to a privileged role.
+    """
+    from sqlalchemy import select
+
+    from app.models.user import User
+
+    user = (await db_session.execute(select(User).where(User.id == user_id))).scalar_one()
+    user.role = role
+    await db_session.flush()

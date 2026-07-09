@@ -24,19 +24,22 @@ def create_password_hash(raw_password: str | None) -> tuple[bytes | None, bytes 
 
 
 def verify_password(raw_password: str | None, password_hash: bytes | None, password_salt: bytes | None) -> bool:
-    """Return True if raw_password matches the stored hash/salt pair."""
-    if password_hash is None and password_salt is None:
-        # No password set: only allow if no raw password was supplied either
-        return raw_password is None
+    """Return True only if raw_password matches the stored hash/salt pair.
+
+    An account with no password set (password_hash/salt both None) can never
+    verify successfully via this path — it has no password-based login at
+    all, regardless of what raw_password is supplied.
+    """
     if raw_password is None or password_hash is None or password_salt is None:
         return False
     computed = _hmac_sha512(password_salt, raw_password.encode())
     return hmac.compare_digest(computed, password_hash)
 
 
-def create_access_token(email: str, role: str) -> str:
+def create_access_token(user_id: int, email: str, role: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(hours=_settings.jwt_expire_hours)
     payload = {
+        "id": user_id,
         "email": email,
         "Role": role,
         "exp": expire,

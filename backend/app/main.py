@@ -74,6 +74,7 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Content-Security-Policy"] = "default-src 'none'"
     return response
 
 
@@ -147,7 +148,8 @@ async def health_ready() -> dict[str, Any]:
             await session.execute(text("SELECT 1"))
         return {"status": "ok", "db": "ok"}
     except Exception as e:
+        _log.error("health_check_db_failure", error=str(e))
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"status": "error", "db": str(e)},
+            content={"status": "error", "db": "unavailable"},
         )

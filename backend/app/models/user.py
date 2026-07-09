@@ -18,6 +18,10 @@ class User(EntityBase):
     password_hash: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     password_salt: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     is_external: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # "local" (password login) or "google" (created via Google sign-in, no
+    # local password). Set once at creation; never used as a login gate —
+    # email match is sufficient for Google sign-in regardless of this value.
+    auth_provider: Mapped[str] = mapped_column(String(20), default="local", server_default="local", nullable=False)
     department: Mapped[int] = mapped_column(Integer, nullable=False)
     region: Mapped[int] = mapped_column(Integer, nullable=False)
     role: Mapped[int] = mapped_column(Integer, default=Role.Employee, nullable=False)

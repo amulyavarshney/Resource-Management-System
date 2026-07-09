@@ -1,6 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
+from tests.conftest import promote_to_role
+
 
 async def _token(client: AsyncClient, email: str, role: int = 3) -> str:
     await client.post("/api/v1/auth/register", json={
@@ -8,6 +10,15 @@ async def _token(client: AsyncClient, email: str, role: int = 3) -> str:
         "password": "SecureP@ss1", "department": 1, "region": 1,
         "role": role, "work_hours_per_day": 8, "parent_id": 0,
     })
+    return (await client.post("/api/v1/auth/login",
+                              json={"email": email, "password": "SecureP@ss1"})).json()
+
+
+async def _token_as_admin(client: AsyncClient, db_session, email: str) -> str:
+    token = await _token(client, email)
+    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
+    uid = next(u["id"] for u in users if u["email"] == email)
+    await promote_to_role(db_session, uid, role=3)  # Admin
     return (await client.post("/api/v1/auth/login",
                               json={"email": email, "password": "SecureP@ss1"})).json()
 
@@ -119,8 +130,10 @@ async def test_health_ready(client: AsyncClient):
 # ── Lock ──────────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_lock_round_trip(client: AsyncClient):
-    token = await _token(client, "lock1@example.com")
+async def test_lock_round_trip(client: AsyncClient, db_session):
+    # GET /lock is open to any authenticated user; POST /lock (setting the
+    # lock) requires Management/Executive/Admin/Developer.
+    token = await _token_as_admin(client, db_session, "lock1@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     resp = await client.get("/api/v1/lock?department=1&region=1", headers=headers)

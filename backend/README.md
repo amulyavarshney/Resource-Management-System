@@ -113,20 +113,45 @@ pytest -v
 ## API Reference
 
 All routes are prefixed `/api/v1/`. Protected routes require `Authorization: Bearer <token>`.
+Some routes additionally require Admin/Developer (or Management+) — see below.
 
 | Router | Prefix | Auth |
 |--------|--------|------|
 | Auth | `/auth` | Public |
-| Users | `/user` | Required |
-| Projects | `/project` | Required |
-| WeekData | `/weekdata` | Required |
+| Users | `/user` | Required (some routes Admin/Developer, or self-only) |
+| Projects | `/project` | Required (import/delete/reset: Admin/Developer) |
+| WeekData | `/weekdata` | Required (reset: Admin/Developer) |
 | Dashboard | `/dashboard` | Required |
-| Holidays | `/holiday` | Required |
-| Leaves | `/leave` | Required |
-| Lock | `/lock` | Required |
+| Holidays | `/holiday` | Required (import/reset: Admin/Developer) |
+| Leaves | `/leave` | Required (reset: Admin/Developer) |
+| Lock | `/lock` | Required (set lock: Management/Executive/Admin/Developer) |
 | Health | `/health/live`, `/health/ready` | Public |
 
 Full interactive docs at `/swagger` in development mode.
+
+## Demo accounts (local/dev only)
+
+Self-registration always creates an `Employee`-role account — there is no
+way to self-serve into a privileged role. To try out Management/Executive/
+Admin/Developer features locally, seed a fixed set of demo accounts:
+
+```sh
+cd backend && python -m scripts.seed_demo
+```
+
+This creates one account per role (idempotent — safe to re-run) and prints
+the shared demo password. The script refuses to run unless
+`APP_ENV=development`, so it can never be run against a production database.
+
+| Email | Role |
+|-------|------|
+| `demo.employee@rms.local` | Employee |
+| `demo.manager@rms.local` | Management |
+| `demo.executive@rms.local` | Executive |
+| `demo.admin@rms.local` | Admin |
+| `demo.developer@rms.local` | Developer |
+
+Password for all of the above: `DemoPass1!`
 
 ## Design Notes
 

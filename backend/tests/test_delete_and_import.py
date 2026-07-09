@@ -6,10 +6,13 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 
-from tests.conftest import _session_factory
+from tests.conftest import _session_factory, promote_to_role
 
 
 async def _token(client: AsyncClient, email: str, role: int = 3) -> tuple[str, int]:
+    """Register (always created as Employee) and log in. `role` is unused —
+    kept for call-site compatibility; see _token_as_admin for privileged
+    callers."""
     await client.post("/api/v1/auth/register", json={
         "first_name": "D", "last_name": "I", "email": email,
         "password": "SecureP@ss1", "department": 1, "region": 1,
@@ -19,6 +22,14 @@ async def _token(client: AsyncClient, email: str, role: int = 3) -> tuple[str, i
                                json={"email": email, "password": "SecureP@ss1"})).json()
     users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
     uid = next(u["id"] for u in users if u["email"] == email)
+    return token, uid
+
+
+async def _token_as_admin(client: AsyncClient, db_session, email: str) -> tuple[str, int]:
+    token, uid = await _token(client, email)
+    await promote_to_role(db_session, uid, role=3)  # Admin
+    token = (await client.post("/api/v1/auth/login",
+                               json={"email": email, "password": "SecureP@ss1"})).json()
     return token, uid
 
 
@@ -36,9 +47,10 @@ def _xlsx_bytes(headers: list[str], rows: list[list]) -> bytes:
 # ── Soft-delete regression (User) ──────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_user_delete_is_soft_not_hard(client: AsyncClient):
-    token, uid = await _token(client, "softdel1@example.com")
-    headers = {"Authorization": f"Bearer {token}"}
+async def test_user_delete_is_soft_not_hard(client: AsyncClient, db_session):
+    admin_token, _ = await _token_as_admin(client, db_session, "softdel1admin@example.com")
+    _, uid = await _token(client, "softdel1@example.com")
+    headers = {"Authorization": f"Bearer {admin_token}"}
 
     resp = await client.delete(f"/api/v1/user/{uid}", headers=headers)
     assert resp.status_code == 200
@@ -52,9 +64,10 @@ async def test_user_delete_is_soft_not_hard(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_user_delete_now_soft_deletes_immediately(client: AsyncClient):
-    token, uid = await _token(client, "softdel2@example.com")
-    headers = {"Authorization": f"Bearer {token}"}
+async def test_user_delete_now_soft_deletes_immediately(client: AsyncClient, db_session):
+    admin_token, _ = await _token_as_admin(client, db_session, "softdel2admin@example.com")
+    _, uid = await _token(client, "softdel2@example.com")
+    headers = {"Authorization": f"Bearer {admin_token}"}
 
     resp = await client.delete(f"/api/v1/user/{uid}?delete_now=true", headers=headers)
     assert resp.status_code == 200
@@ -70,8 +83,8 @@ async def test_user_delete_now_soft_deletes_immediately(client: AsyncClient):
 # ── Soft-delete regression (Project) ───────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_project_delete_is_soft_not_hard(client: AsyncClient):
-    token, _ = await _token(client, "softdel3@example.com")
+async def test_project_delete_is_soft_not_hard(client: AsyncClient, db_session):
+    token, _ = await _token_as_admin(client, db_session, "softdel3@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     proj = (await client.post("/api/v1/project", headers=headers,
                               json={"number": "SD1", "title": "Soft Delete Test",
@@ -136,13 +149,15 @@ async def test_get_holiday_same_date_multiple_regions_no_region_filter(client: A
 # ── Personal holiday region filter regression ──────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_personal_holiday_region_filter_actually_filters(client: AsyncClient):
-    token_in, uid_in = await _token(client, "regionin@example.com")
-    _, uid_us = await _token(client, "regionus@example.com", role=3)
+async def test_personal_holiday_region_filter_actually_filters(client: AsyncClient, db_session):
+    admin_token, _ = await _token_as_admin(client, db_session, "regionadmin@example.com")
+    _, uid_in = await _token(client, "regionin@example.com")
+    _, uid_us = await _token(client, "regionus@example.com")
 
-    # uid_us needs USA region — register doesn't take region directly beyond default,
-    # so patch it explicitly.
-    admin_headers = {"Authorization": f"Bearer {token_in}"}
+    # uid_us needs USA region — register doesn't take region directly beyond
+    # default, so patch it explicitly as admin (changing another user's
+    # fields requires Admin/Developer).
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
     await client.patch(f"/api/v1/user/{uid_us}", headers=admin_headers, json={"region": 2})
 
     await client.post("/api/v1/holiday", headers=admin_headers,
@@ -160,8 +175,8 @@ async def test_personal_holiday_region_filter_actually_filters(client: AsyncClie
 # ── Excel import ────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_import_users_from_excel(client: AsyncClient):
-    token, _ = await _token(client, "importusers@example.com")
+async def test_import_users_from_excel(client: AsyncClient, db_session):
+    token, _ = await _token_as_admin(client, db_session, "importusers@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     xlsx = _xlsx_bytes(
@@ -181,8 +196,8 @@ async def test_import_users_from_excel(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_import_projects_from_excel(client: AsyncClient):
-    token, _ = await _token(client, "importprojects@example.com")
+async def test_import_projects_from_excel(client: AsyncClient, db_session):
+    token, _ = await _token_as_admin(client, db_session, "importprojects@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     xlsx = _xlsx_bytes(
@@ -201,8 +216,8 @@ async def test_import_projects_from_excel(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_import_company_holidays_from_excel(client: AsyncClient):
-    token, _ = await _token(client, "importholidays@example.com")
+async def test_import_company_holidays_from_excel(client: AsyncClient, db_session):
+    token, _ = await _token_as_admin(client, db_session, "importholidays@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     xlsx = _xlsx_bytes(
@@ -220,8 +235,8 @@ async def test_import_company_holidays_from_excel(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_import_personal_holidays_from_excel(client: AsyncClient):
-    token, uid = await _token(client, "importpersonal@example.com")
+async def test_import_personal_holidays_from_excel(client: AsyncClient, db_session):
+    token, uid = await _token_as_admin(client, db_session, "importpersonal@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     xlsx = _xlsx_bytes(

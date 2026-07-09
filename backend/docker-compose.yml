@@ -13,10 +13,11 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "${DB_SA_PASSWORD:-StrongPass1!}"
+      SA_PASSWORD: "${DB_SA_PASSWORD:?DB_SA_PASSWORD must be set — no default password is provided}"
       MSSQL_PID: Developer
-    ports:
-      - "1433:1433"
+    # No ports mapping: the api container reaches db over the internal
+    # Docker network by service name — publishing 1433 to the host is
+    # unnecessary and exposes SQL Server outside the compose network.
     volumes:
       - mssql_data:/var/opt/mssql
     healthcheck:

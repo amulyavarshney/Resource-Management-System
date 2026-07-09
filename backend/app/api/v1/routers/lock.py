@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query
 
-from app.core.deps import AllAuthenticated, DbSession
+from app.core.deps import AllAuthenticated, DbSession, ManagementAndAbove
 from app.models.enums import Department, Region
 from app.schemas.common import MessageResponse
 from app.services.dashboard_service import DashboardService
@@ -17,7 +17,7 @@ async def get_lock(
     return await DashboardService(db).get_lock(department, region)
 
 
-@router.post("", response_model=MessageResponse)
+@router.post("", response_model=MessageResponse, dependencies=[ManagementAndAbove])
 async def set_lock(
     is_locked: bool,
     db: DbSession,

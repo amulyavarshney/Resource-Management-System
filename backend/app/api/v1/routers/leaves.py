@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, Query
 
-from app.core.deps import AllAuthenticated, DbSession
+from app.core.deps import AdminOrDeveloper, AllAuthenticated, DbSession
 from app.schemas.common import MessageResponse
 from app.schemas.leave import LeaveCreate, LeaveResponse
 from app.services.leave_service import LeaveService
@@ -40,6 +40,6 @@ async def delete(user_id: int, date: date, db: DbSession) -> MessageResponse:
     return await LeaveService(db).delete(date, user_id)
 
 
-@router.delete("/reset", response_model=MessageResponse)
+@router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
 async def reset(db: DbSession) -> MessageResponse:
     return await LeaveService(db).reset()

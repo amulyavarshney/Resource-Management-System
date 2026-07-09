@@ -13,6 +13,15 @@ class LoginRequest(BaseModel):
     password: str | None = None
 
 
+class GoogleLoginRequest(BaseModel):
+    """Minimal profile relayed by the Next.js server after NextAuth's Google
+    provider has already verified the identity — see POST /auth/google."""
+
+    email: EmailStr
+    first_name: str = Field(max_length=50)
+    last_name: str = Field(max_length=50)
+
+
 class UserCreate(BaseModel):
     emp_id: int | None = None
     first_name: str = Field(max_length=50)
@@ -61,6 +70,10 @@ class PasswordChange(BaseModel):
                 "Password must be 8-20 chars, contain uppercase, lowercase, digit and special char"
             )
         return v
+
+
+class PasswordRemove(BaseModel):
+    password: str
 
 
 class UserResponse(BaseModel):

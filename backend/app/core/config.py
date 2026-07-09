@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS512"
     jwt_expire_hours: int = 2
 
+    # Shared secret with the Next.js server, used to authenticate the
+    # server-to-server POST /auth/google exchange (see AuthService.google_login).
+    internal_auth_secret: str = ""
+
     # Accept either a JSON array or a comma-separated string from the env file
     allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
 
