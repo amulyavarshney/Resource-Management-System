@@ -102,6 +102,28 @@ Self-registration (`/auth`, "Register Now") always creates an `Employee`-role ac
 
 The session token carries: `id`, `email`, `role`, `department`, `region`, `empId`, `firstName`, `lastName`, `parentId`, `workHoursPerDay`.
 
+For the full login sequence (Credentials and Google, including the
+`INTERNAL_AUTH_SECRET` exchange), see
+[backend/README.md](../backend/README.md#authentication-flow). The
+frontend-specific half of the picture — how a page gets from render to an
+authenticated backend call — looks like this:
+
+```mermaid
+flowchart TD
+    A["Page component renders<br/>(e.g. /timesheet)"] --> B["calls a service in<br/>app/api/services/*.ts"]
+    B --> C["httpInstance.ts request interceptor"]
+    C --> D{"typeof window<br/>!== 'undefined'?"}
+    D -- "yes (browser)" --> E["getSession() from next-auth/react"]
+    E --> F["read session.user.backendToken"]
+    F --> G["set Authorization: Bearer &lt;token&gt;"]
+    G --> H["axios sends request to<br/>NEXT_PUBLIC_BACKEND_API"]
+    D -- "no (server render)" --> H
+```
+
+Every service file wraps one backend resource, so a component never talks
+to Axios directly — it calls e.g. `weekDataService.getWorkHours(...)`,
+which goes through this shared interceptor.
+
 ## Pages
 
 | Route | Access | Description |

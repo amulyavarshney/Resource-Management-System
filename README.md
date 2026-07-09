@@ -18,6 +18,45 @@ Resource-Management-System/
 └── frontend/   # Next.js 14 application
 ```
 
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Browser
+        UI[Next.js UI<br/>React components]
+    end
+
+    subgraph "Next.js Server (frontend)"
+        NextAuth["NextAuth.js<br/>Credentials + Google providers"]
+        Axios["Axios client<br/>attaches JWT to every request"]
+    end
+
+    subgraph "FastAPI Server (backend)"
+        Routers["API routers<br/>auth · user · project · weekData<br/>dashboard · holiday · leave · lock"]
+        Deps["Dependencies<br/>JWT decode · role checks · self-or-admin"]
+        Services["Services<br/>business logic"]
+    end
+
+    DB[("SQL Server / PostgreSQL / MySQL")]
+    Google[("Google OAuth")]
+
+    UI -->|"sign in"| NextAuth
+    UI -->|"page data"| Axios
+    NextAuth -->|"POST /auth/login or /auth/google<br/>(+ INTERNAL_AUTH_SECRET for Google)"| Routers
+    NextAuth <-.->|"OAuth consent"| Google
+    Axios -->|"Bearer JWT"| Routers
+    Routers --> Deps
+    Deps --> Services
+    Services -->|"SQLAlchemy (async)"| DB
+```
+
+Both servers run independently — the frontend never talks to the database
+directly, and the backend never talks to Google directly. The Next.js
+server is the only thing trusted to hold `INTERNAL_AUTH_SECRET`, so Google
+identities are always verified server-side before being exchanged for an
+app JWT. See [backend/README.md](backend/README.md) for the data model and
+[frontend/README.md](frontend/README.md) for the page/route map.
+
 ## Tech Stack
 
 | Layer | Technology |

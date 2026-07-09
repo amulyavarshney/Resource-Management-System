@@ -37,6 +37,74 @@ backend/
 └── .env.example
 ```
 
+## Data Model
+
+```mermaid
+erDiagram
+    User ||--o{ WeekData : logs
+    User ||--o{ Leave : takes
+    User ||--o{ PersonalHoliday : has
+    User }o--o{ User : "reports to (parent_id)"
+    Project ||--o{ WeekData : "logged against"
+
+    User {
+        int id PK
+        string email
+        string first_name
+        string last_name
+        string auth_provider "local or google"
+        int role "Employee..Developer"
+        int department "IntFlag: D1, D2"
+        int region "IntFlag: India, USA"
+        int parent_id FK "reporting manager"
+        datetime date_deleted "soft delete"
+    }
+    Project {
+        int id PK
+        string number
+        string title
+        int department
+        int region
+        datetime date_deleted "soft delete"
+    }
+    WeekData {
+        int year PK
+        int month PK
+        int user_id PK, FK
+        int project_id PK, FK
+        int week1
+        int week2
+        int week3
+        int week4
+        int week5
+    }
+    Leave {
+        date date PK
+        int user_id PK, FK
+        int type "Casual/Planned/Sick/Unplanned"
+        int session "FullDay/HalfDay"
+    }
+    Holiday {
+        date date PK
+        int region PK
+        string name
+        int type "Compulsory/Festival"
+    }
+    PersonalHoliday {
+        date date PK
+        int user_id PK, FK
+        string name
+        int type
+        bool show
+    }
+```
+
+Composite primary keys (e.g. `WeekData` on `year + month + user_id +
+project_id`) avoid a separate surrogate key for what's naturally a join
+row. Nothing is ever hard-deleted — every entity with a `date_deleted`
+column is filtered out of normal queries rather than removed, so historical
+timesheets/projects/users stay intact even after "deletion."
+
 ## Setup
 
 ### Prerequisites
@@ -128,6 +196,61 @@ Some routes additionally require Admin/Developer (or Management+) — see below.
 | Health | `/health/live`, `/health/ready` | Public |
 
 Full interactive docs at `/swagger` in development mode.
+
+### Authentication flow
+
+Both login paths converge on the same JWT shape (`id`, `email`, `Role`,
+`exp`), so every downstream router treats a Credentials-issued and a
+Google-issued token identically.
+
+```mermaid
+sequenceDiagram
+    participant U as Browser
+    participant N as Next.js server
+    participant A as FastAPI /auth
+    participant DB as Database
+
+    rect rgb(240, 240, 240)
+    note over U,DB: Credentials login
+    U->>N: submit email + password
+    N->>A: POST /auth/login
+    A->>DB: look up User by email
+    A->>A: verify HMAC-SHA512(password, salt) == stored hash
+    A->>N: JWT {id, email, Role, exp}
+    N->>U: session cookie (backendToken = JWT)
+    end
+
+    rect rgb(230, 245, 255)
+    note over U,DB: Google sign-in
+    U->>N: click "Sign in with Google"
+    N->>Google: OAuth consent (NextAuth Google provider)
+    Google->>N: verified identity (email, name)
+    N->>A: POST /auth/google<br/>+ X-Internal-Secret header
+    A->>A: compare_digest(secret, INTERNAL_AUTH_SECRET)
+    alt secret invalid
+        A->>N: 401 Unauthorized
+    else secret valid
+        A->>DB: look up User by email
+        alt no match
+            A->>DB: create User (role=Employee, auth_provider=google, no password)
+        end
+        A->>N: JWT {id, email, Role, exp}
+        N->>U: session cookie (backendToken = JWT)
+    end
+    end
+
+    note over U,A: Every later request
+    U->>N: page load / API call
+    N->>A: Authorization: Bearer JWT
+    A->>A: decode JWT, run role/self-or-admin checks
+```
+
+`INTERNAL_AUTH_SECRET` never reaches the browser — only the Next.js server
+and FastAPI hold it, so the `/auth/google` exchange can't be called by
+anything except the trusted frontend server. Role is always assigned
+server-side (`Role.Employee` for new registrations and new Google
+sign-ins); no request body can set an arbitrary role at account-creation
+time.
 
 ## Demo accounts (local/dev only)
 
