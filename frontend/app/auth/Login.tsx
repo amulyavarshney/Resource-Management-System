@@ -25,9 +25,6 @@ export default function Login({ updateIsLogin }: LoginProps) {
 					toast.error(callback.error);
 				} else if (callback?.ok) {
 					toast.success("Logged in successfully!");
-					// if (rememberMe) { // rememberMe is the state of the "Remember Me" checkbox
-					// 	Cookies.set('rememberMe', credentials, { expires: 7 }); // This cookie expires after 7 days
-					// }
 				}
 			}
 		);
@@ -79,21 +76,6 @@ export default function Login({ updateIsLogin }: LoginProps) {
 								onChange={handleChange}
 							/>
 						</div>
-						{/* <div className="mt-2 flex justify-between items-center shadow-sm sm:text-sm sm:leading-6">
-							<input
-								id="email"
-								name="email"
-								type="text"
-								value={credentials.email}
-								required
-								className="flex-auto appearance-none w-full px-3 py-1.5 bg-transparent border-0 border-gray-300 rounded-l-md ring-1 ring-inset ring-gray-300 placeholder-gray-400 focus:outline-none focus:rounded-l-md focus:ring-2 focus:ring-inset focus:ring-indigo-600"
-								placeholder="Email Address"
-								onChange={handleChange}
-							/>
-							<span className="bg-gray-300 px-3 py-1.5 rounded-r-md font-medium">
-								@rms.com
-							</span>
-						</div> */}
 					</div>
 					<div>
 						<div className="flex items-center justify-between">

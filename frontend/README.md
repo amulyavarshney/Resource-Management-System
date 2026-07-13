@@ -236,12 +236,13 @@ All backend calls go through typed Axios clients in `app/api/services/`. Each fi
 | `auth.ts` | `authService` | `login`, `register` |
 | `user.ts` | `userService` | `getUsers`, `getUser`, `createUser`, `updateUser`, `deleteUser`, `getFullName` |
 | `project.ts` | `projectService` | `getProjects`, `getProject`, `getProjectsByYearAndMonth`, `createProject`, `updateProject`, `deleteProject`, `importFromExcel` |
-| `weekData.ts` | `weekDataService` | `getWorkHours`, `getWorkHour`, `createWorkHours`, `updateWorkHours`, `importFromExcel` |
+| `weekData.ts` | `weekDataService` | `getWorkHours`, `getWorkHoursByYearAndMonth`, `getWorkHour`, `addWorkHour`, `removeWorkHour` |
 | `leave.ts` | `leaveService` | `getLeaves`, `getLeavesInMonth`, `getLeavesCountInAWeek`, `addLeave`, `removeLeave` |
 | `holiday.ts` | `holidayService` | `getAllHolidays`, `getHolidaysInMonth`, `getUpcomingHolidays`, `createHoliday`, `updateHoliday`, `deleteHoliday` |
 | `dashboard.ts` | `dashboardService` | `getDashboard`, `getProjectDashboard`, `getProjectDashboardById`, `getUserDashboard`, `getUsersWithUnfilledTimesheet` |
 | `lock.ts` | `lockService` | `getLock`, `setLock` |
-| `userPreferences.ts` | `userPreferencesService` | Favourite project persistence |
+| `userPreferences.ts` | `userPreferencesService` | `getFavourites`, `addFavourite`, `removeFavourite`, `replaceFavourites` |
+| `mail.ts` | `mailService` | `send` (via `/api/mail` proxy) |
 | `weeksList.ts` | `weeksList` | `getWeeksInMonth`, `getMonthName`, `getDayName` |
 | `utils.ts` | helpers | `sortProjects`, `sortUsers` |
 
