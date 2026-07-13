@@ -56,7 +56,7 @@ export type UserDashboardViewModel = UserDashboardMetrics & {
 };
 
 class DashboardService {
-	getFullName(user: UserDashboardViewModel) {
+	getFullName(user: Pick<UserDashboardViewModel, "first_name" | "last_name">) {
 		return `${user.first_name} ${user.last_name}`;
 	}
 
@@ -255,7 +255,7 @@ class DashboardService {
 		region?: Region
 	) {
 		try {
-			const response = await http.get<User[]>(
+			const response = await http.get<UserDashboardViewModel[]>(
 				`/dashboard/${encodeURIComponent(year)}/${encodeURIComponent(
 					month
 				)}/users-with-unfilled-timesheet?${
@@ -265,7 +265,15 @@ class DashboardService {
 					""
 				)
 			);
-			return response.data;
+			return response.data.map((data) => {
+				data.totalHours =
+					(data.total_week1_hours || 0) +
+					(data.total_week2_hours || 0) +
+					(data.total_week3_hours || 0) +
+					(data.total_week4_hours || 0) +
+					(data.total_week5_hours || 0);
+				return data;
+			});
 		} catch (error) {
 			console.error(
 				"Error while fetching Users with unfilled timesheet",

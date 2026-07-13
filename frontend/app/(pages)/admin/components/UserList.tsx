@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { User } from "@/app/api/services/user";
-import dashboardService from "@/app/api/services/dashboard";
+import dashboardService, {
+	UserDashboardViewModel,
+} from "@/app/api/services/dashboard";
 import StatItem from "../../dashboard/components/StatsCard";
 
 export default function UserList() {
 	const { data: session } = useSession();
 	const year = new Date().getFullYear();
 	const month = new Date().getMonth() + 1;
-	const [users, setUsers] = useState<User[]>();
+	const [users, setUsers] = useState<UserDashboardViewModel[]>([]);
 	const [ext, setExt] = useState(0);
 
 	const fetchUsers = async () => {
@@ -19,23 +20,22 @@ export default function UserList() {
 			session?.user.region
 		);
 		setUsers(data);
-		const filteredUsers = data.filter((user) => user.is_external);
-		const extCount = filteredUsers?.length ?? 0;
-		setExt(extCount);
+		setExt(data.filter((user) => user.is_external).length);
 	};
 
 	useEffect(() => {
+		if (!session?.user) return;
 		fetchUsers();
-	}, []);
+	}, [session?.user]);
 
 	return (
 		<div className="inline-flex p-3">
 			<StatItem
 				label="Users with Unfilled Timesheet"
-				value={users?.length ?? 0}
-				fteValue={(users?.length ?? 0) - ext}
+				value={users.length}
+				fteValue={users.length - ext}
 				extValue={ext}
-				href=""
+				href="/admin/users-with-unfilled-timesheet"
 				icon={
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
