@@ -22,6 +22,8 @@ class Settings(BaseSettings):
 
     app_env: str = "development"
     log_level: str = "info"
+    # Disable in automated tests via RATE_LIMIT_ENABLED=false (see tests/conftest.py).
+    rate_limit_enabled: bool = True
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

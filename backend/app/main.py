@@ -5,6 +5,9 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.api.v1 import router as api_v1_router
 from app.core.config import get_settings
@@ -17,6 +20,7 @@ from app.core.exceptions import (
     RecordNotFoundException,
 )
 from app.core.logging import configure_logging, get_logger
+from app.core.rate_limit import limiter
 
 _settings = get_settings()
 _log = get_logger(__name__)
@@ -46,6 +50,9 @@ app = FastAPI(
     openapi_url="/openapi.json" if _settings.is_development else None,
     lifespan=lifespan,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # ── Middleware ──────────────────────────────────────────────────────────────
 

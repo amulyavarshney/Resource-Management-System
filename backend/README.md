@@ -156,6 +156,7 @@ docker compose up --build
 | `ALLOWED_ORIGINS` | No | localhost | Comma-separated CORS origins |
 | `APP_ENV` | No | `development` | `development` enables Swagger UI |
 | `LOG_LEVEL` | No | `info` | structlog level |
+| `RATE_LIMIT_ENABLED` | No | `true` | Rate-limit `/auth/login` (10/min), `/auth/register` (5/min), `/auth/google` (30/min) |
 
 ## Database Migrations
 

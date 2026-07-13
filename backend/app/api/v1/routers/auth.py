@@ -1,9 +1,10 @@
 import hmac
 
-from fastapi import APIRouter, Header, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, Request, status
 
 from app.core.config import get_settings
 from app.core.deps import DbSession
+from app.core.rate_limit import limiter
 from app.schemas.common import MessageResponse
 from app.schemas.user import GoogleLoginRequest, LoginRequest, UserCreate
 from app.services.auth_service import AuthService
@@ -12,17 +13,21 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=str)
-async def login(body: LoginRequest, db: DbSession) -> str:
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest, db: DbSession) -> str:
     return await AuthService(db).login(body)
 
 
 @router.post("/register", response_model=MessageResponse)
-async def register(body: UserCreate, db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def register(request: Request, body: UserCreate, db: DbSession) -> MessageResponse:
     return await AuthService(db).register(body)
 
 
 @router.post("/google", response_model=str)
+@limiter.limit("30/minute")
 async def google_login(
+    request: Request,
     body: GoogleLoginRequest,
     db: DbSession,
     x_internal_secret: str = Header(default=""),

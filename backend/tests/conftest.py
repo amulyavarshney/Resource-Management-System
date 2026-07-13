@@ -10,6 +10,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 # importing anything under app.* — tests should not depend on a local .env.
 os.environ.setdefault("DATABASE_URL", TEST_DATABASE_URL)
 os.environ.setdefault("JWT_SECRET", "test-secret-key-at-least-32-characters-long")
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402
