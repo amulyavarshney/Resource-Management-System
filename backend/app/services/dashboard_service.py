@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from app.core.exceptions import RecordNotFoundException
 from app.models.enums import Department, Region, Role
 from app.models.project import Project
+from app.models.timesheet_lock import TimesheetLock
 from app.models.user import User
 from app.models.week_data import WeekData
 from app.schemas.dashboard import DashboardResponse, ProjectDashboardResponse, UserDashboardResponse
@@ -20,10 +21,12 @@ def _week_total(wd: WeekData) -> int:
     return wd.week1 + wd.week2 + wd.week3 + wd.week4 + (wd.week5 or 0)
 
 
-# Process-local timesheet lock state, keyed by "{department}-{region}".
-# Mirrors the C# backend's in-memory IDistributedCache default — no
-# external cache dependency, resets on restart.
-_timesheet_locks: dict[str, bool] = {}
+def _lock_scope(department: Department | None, region: Region | None) -> tuple[int, int]:
+    """Map optional enum filters to the TimesheetLock composite key (0 = unspecified)."""
+    return (
+        int(department) if department is not None else 0,
+        int(region) if region is not None else 0,
+    )
 
 
 class DashboardService:
@@ -331,10 +334,32 @@ class DashboardService:
     # ------------------------------------------------------------------ lock timesheet
 
     async def get_lock(self, department: Department | None, region: Region | None) -> bool:
-        return _timesheet_locks.get(f"{department}-{region}", False)
+        dept, reg = _lock_scope(department, region)
+        row = (
+            await self._db.execute(
+                select(TimesheetLock).where(
+                    TimesheetLock.department == dept,
+                    TimesheetLock.region == reg,
+                )
+            )
+        ).scalar_one_or_none()
+        return bool(row and row.is_locked)
 
     async def set_lock(self, is_locked: bool, department: Department | None, region: Region | None) -> None:
-        _timesheet_locks[f"{department}-{region}"] = is_locked
+        dept, reg = _lock_scope(department, region)
+        row = (
+            await self._db.execute(
+                select(TimesheetLock).where(
+                    TimesheetLock.department == dept,
+                    TimesheetLock.region == reg,
+                )
+            )
+        ).scalar_one_or_none()
+        if row is None:
+            self._db.add(TimesheetLock(department=dept, region=reg, is_locked=is_locked))
+        else:
+            row.is_locked = is_locked
+        await self._db.flush()
 
     # ------------------------------------------------------------------ helpers
 

@@ -320,5 +320,5 @@ Password for all of the above: `DemoPass1!`
 - **Password hashing** — `hmac.new(salt, password, sha512)` with a random salt per user.
 - **Department/Region filters** — modeled as `IntFlag` enums, filtered via bitwise AND in SQLAlchemy (`.op("&")`).
 - **Soft deletes** — a `date_deleted` column on each entity; queries filter it out rather than physically deleting rows.
-- **Timesheet lock** — process-local in-memory store (`DashboardService`), keyed by department/region. Resets on restart; swap for Redis if you need it to survive restarts or run across multiple instances.
+- **Timesheet lock** — DB-backed (`TimesheetLock` table), keyed by department/region (0 = unspecified). Survives restarts and works across multiple API workers.
 - **Excel import** — `openpyxl` reads `.xlsx` uploads for bulk user/project/holiday import.
