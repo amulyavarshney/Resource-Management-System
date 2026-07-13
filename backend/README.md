@@ -240,9 +240,17 @@ Some routes additionally require Admin/Developer (or Management+) — see above.
 | Holidays | `/holiday` | Required (import/reset: Admin/Developer) |
 | Leaves | `/leave` | Required (reset: Admin/Developer) |
 | Lock | `/lock` | Required (set lock: Management/Executive/Admin/Developer) |
+| Preferences | `/preferences` | Required (favourites for the current user) |
 | Health | `/health/live`, `/health/ready` | Public |
 
 Full interactive docs at `/swagger` in development mode.
+
+### Observability
+
+- Structured JSON logs via **structlog** (`LOG_LEVEL` controls verbosity).
+- Every response includes `X-Correlation-ID` (echoed from the request or generated).
+- Non-health requests emit an `http_request` log with method, path, status, and `duration_ms`.
+- Probe endpoints: `GET /health/live` (process up) and `GET /health/ready` (DB reachable).
 
 ### Authentication flow
 

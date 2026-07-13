@@ -67,11 +67,31 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
 @app.middleware("http")
-async def correlation_id_header(request: Request, call_next):
+async def request_observability(request: Request, call_next):
+    """Attach correlation ID, bind structlog context, and emit access logs."""
+    import time
     import uuid
-    correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+
+    from structlog.contextvars import bind_contextvars, clear_contextvars
+
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
+    clear_contextvars()
+    bind_contextvars(correlation_id=correlation_id)
+
+    start = time.perf_counter()
     response = await call_next(request)
+    duration_ms = round((time.perf_counter() - start) * 1000, 2)
     response.headers["X-Correlation-ID"] = correlation_id
+
+    path = request.url.path
+    log_fn = _log.debug if path.startswith("/health/") else _log.info
+    log_fn(
+        "http_request",
+        method=request.method,
+        path=path,
+        status_code=response.status_code,
+        duration_ms=duration_ms,
+    )
     return response
 
 
@@ -131,7 +151,12 @@ async def handle_value_error(request: Request, exc: ValueError) -> JSONResponse:
 
 @app.exception_handler(Exception)
 async def handle_unhandled(request: Request, exc: Exception) -> JSONResponse:
-    _log.error("unhandled_exception", error=str(exc), path=request.url.path)
+    _log.error(
+        "unhandled_exception",
+        error=str(exc),
+        path=request.url.path,
+        method=request.method,
+    )
     return _problem(status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error", "An unexpected error occurred.")
 
 
