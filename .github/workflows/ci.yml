@@ -83,7 +83,6 @@ jobs:
           NEXT_PUBLIC_BACKEND_API: http://localhost:8000/api/v1
           NEXT_PUBLIC_MAX_HOURS: "8"
           NEXT_PUBLIC_FETCH_LOCK_INTERVAL: "60000"
-          NEXT_PUBLIC_LAST_DATE: "25"
         run: npm run build
 
   e2e:
@@ -142,7 +141,6 @@ jobs:
           NEXT_PUBLIC_BACKEND_API: http://127.0.0.1:8000/api/v1
           NEXT_PUBLIC_MAX_HOURS: "8"
           NEXT_PUBLIC_FETCH_LOCK_INTERVAL: "60000"
-          NEXT_PUBLIC_LAST_DATE: "25"
         run: npm run build
 
       - name: Run Playwright

@@ -11,7 +11,7 @@ The Resource Management System API — a Python 3.11 + FastAPI service covering 
 | ORM | SQLAlchemy (async) | ≥ 2.0 |
 | Migrations | Alembic | ≥ 1.13 |
 | Validation | Pydantic v2 | ≥ 2.7 |
-| Auth | python-jose + passlib | ≥ 3.3 / 1.7 |
+| Auth | python-jose (JWT) + HMAC-SHA512 passwords | ≥ 3.3 |
 | Excel | openpyxl | ≥ 3.1 |
 | Logging | structlog | ≥ 24.1 |
 | Tests | pytest-asyncio + httpx | ≥ 0.23 / 0.27 |
@@ -22,7 +22,7 @@ The Resource Management System API — a Python 3.11 + FastAPI service covering 
 backend/
 ├── app/
 │   ├── api/v1/routers/     # FastAPI routers (one per resource)
-│   ├── core/               # Config, security (JWT + bcrypt), deps, exceptions, logging
+│   ├── core/               # Config, security (JWT + HMAC passwords), deps, exceptions, logging
 │   ├── db/                 # SQLAlchemy engine, session, Base
 │   ├── models/             # SQLAlchemy ORM models + enums
 │   ├── schemas/            # Pydantic request/response models
