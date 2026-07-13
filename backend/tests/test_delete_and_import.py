@@ -104,8 +104,8 @@ async def test_project_delete_is_soft_not_hard(client: AsyncClient, db_session):
 # ── Duplicate-project crash regression ─────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_duplicate_project_number_and_title_cross_match_returns_409(client: AsyncClient):
-    token, _ = await _token(client, "dupcross@example.com")
+async def test_duplicate_project_number_and_title_cross_match_returns_409(client: AsyncClient, db_session):
+    token, _ = await _token_as_admin(client, db_session, "dupcross@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     await client.post("/api/v1/project", headers=headers,
                       json={"number": "CROSS1", "title": "First Title", "department": 1, "region": 1})
@@ -133,8 +133,8 @@ async def test_two_users_without_emp_id_can_both_register(client: AsyncClient):
 # ── Holiday lookup across multiple regions on the same date ────────────────────
 
 @pytest.mark.asyncio
-async def test_get_holiday_same_date_multiple_regions_no_region_filter(client: AsyncClient):
-    token, _ = await _token(client, "multiregion@example.com")
+async def test_get_holiday_same_date_multiple_regions_no_region_filter(client: AsyncClient, db_session):
+    token, _ = await _token_as_admin(client, db_session, "multiregion@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     await client.post("/api/v1/holiday", headers=headers,
                       json={"date": "2024-01-26", "name": "India Day", "type": 0, "region": 1})

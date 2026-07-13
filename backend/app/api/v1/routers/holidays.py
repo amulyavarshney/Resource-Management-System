@@ -2,7 +2,15 @@ from datetime import date
 
 from fastapi import APIRouter, Query, UploadFile
 
-from app.core.deps import AdminOrDeveloper, AllAuthenticated, DbSession
+from app.core.deps import (
+    AdminOrDeveloper,
+    AllAuthenticated,
+    CurrentUser,
+    DbSession,
+    assert_admin_or_developer,
+    assert_self_or_admin,
+    require_self_or_admin,
+)
 from app.models.enums import Region
 from app.schemas.common import MessageResponse
 from app.schemas.holiday import HolidayCreate, HolidayResponse, HolidayUpdate
@@ -61,7 +69,12 @@ async def get_one(
 
 
 @router.post("", response_model=HolidayResponse, status_code=201)
-async def create(body: HolidayCreate, db: DbSession) -> HolidayResponse:
+async def create(body: HolidayCreate, db: DbSession, payload: CurrentUser) -> HolidayResponse:
+    # Company holidays (region) are admin-only; personal holidays are self-or-admin.
+    if body.user_id is not None:
+        assert_self_or_admin(payload, body.user_id)
+    else:
+        assert_admin_or_developer(payload)
     return await HolidayService(db).create(body)
 
 
@@ -75,7 +88,7 @@ async def import_personal_holidays(excelFile: UploadFile, db: DbSession) -> Mess
     return await HolidayService(db).import_personal_from_excel(excelFile)
 
 
-@router.patch("", response_model=HolidayResponse)
+@router.patch("", response_model=HolidayResponse, dependencies=[AdminOrDeveloper])
 async def update_company(
     date: date,
     region: Region,
@@ -85,7 +98,7 @@ async def update_company(
     return await HolidayService(db).update_company(date, region, body)
 
 
-@router.patch("/{user_id}", response_model=HolidayResponse)
+@router.patch("/{user_id}", response_model=HolidayResponse, dependencies=[require_self_or_admin("user_id")])
 async def update_personal(
     user_id: int,
     date: date,
@@ -99,9 +112,14 @@ async def update_personal(
 async def delete(
     date: date,
     db: DbSession,
+    payload: CurrentUser,
     user_id: int | None = Query(default=None),
     region: Region | None = Query(default=None),
 ) -> MessageResponse:
+    if user_id is not None:
+        assert_self_or_admin(payload, user_id)
+    else:
+        assert_admin_or_developer(payload)
     return await HolidayService(db).delete(date, user_id, region)
 
 

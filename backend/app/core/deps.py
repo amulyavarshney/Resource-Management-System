@@ -26,16 +26,19 @@ CurrentUser = Annotated[dict, Depends(get_current_user_payload)]
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 
+def role_from_payload(payload: dict) -> Role | None:
+    try:
+        return Role[payload.get("Role", "")]
+    except KeyError:
+        return None
+
+
 def require_roles(*roles: Role):
     """Factory that returns a dependency enforcing at least one of the given roles."""
 
     async def _check(payload: CurrentUser) -> dict:
-        role_str = payload.get("Role", "")
-        try:
-            user_role = Role[role_str]
-        except KeyError:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
-        if user_role not in roles:
+        user_role = role_from_payload(payload)
+        if user_role is None or user_role not in roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
         return payload
 
@@ -57,12 +60,7 @@ def require_self_or_admin(path_param: str = "id"):
         target_id = request.path_params.get(path_param)
         if target_id is not None and str(payload.get("id")) == str(target_id):
             return payload
-        role_str = payload.get("Role", "")
-        try:
-            user_role = Role[role_str]
-        except KeyError:
-            user_role = None
-        if user_role not in (Role.Admin, Role.Developer):
+        if role_from_payload(payload) not in (Role.Admin, Role.Developer):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
         return payload
 
@@ -89,3 +87,14 @@ def require_self(path_param: str = "id"):
 
 
 SelfOnly = require_self("id")
+
+
+def assert_admin_or_developer(payload: dict) -> None:
+    if role_from_payload(payload) not in (Role.Admin, Role.Developer):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+
+
+def assert_self_or_admin(payload: dict, target_user_id: int) -> None:
+    if str(payload.get("id")) == str(target_user_id):
+        return
+    assert_admin_or_developer(payload)

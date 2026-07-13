@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.conftest import promote_to_role
 
 
-async def _get_token(client: AsyncClient, db_session: AsyncSession | None = None, email: str = "bob@example.com") -> str:
+async def _get_token(client: AsyncClient, db_session: AsyncSession, email: str = "bob@example.com") -> str:
     await client.post(
         "/api/v1/auth/register",
         json={
@@ -17,15 +17,11 @@ async def _get_token(client: AsyncClient, db_session: AsyncSession | None = None
     )
     resp = await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
     token = resp.json()
-    if db_session is not None:
-        # Registration always creates Employee — promote directly for tests
-        # that need an Admin/Developer caller (import/delete/reset routes).
-        users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-        uid = next(u["id"] for u in users if u["email"] == email)
-        await promote_to_role(db_session, uid, role=3)  # Admin
-        resp = await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
-        token = resp.json()
-    return token
+    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
+    uid = next(u["id"] for u in users if u["email"] == email)
+    await promote_to_role(db_session, uid, role=3)  # Admin
+    resp = await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
+    return resp.json()
 
 
 @pytest.mark.asyncio
@@ -61,8 +57,8 @@ async def test_project_crud(client: AsyncClient, db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_duplicate_project(client: AsyncClient):
-    token = await _get_token(client)
+async def test_duplicate_project(client: AsyncClient, db_session: AsyncSession):
+    token = await _get_token(client, db_session, email="bob2@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     payload = {"number": "P002", "title": "Beta", "department": 1, "region": 1}
     await client.post("/api/v1/project", json=payload, headers=headers)

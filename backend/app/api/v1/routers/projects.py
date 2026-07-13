@@ -34,7 +34,7 @@ async def get_project(id: int, db: DbSession) -> ProjectResponse:
     return await ProjectService(db).get_by_id(id)
 
 
-@router.post("", response_model=ProjectResponse, status_code=201)
+@router.post("", response_model=ProjectResponse, status_code=201, dependencies=[AdminOrDeveloper])
 async def create_project(body: ProjectCreate, db: DbSession) -> ProjectResponse:
     return await ProjectService(db).create(body)
 
@@ -44,7 +44,7 @@ async def import_projects(excelFile: UploadFile, db: DbSession) -> MessageRespon
     return await ProjectService(db).import_from_excel(excelFile)
 
 
-@router.patch("/{id}", response_model=ProjectResponse)
+@router.patch("/{id}", response_model=ProjectResponse, dependencies=[AdminOrDeveloper])
 async def update_project(id: int, body: ProjectUpdate, db: DbSession) -> ProjectResponse:
     return await ProjectService(db).update(id, body)
 

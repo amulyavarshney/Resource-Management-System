@@ -1,9 +1,12 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from tests.conftest import promote_to_role
 
 
-async def _setup(client: AsyncClient, email: str) -> tuple[str, int, int]:
-    """Return (token, user_id, project_id)."""
+async def _setup(client: AsyncClient, db_session: AsyncSession, email: str) -> tuple[str, int, int]:
+    """Return (token, user_id, project_id). Project create requires Admin."""
     await client.post("/api/v1/auth/register", json={
         "first_name": "WD", "last_name": "Tester", "email": email,
         "password": "SecureP@ss1", "department": 1, "region": 1,
@@ -11,20 +14,23 @@ async def _setup(client: AsyncClient, email: str) -> tuple[str, int, int]:
     })
     token = (await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})).json()
     headers = {"Authorization": f"Bearer {token}"}
+    users = (await client.get("/api/v1/user", headers=headers)).json()
+    uid = next(u["id"] for u in users if u["email"] == email)
+    await promote_to_role(db_session, uid, role=3)
+    token = (await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})).json()
+    headers = {"Authorization": f"Bearer {token}"}
 
     proj = (await client.post("/api/v1/project", headers=headers,
                               json={"number": f"P{email[:4]}", "title": f"Proj {email[:4]}",
                                     "department": 1, "region": 1})).json()
-    users = (await client.get("/api/v1/user", headers=headers)).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
     return token, uid, proj["id"]
 
 
 # ── WeekData ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_weekdata_create_and_get(client: AsyncClient):
-    token, uid, pid = await _setup(client, "wd1@example.com")
+async def test_weekdata_create_and_get(client: AsyncClient, db_session: AsyncSession):
+    token, uid, pid = await _setup(client, db_session, "wd1@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     body = {"week1": 10, "week2": 20, "week3": 15, "week4": 5}
@@ -40,8 +46,8 @@ async def test_weekdata_create_and_get(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_weekdata_upsert(client: AsyncClient):
-    token, uid, pid = await _setup(client, "wd2@example.com")
+async def test_weekdata_upsert(client: AsyncClient, db_session: AsyncSession):
+    token, uid, pid = await _setup(client, db_session, "wd2@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     await client.post(f"/api/v1/weekData/{uid}/{pid}/2024/7", headers=headers,
@@ -53,8 +59,8 @@ async def test_weekdata_upsert(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_weekdata_get_nonexistent_returns_zeros(client: AsyncClient):
-    token, uid, pid = await _setup(client, "wd3@example.com")
+async def test_weekdata_get_nonexistent_returns_zeros(client: AsyncClient, db_session: AsyncSession):
+    token, uid, pid = await _setup(client, db_session, "wd3@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     resp = await client.get(f"/api/v1/weekData/{uid}/{pid}/2099/12", headers=headers)
     assert resp.status_code == 200
@@ -63,8 +69,8 @@ async def test_weekdata_get_nonexistent_returns_zeros(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_weekdata_by_period(client: AsyncClient):
-    token, uid, pid = await _setup(client, "wd4@example.com")
+async def test_weekdata_by_period(client: AsyncClient, db_session: AsyncSession):
+    token, uid, pid = await _setup(client, db_session, "wd4@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     await client.post(f"/api/v1/weekData/{uid}/{pid}/2024/8", headers=headers,
                       json={"week1": 5, "week2": 5, "week3": 5, "week4": 5})
@@ -76,8 +82,8 @@ async def test_weekdata_by_period(client: AsyncClient):
 # ── Leaves ────────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_leave_create_and_get(client: AsyncClient):
-    token, uid, _ = await _setup(client, "lv1@example.com")
+async def test_leave_create_and_get(client: AsyncClient, db_session: AsyncSession):
+    token, uid, _ = await _setup(client, db_session, "lv1@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     body = {"date": "2024-06-03", "type": "Casual", "session": "FullDay", "user_id": uid}
@@ -93,8 +99,8 @@ async def test_leave_create_and_get(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_leave_rejected_on_weekend(client: AsyncClient):
-    token, uid, _ = await _setup(client, "lv2@example.com")
+async def test_leave_rejected_on_weekend(client: AsyncClient, db_session: AsyncSession):
+    token, uid, _ = await _setup(client, db_session, "lv2@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     # 2024-06-01 is a Saturday
     body = {"date": "2024-06-01", "type": "Casual", "session": "FullDay", "user_id": uid}
@@ -103,8 +109,8 @@ async def test_leave_rejected_on_weekend(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_leave_delete(client: AsyncClient):
-    token, uid, _ = await _setup(client, "lv3@example.com")
+async def test_leave_delete(client: AsyncClient, db_session: AsyncSession):
+    token, uid, _ = await _setup(client, db_session, "lv3@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     await client.post("/api/v1/leave", headers=headers,
                       json={"date": "2024-06-04", "type": "Planned", "session": "FullDay", "user_id": uid})
@@ -114,9 +120,9 @@ async def test_leave_delete(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_leave_description_strings(client: AsyncClient):
+async def test_leave_description_strings(client: AsyncClient, db_session: AsyncSession):
     """Accept descriptive strings like 'Casual Leave' / 'Full Day' (from C# [Description])."""
-    token, uid, _ = await _setup(client, "lv4@example.com")
+    token, uid, _ = await _setup(client, db_session, "lv4@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     body = {"date": "2024-06-05", "type": "Casual Leave", "session": "Full Day", "user_id": uid}
     resp = await client.post("/api/v1/leave", headers=headers, json=body)

@@ -26,8 +26,8 @@ async def _token_as_admin(client: AsyncClient, db_session, email: str) -> str:
 # ── Holidays ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_holiday_create_and_get(client: AsyncClient):
-    token = await _token(client, "hol1@example.com")
+async def test_holiday_create_and_get(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "hol1@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     resp = await client.post("/api/v1/holiday", headers=headers,
@@ -43,8 +43,8 @@ async def test_holiday_create_and_get(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_holiday_duplicate_rejected(client: AsyncClient):
-    token = await _token(client, "hol2@example.com")
+async def test_holiday_duplicate_rejected(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "hol2@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     payload = {"date": "2024-10-02", "name": "Gandhi Jayanti", "type": 0, "region": 1}
     await client.post("/api/v1/holiday", headers=headers, json=payload)
@@ -53,8 +53,8 @@ async def test_holiday_duplicate_rejected(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_holiday_list_shape(client: AsyncClient):
-    token = await _token(client, "hol3@example.com")
+async def test_holiday_list_shape(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "hol3@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     await client.post("/api/v1/holiday", headers=headers,
                       json={"date": "2024-11-01", "name": "Diwali", "type": 1, "region": 1})
@@ -66,13 +66,27 @@ async def test_holiday_list_shape(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_holiday_delete(client: AsyncClient):
-    token = await _token(client, "hol4@example.com")
+async def test_holiday_delete(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "hol4@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     await client.post("/api/v1/holiday", headers=headers,
                       json={"date": "2024-12-25", "name": "Christmas", "type": 0, "region": 2})
     resp = await client.delete("/api/v1/holiday?date=2024-12-25&region=2", headers=headers)
     assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_personal_holiday_self_create(client: AsyncClient):
+    token = await _token(client, "holpersonal@example.com")
+    headers = {"Authorization": f"Bearer {token}"}
+    users = (await client.get("/api/v1/user", headers=headers)).json()
+    uid = next(u["id"] for u in users if u["email"] == "holpersonal@example.com")
+
+    resp = await client.post("/api/v1/holiday", headers=headers,
+                             json={"date": "2024-09-01", "name": "My Day Off",
+                                   "type": 1, "user_id": uid})
+    assert resp.status_code == 201
+    assert resp.json()["user_id"] == uid
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -107,8 +121,8 @@ async def test_dashboard_user(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_dashboard_project(client: AsyncClient):
-    token = await _token(client, "dash3@example.com")
+async def test_dashboard_project(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "dash3@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     proj = (await client.post("/api/v1/project", headers=headers,
                               json={"number": "DASH1", "title": "Dashboard Test",

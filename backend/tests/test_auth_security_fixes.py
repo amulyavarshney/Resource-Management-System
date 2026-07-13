@@ -46,7 +46,7 @@ async def test_registration_ignores_client_supplied_role(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_employee_cannot_reset_or_import_or_lock(client: AsyncClient):
-    token, _ = await _register_and_login(client, "plainemployee@example.com")
+    token, uid = await _register_and_login(client, "plainemployee@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     assert (await client.delete("/api/v1/project/reset", headers=headers)).status_code == 403
@@ -55,6 +55,23 @@ async def test_employee_cannot_reset_or_import_or_lock(client: AsyncClient):
     assert (await client.post("/api/v1/user", headers=headers, json={
         "first_name": "X", "last_name": "Y", "email": "shouldfail@example.com",
         "department": 1, "region": 1,
+    })).status_code == 403
+    assert (await client.post("/api/v1/project", headers=headers, json={
+        "number": "NOPE", "title": "Nope", "department": 1, "region": 1,
+    })).status_code == 403
+    assert (await client.patch("/api/v1/project/1", headers=headers, json={
+        "title": "Hacked",
+    })).status_code == 403
+    assert (await client.post("/api/v1/holiday", headers=headers, json={
+        "date": "2024-01-01", "name": "Company Hijack", "type": 0, "region": 1,
+    })).status_code == 403
+    # Personal holiday for self is still allowed
+    assert (await client.post("/api/v1/holiday", headers=headers, json={
+        "date": "2024-01-02", "name": "My Holiday", "type": 1, "user_id": uid,
+    })).status_code == 201
+    # Personal holiday for another user is not
+    assert (await client.post("/api/v1/holiday", headers=headers, json={
+        "date": "2024-01-03", "name": "Someone Else", "type": 1, "user_id": uid + 999,
     })).status_code == 403
 
 

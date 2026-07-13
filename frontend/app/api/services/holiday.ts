@@ -144,12 +144,11 @@ class HolidayService {
 
 	async addHoliday(holiday: HolidayBase, userId?: number, region?: Region) {
 		try {
-			const response = await http.post<Holiday>(
-				`/holiday?${userId ? `user_id=${userId}&` : ""}${
-					region ? `region=${region}&` : ""
-				}`.replace(/[?&]$/, ""),
-				holiday
-			);
+			const response = await http.post<Holiday>("/holiday", {
+				...holiday,
+				...(userId !== undefined ? { user_id: userId } : {}),
+				...(region !== undefined ? { region } : {}),
+			});
 			toast.success("Holiday added successfully.");
 			return response.data;
 		} catch (error) {
