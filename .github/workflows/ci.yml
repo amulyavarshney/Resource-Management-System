@@ -38,6 +38,17 @@ jobs:
           RATE_LIMIT_ENABLED: "false"
         run: pytest -q
 
+      - name: Export OpenAPI schema
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          JWT_SECRET: test-secret-key-at-least-32-characters-long
+          RATE_LIMIT_ENABLED: "false"
+          APP_ENV: development
+        run: |
+          python -m scripts.export_openapi > /tmp/openapi.json
+          # Fail if the committed frontend schema drifted from the live FastAPI app
+          diff -u ../frontend/openapi.json /tmp/openapi.json
+
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
@@ -58,6 +69,11 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Verify OpenAPI types are up to date
+        run: |
+          npm run generate:api:types
+          git diff --exit-code -- app/api/generated/openapi.ts
 
       - name: Build
         env:

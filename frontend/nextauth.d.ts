@@ -10,7 +10,7 @@ export enum Region {
 	USA = 1 << 1,
 }
 
-/** Numeric values must match backend `app.models.enums.Role` (IntEnum). */
+/** Numeric values must match backend `app.models.enums.Role` / OpenAPI `Role`. */
 export enum Role {
 	Employee = 0,
 	Management = 1,

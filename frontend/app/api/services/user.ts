@@ -2,6 +2,16 @@ import { toast } from "react-hot-toast";
 import { Department, Region, Role } from "@/nextauth.d";
 import http from "./httpInstance";
 
+export type {
+	ApiUser,
+	ApiUserCreate,
+	ApiUserUpdate,
+	ApiRole,
+	ApiDepartment,
+	ApiRegion,
+} from "../generated";
+
+/** Create payload used by admin/register forms. Values align with OpenAPI UserCreate. */
 export type UserCreateViewModel = {
 	emp_id?: number;
 	user_name: string;
@@ -17,11 +27,12 @@ export type UserCreateViewModel = {
 
 export type UserUpdateViewModel = Partial<UserCreateViewModel>;
 
+/** API user row — fields match OpenAPI UserResponse (role/dept/region are numeric enums). */
 export type User = UserCreateViewModel & {
-	[key: string]: number | string | boolean | Date;
 	id: number;
 	is_external: boolean;
-	last_saved_time: Date;
+	is_password_protected?: boolean;
+	last_saved_time: Date | string | null;
 	week1_hours: number;
 	week2_hours: number;
 	week3_hours: number;
@@ -30,7 +41,7 @@ export type User = UserCreateViewModel & {
 };
 
 class UserService {
-	getFullName(user: User) {
+	getFullName(user: { first_name: string; last_name: string }) {
 		return `${user.first_name} ${user.last_name}`;
 	}
 

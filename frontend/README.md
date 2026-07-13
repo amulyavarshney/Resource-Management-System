@@ -76,9 +76,12 @@ npm start
 npm run lint       # ESLint
 npm run format     # Prettier
 npm run test:e2e   # Playwright (API must be on :8000; builds/starts UI via config)
+npm run generate:api  # Refresh OpenAPI JSON + TypeScript types from the FastAPI schema
 ```
 
 Requires a running backend (`uvicorn app.main:app --port 8000`). CI starts both automatically.
+
+Generated API types live in `app/api/generated/` (from `openapi.json`). After backend schema changes, activate the backend venv and run `npm run generate:api`.
 
 ### Docker
 
