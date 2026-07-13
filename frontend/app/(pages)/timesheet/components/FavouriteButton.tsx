@@ -1,4 +1,6 @@
-import { useSession } from "next-auth/react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import userPreferencesService from "@/app/api/services/userPreferences";
 
 type FavouritesProps = {
 	projectId: number;
@@ -11,32 +13,35 @@ export default function Favourites({
 	favouriteProjects,
 	setFavouriteProjects,
 }: FavouritesProps) {
-	const { data: session } = useSession();
-	const userId = session?.user.id;
+	const [pending, setPending] = useState(false);
+	const isFavourite = favouriteProjects.includes(projectId);
 
-	const toggleFavourite = (projectId: number) => {
-		const key = `favouriteProjects-${userId}`;
-		let favouriteProjects = JSON.parse(localStorage.getItem(key) || "[]");
-
-		const index = favouriteProjects.indexOf(projectId);
-		if (index === -1) {
-			favouriteProjects.push(projectId);
-		} else {
-			favouriteProjects.splice(index, 1);
+	const toggleFavourite = async () => {
+		if (pending) return;
+		setPending(true);
+		try {
+			const next = isFavourite
+				? await userPreferencesService.removeFavourite(projectId)
+				: await userPreferencesService.addFavourite(projectId);
+			setFavouriteProjects(next);
+		} catch (error) {
+			console.error("Failed to update favourite", error);
+			toast.error("Failed to update favourite");
+		} finally {
+			setPending(false);
 		}
-
-		localStorage.setItem(key, JSON.stringify(favouriteProjects));
-
-		// Optionally, update the state if needed
-		setFavouriteProjects(favouriteProjects);
 	};
 
 	return (
 		<button
-			className="cursor-pointer"
-			onClick={() => toggleFavourite(projectId)}
+			type="button"
+			className="cursor-pointer disabled:opacity-50"
+			disabled={pending}
+			aria-pressed={isFavourite}
+			aria-label={isFavourite ? "Remove from favourites" : "Add to favourites"}
+			onClick={toggleFavourite}
 		>
-			{favouriteProjects.includes(projectId) ? (
+			{isFavourite ? (
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="24"

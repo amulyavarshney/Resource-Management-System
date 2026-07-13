@@ -7,6 +7,7 @@ import { useSearch } from "@/app/contexts/SearchContext";
 import { Role } from "@/nextauth.d";
 import Unauthorized from "@/app/components/Unauthorized";
 import projectService, { Project } from "@/app/api/services/project";
+import userPreferencesService from "@/app/api/services/userPreferences";
 import Table from "./components/Timesheet";
 import { sortProjects } from "@/app/api/services/utils";
 
@@ -88,12 +89,34 @@ export default function Timesheet() {
 	}, [fetchedProjects, showFavourites, favourites, search, sortConfig]);
 
 	useEffect(() => {
-		const key = `favouriteProjects-${userId}`;
-		const storedFavourites = localStorage.getItem(key);
-		if (storedFavourites) {
-			setFavourites(JSON.parse(storedFavourites));
-		}
-	}, []);
+		if (!userId) return;
+
+		const loadFavourites = async () => {
+			try {
+				let projectIds = await userPreferencesService.getFavourites();
+
+				// One-time migration from legacy localStorage favourites
+				const key = `favouriteProjects-${userId}`;
+				const stored = localStorage.getItem(key);
+				if (projectIds.length === 0 && stored) {
+					const legacy: number[] = JSON.parse(stored);
+					if (Array.isArray(legacy) && legacy.length > 0) {
+						projectIds = await userPreferencesService.replaceFavourites(legacy);
+					}
+					localStorage.removeItem(key);
+				} else if (stored) {
+					localStorage.removeItem(key);
+				}
+
+				setFavourites(projectIds);
+			} catch (error) {
+				console.error("Failed to load favourites", error);
+				toast.error("Failed to load favourites");
+			}
+		};
+
+		loadFavourites();
+	}, [userId]);
 
 	if (session?.user?.role === Role.Executive) {
 		return <Unauthorized />;

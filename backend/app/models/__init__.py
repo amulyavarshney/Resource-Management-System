@@ -3,6 +3,7 @@ from app.models.leave import Leave
 from app.models.project import Project
 from app.models.timesheet_lock import TimesheetLock
 from app.models.user import User
+from app.models.user_favourite import UserFavourite
 from app.models.week_data import WeekData
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "PersonalHoliday",
     "Leave",
     "TimesheetLock",
+    "UserFavourite",
 ]
