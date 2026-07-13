@@ -23,7 +23,7 @@ export default function Register({ updateIsLogin }: RegisterProps) {
 		email: "",
 		department: Department.D1,
 		region: Region.India,
-		role: Role.Developer,
+		role: Role.Employee,
 		work_hours_per_day: 8,
 		password: "",
 		confirmPassword: "",

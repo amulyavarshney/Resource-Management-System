@@ -21,7 +21,7 @@ import Header from "./components/Header";
 
 export default function Timesheet() {
 	const router = useRouter();
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 	const { weeks, setWeeks } = useWeeks();
 	const { search } = useSearch();
 	const [sortConfig, setSortConfig] = useState<{
@@ -38,10 +38,10 @@ export default function Timesheet() {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		if (status == "unauthenticated") {
+		if (status === "unauthenticated") {
 			router.push("/auth");
 		}
-	}, [status]);
+	}, [status, router]);
 
 	useEffect(() => {
 		const loadWeeks = async () => {

@@ -120,8 +120,8 @@ export default function Table({
 		// Then set up an interval to call fetchLock every X milliseconds
 		const intervalId = setInterval(
 			fetchLock,
-			Number(process.env.NEXT_PUBLIC_FETCH_LOCK_INTERVAL)
-		); // in seconds
+			Number(process.env.NEXT_PUBLIC_FETCH_LOCK_INTERVAL) || 60_000
+		); // milliseconds (default 60s)
 
 		// Clean up function to clear the interval when the component unmounts
 		return () => clearInterval(intervalId);

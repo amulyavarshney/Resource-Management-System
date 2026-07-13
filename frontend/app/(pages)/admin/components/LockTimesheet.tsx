@@ -19,7 +19,7 @@ export default function LockTimesheet() {
 				() => {
 					setIsLocked(true);
 				},
-				1000 * 60 * 60 * 24 * Number(process.env.NEXT_PUBLIC_LAST_DATE)
+				1000 * 60 * 60 * 24 * (Number(process.env.NEXT_PUBLIC_LAST_DATE) || 25)
 			); // after LAST_DATE
 		},
 		null,

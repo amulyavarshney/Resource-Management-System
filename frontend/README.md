@@ -87,6 +87,9 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `NEXTAUTH_SECRET` | Yes | Secret for signing NextAuth JWTs — generate with `openssl rand -base64 32` |
 | `NEXT_PUBLIC_FRONTEND_URL` | Yes | Public base URL of this app |
 | `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL (e.g. `http://localhost:8000/api/v1`) |
+| `NEXT_PUBLIC_MAX_HOURS` | No | Default work hours per day (default `8`) |
+| `NEXT_PUBLIC_FETCH_LOCK_INTERVAL` | No | Timesheet lock poll interval in ms (default `60000`) |
+| `NEXT_PUBLIC_LAST_DATE` | No | Day-of-month used by the admin lock schedule helper (default `25`) |
 | `GOOGLE_CLIENT_ID` | No | Google OAuth client ID — omit to disable "Sign in with Google" |
 | `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
 | `INTERNAL_AUTH_SECRET` | Only if using Google sign-in | Shared secret with the backend's `INTERNAL_AUTH_SECRET`, used for the server-to-server `POST /auth/google` exchange. Server-side only — never exposed to the browser. |

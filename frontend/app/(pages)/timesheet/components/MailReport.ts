@@ -22,7 +22,7 @@ type TimesheetReportProps = {
 	userId: number;
 };
 
-const MAX_HOURS = Number(process.env.NEXT_PUBLIC_MAX_HOURS);
+const MAX_HOURS = Number(process.env.NEXT_PUBLIC_MAX_HOURS) || 8;
 
 export const generateReport = async (
 	year: number,

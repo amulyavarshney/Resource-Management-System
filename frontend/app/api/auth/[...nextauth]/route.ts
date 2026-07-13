@@ -70,16 +70,17 @@ const authOptions: NextAuthOptions = {
 				);
 				const backendUser = await userService.getUserByEmail(profile.email, backendToken);
 				token.id = Number(backendUser.id);
-				token.department = (backendUser as any).department;
-				token.region = (backendUser as any).region;
-				token.role = (backendUser as any).role;
+				token.department = Number((backendUser as any).department);
+				token.region = Number((backendUser as any).region);
+				// Coerce to number — API returns role as int matching Role enum
+				token.role = Number((backendUser as any).role);
 				token.backendToken = backendToken;
 				token.name = userService.getFullName(backendUser);
 			} else if (user) {
 				token.id = Number(user.id);
-				token.department = (user as any).department;
-				token.region = (user as any).region;
-				token.role = (user as any).role;
+				token.department = Number((user as any).department);
+				token.region = Number((user as any).region);
+				token.role = Number((user as any).role);
 				// Carry the backend JWT in the NextAuth JWT so the axios
 				// interceptor can attach it to every API request.
 				token.backendToken = (user as any).backendToken;

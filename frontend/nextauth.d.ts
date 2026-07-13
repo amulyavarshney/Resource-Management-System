@@ -10,13 +10,19 @@ export enum Region {
 	USA = 1 << 1,
 }
 
+/** Numeric values must match backend `app.models.enums.Role` (IntEnum). */
 export enum Role {
-	Employee = "Employee",
-	Management = "Management",
-	Executive = "Executive",
-	Admin = "Admin",
-	Developer = "Developer",
+	Employee = 0,
+	Management = 1,
+	Executive = 2,
+	Admin = 3,
+	Developer = 4,
 }
+
+/** Name keys only — TypeScript numeric enums also reverse-map `0 → "Employee"`. */
+export const ROLE_NAMES = Object.keys(Role).filter((key) =>
+	Number.isNaN(Number(key))
+) as Array<keyof typeof Role>;
 
 declare module "next-auth" {
 	interface User {

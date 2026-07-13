@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { useSession } from "next-auth/react";
-import { Department, Region, Role } from "@/nextauth.d";
+import { Department, Region, Role, ROLE_NAMES } from "@/nextauth.d";
 import toast from "react-hot-toast";
 import userService, {
 	User,
@@ -226,13 +226,13 @@ export default function UpdateUsers() {
 								onChange={(e) =>
 									setUser({
 										...user,
-										role: Role[e.target.value as keyof typeof Role],
+										role: Number(e.target.value) as Role,
 									})
 								}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							>
-								{Object.keys(Role).map((key) => (
-									<option value={Role[key as keyof typeof Role]} key={key}>
+								{ROLE_NAMES.map((key) => (
+									<option value={Role[key]} key={key}>
 										{key}
 									</option>
 								))}

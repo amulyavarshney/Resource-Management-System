@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 
 const isDev = process.env.NODE_ENV === "development";
-const backendApi = process.env.NEXT_PUBLIC_BACKEND_API ?? "http://localhost:8001/api/v1";
-// Extract origin from backend URL (e.g. "http://localhost:8001")
+const backendApi = process.env.NEXT_PUBLIC_BACKEND_API ?? "http://localhost:8000/api/v1";
+// Extract origin from backend URL (e.g. "http://localhost:8000")
 const backendOrigin = backendApi.replace(/\/api.*$/, "");
 
 // In dev, allow unsafe-eval (needed by Next.js hot-reload / React refresh)
