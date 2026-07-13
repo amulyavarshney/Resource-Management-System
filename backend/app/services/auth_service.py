@@ -3,6 +3,7 @@ from datetime import date
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.exceptions import DuplicateEntityException, LoginFailedException
 from app.core.security import create_access_token, verify_password
 from app.models.enums import Role
@@ -58,6 +59,7 @@ class AuthService:
         stmt = select(User).where(User.email == data.email, User.date_deleted.is_(None))
         user = (await self._db.execute(stmt)).scalar_one_or_none()
         if user is None:
+            settings = get_settings()
             user = User(
                 first_name=data.first_name.title(),
                 last_name=data.last_name.title(),
@@ -66,8 +68,8 @@ class AuthService:
                 password_salt=None,
                 is_external="ext" in data.email,
                 auth_provider="google",
-                department=0,
-                region=0,
+                department=settings.google_default_department,
+                region=settings.google_default_region,
                 role=int(Role.Employee),
                 work_hours_per_day=8,
                 parent_id=0,

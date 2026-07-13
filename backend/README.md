@@ -157,6 +157,9 @@ For the full stack including the Next.js UI, use the root `docker-compose.yml`.
 | `JWT_SECRET` | Yes | — | HS512 signing key, min 32 chars |
 | `JWT_ALGORITHM` | No | `HS512` | JWT signing algorithm |
 | `JWT_EXPIRE_HOURS` | No | `2` | Token lifetime in hours |
+| `INTERNAL_AUTH_SECRET` | Only if using Google | — | Shared secret for server-to-server Google exchange |
+| `GOOGLE_DEFAULT_DEPARTMENT` | No | `1` (D1) | Department bitmask for first-time Google sign-ups |
+| `GOOGLE_DEFAULT_REGION` | No | `1` (India) | Region bitmask for first-time Google sign-ups |
 | `ALLOWED_ORIGINS` | No | localhost | Comma-separated CORS origins |
 | `APP_ENV` | No | `development` | `development` enables Swagger UI |
 | `LOG_LEVEL` | No | `info` | structlog level |

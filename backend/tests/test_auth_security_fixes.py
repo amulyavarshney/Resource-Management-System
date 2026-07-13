@@ -206,3 +206,63 @@ async def test_google_login_wrong_secret_rejected(client: AsyncClient):
         headers={"X-Internal-Secret": "wrong-secret"},
     )
     assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_google_login_creates_user_with_defaults(client: AsyncClient):
+    resp = await client.post(
+        "/api/v1/auth/google",
+        json={"email": "new.google@example.com", "first_name": "new", "last_name": "user"},
+        headers={"X-Internal-Secret": "test-internal-auth-secret"},
+    )
+    assert resp.status_code == 200
+    token = resp.json()
+    assert isinstance(token, str) and len(token) > 20
+
+    users = (
+        await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})
+    ).json()
+    created = next(u for u in users if u["email"] == "new.google@example.com")
+    assert created["first_name"] == "New"
+    assert created["last_name"] == "User"
+    assert created["role"] == 0  # Employee
+    assert created["department"] == 1  # GOOGLE_DEFAULT_DEPARTMENT
+    assert created["region"] == 1  # GOOGLE_DEFAULT_REGION
+    assert created["is_password_protected"] is False
+
+
+@pytest.mark.asyncio
+async def test_google_login_links_existing_user(client: AsyncClient):
+    await client.post(
+        "/api/v1/auth/register",
+        json={
+            "first_name": "Existing",
+            "last_name": "User",
+            "email": "linked.google@example.com",
+            "password": "SecureP@ss1",
+            "department": 2,
+            "region": 2,
+            "role": 0,
+            "work_hours_per_day": 8,
+            "parent_id": 0,
+        },
+    )
+    resp = await client.post(
+        "/api/v1/auth/google",
+        json={
+            "email": "linked.google@example.com",
+            "first_name": "Ignored",
+            "last_name": "Name",
+        },
+        headers={"X-Internal-Secret": "test-internal-auth-secret"},
+    )
+    assert resp.status_code == 200
+    token = resp.json()
+    users = (
+        await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})
+    ).json()
+    linked = next(u for u in users if u["email"] == "linked.google@example.com")
+    # Existing profile fields are preserved (not overwritten by Google defaults)
+    assert linked["first_name"] == "Existing"
+    assert linked["department"] == 2
+    assert linked["region"] == 2

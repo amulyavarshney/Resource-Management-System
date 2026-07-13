@@ -11,6 +11,9 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 os.environ.setdefault("DATABASE_URL", TEST_DATABASE_URL)
 os.environ.setdefault("JWT_SECRET", "test-secret-key-at-least-32-characters-long")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+os.environ.setdefault("INTERNAL_AUTH_SECRET", "test-internal-auth-secret")
+os.environ.setdefault("GOOGLE_DEFAULT_DEPARTMENT", "1")
+os.environ.setdefault("GOOGLE_DEFAULT_REGION", "1")
 
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402

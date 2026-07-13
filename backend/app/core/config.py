@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     # server-to-server POST /auth/google exchange (see AuthService.google_login).
     internal_auth_secret: str = ""
 
+    # Defaults applied when a first-time Google sign-in creates a user.
+    # Bitmask values matching Department / Region IntFlags (1 = D1 / India).
+    google_default_department: int = 1
+    google_default_region: int = 1
+
     # Accept either a JSON array or a comma-separated string from the env file
     allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
 
