@@ -138,12 +138,16 @@ uvicorn app.main:app --reload
 
 ### Docker
 
+API + SQL Server only (from `backend/`):
+
 ```sh
-cp .env.example .env   # fill in JWT_SECRET at minimum
+cp .env.example .env   # fill in JWT_SECRET at minimum; set DATABASE_URL host to `db`
 docker compose up --build
 # API:     http://localhost:8000
 # Swagger: http://localhost:8000/swagger (development mode only)
 ```
+
+For the full stack including the Next.js UI, use the root `docker-compose.yml`.
 
 ## Environment Variables
 

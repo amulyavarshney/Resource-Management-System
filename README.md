@@ -103,9 +103,17 @@ Full dependency lists: [backend/README.md](backend/README.md#technology) ·
 
 ## Docker
 
-The backend ships with a `Dockerfile` and `docker-compose.yml` — see
-[backend/README.md § Docker](backend/README.md#docker) for both the
-standalone-container and compose forms and their required variables.
+Full stack (SQL Server + API + Next.js UI) from the repo root:
+
+```sh
+cp .env.example .env   # fill JWT_SECRET, NEXTAUTH_SECRET, DB_SA_PASSWORD
+docker compose up --build
+# UI:  http://localhost:3000
+# API: http://localhost:8000
+```
+
+API + database only: see [backend/README.md § Docker](backend/README.md#docker).
+Frontend image alone: see [frontend/README.md § Docker](frontend/README.md#docker).
 
 ## Contributing
 

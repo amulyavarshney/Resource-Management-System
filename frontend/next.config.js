@@ -22,6 +22,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig = {
+    output: "standalone",
     serverRuntimeConfig: {
         HOST: process.env.NEXTAUTH_URL,
     },

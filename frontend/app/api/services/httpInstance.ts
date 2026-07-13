@@ -1,7 +1,11 @@
 import axios from "axios";
 
+// Browser uses NEXT_PUBLIC_BACKEND_API (host-reachable URL).
+// Next.js server (auth callbacks, SSR) prefers BACKEND_API_URL so Docker
+// compose can point at the internal `api` service hostname.
 const http = axios.create({
-	baseURL: process.env.NEXT_PUBLIC_BACKEND_API,
+	baseURL:
+		process.env.BACKEND_API_URL ?? process.env.NEXT_PUBLIC_BACKEND_API,
 });
 
 // Attach the backend JWT on every request.

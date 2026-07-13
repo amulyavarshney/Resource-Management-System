@@ -1,0 +1,75 @@
+# Full-stack stack: SQL Server + API + Next.js UI
+# Usage:
+#   cp .env.example .env   # fill secrets
+#   docker compose up --build
+#
+# API-only (backend + db): see backend/docker-compose.yml
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${DB_SA_PASSWORD:?DB_SA_PASSWORD must be set — no default password is provided}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -C -Q "SELECT 1" || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "${DATABASE_URL:?Set DATABASE_URL pointing at host 'db'}"
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set}"
+      JWT_ALGORITHM: "${JWT_ALGORITHM:-HS512}"
+      JWT_EXPIRE_HOURS: "${JWT_EXPIRE_HOURS:-2}"
+      INTERNAL_AUTH_SECRET: "${INTERNAL_AUTH_SECRET:-}"
+      ALLOWED_ORIGINS: '["http://localhost:3000"]'
+      APP_ENV: "${APP_ENV:-production}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+      RATE_LIMIT_ENABLED: "${RATE_LIMIT_ENABLED:-true}"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_BACKEND_API: http://localhost:8000/api/v1
+        NEXT_PUBLIC_FRONTEND_URL: http://localhost:3000
+        NEXT_PUBLIC_MAX_HOURS: "8"
+        NEXT_PUBLIC_FETCH_LOCK_INTERVAL: "60000"
+        NEXT_PUBLIC_LAST_DATE: "25"
+    ports:
+      - "3000:3000"
+    environment:
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set}"
+      # Server-side calls from the web container to the api service
+      BACKEND_API_URL: http://api:8000/api/v1
+      INTERNAL_AUTH_SECRET: "${INTERNAL_AUTH_SECRET:-}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mssql_data:

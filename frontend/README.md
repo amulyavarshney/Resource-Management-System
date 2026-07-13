@@ -77,6 +77,24 @@ npm run lint       # ESLint
 npm run format     # Prettier
 ```
 
+### Docker
+
+```sh
+# From frontend/ — build args bake browser-facing NEXT_PUBLIC_* at image build time
+docker build -t rms-frontend \
+  --build-arg NEXT_PUBLIC_BACKEND_API=http://localhost:8000/api/v1 \
+  --build-arg NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000 \
+  .
+
+docker run --rm -p 3000:3000 \
+  -e NEXTAUTH_URL=http://localhost:3000 \
+  -e NEXTAUTH_SECRET=replace-me \
+  -e BACKEND_API_URL=http://host.docker.internal:8000/api/v1 \
+  rms-frontend
+```
+
+For API + DB + UI together, use the root `docker-compose.yml`.
+
 ## Environment Variables
 
 Create `.env.local` for local overrides (not committed). The committed `.env.development` and `.env.production` files contain non-secret defaults.
@@ -86,7 +104,8 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `NEXTAUTH_URL` | Yes | Canonical URL of this app (e.g. `http://localhost:3000`) |
 | `NEXTAUTH_SECRET` | Yes | Secret for signing NextAuth JWTs — generate with `openssl rand -base64 32` |
 | `NEXT_PUBLIC_FRONTEND_URL` | Yes | Public base URL of this app |
-| `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL (e.g. `http://localhost:8000/api/v1`) |
+| `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL for the **browser** (e.g. `http://localhost:8000/api/v1`) |
+| `BACKEND_API_URL` | No | Server-side API base URL (Docker internal hostname). Falls back to `NEXT_PUBLIC_BACKEND_API` |
 | `NEXT_PUBLIC_MAX_HOURS` | No | Default work hours per day (default `8`) |
 | `NEXT_PUBLIC_FETCH_LOCK_INTERVAL` | No | Timesheet lock poll interval in ms (default `60000`) |
 | `NEXT_PUBLIC_LAST_DATE` | No | Day-of-month used by the admin lock schedule helper (default `25`) |
