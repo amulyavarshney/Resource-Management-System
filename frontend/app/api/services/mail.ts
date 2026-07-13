@@ -1,8 +1,20 @@
 import axios from "axios";
 
-const URL = process.env.NEXT_PUBLIC_ESB_API_URL;
+export type MailSendRequest = {
+	subject: string;
+	messageBody: string;
+	priority?: string;
+	recipients: string[];
+	cc?: string[];
+	bcc?: string[];
+	attachments?: string[];
+};
 
 class MailService {
+	/**
+	 * Send mail via the Next.js `/api/mail` proxy so ESB credentials stay
+	 * server-side (never NEXT_PUBLIC_* in the browser bundle).
+	 */
 	async send(
 		subject: string,
 		messageBody: string,
@@ -12,36 +24,17 @@ class MailService {
 		bcc: string[],
 		attachments: string[]
 	) {
-		const data = {
-			Subject: subject,
-			MessageBody: messageBody,
-			Priority: priority,
-			Recipients: recipients,
-			CC: cc,
-			BCC: bcc,
-			From: process.env.NEXT_PUBLIC_ESB_MAIL_FROM,
-			Sender: process.env.NEXT_PUBLIC_ESB_MAIL_SENDER,
-			ReplyTo: process.env.NEXT_PUBLIC_ESB_MAIL_REPLYTO,
-			ErrorReportDetails: false,
-			SaveAttachmentsExternal: false,
-			Attachments: attachments,
-			Callback: {
-				positiveMethod: "Post",
-				positiveUrl: process.env.NEXT_PUBLIC_ESB_CALLBACK_POSITIVE_URL,
-				positiveHeaders: [],
-				negativeMethod: "Get",
-				negativeUrl: process.env.NEXT_PUBLIC_ESB_CALLBACK_NEGATIVE_URL,
-				negativeHeaders: [],
-			},
+		const body: MailSendRequest = {
+			subject,
+			messageBody,
+			priority,
+			recipients,
+			cc,
+			bcc,
+			attachments,
 		};
 
-		const headers = {
-			"Content-Type": "application/json",
-			"Cache-Control": "no-cache",
-			"EsbApi-Subscription-Key": process.env.NEXT_PUBLIC_ESB_SUB_KEY,
-		};
-
-		await axios.post(URL!, JSON.stringify(data), { headers });
+		await axios.post("/api/mail", body);
 	}
 }
 
