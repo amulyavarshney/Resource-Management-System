@@ -39,5 +39,8 @@ async def google_login(
     if not settings.internal_auth_secret or not hmac.compare_digest(
         x_internal_secret, settings.internal_auth_secret
     ):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing internal secret")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing internal secret",
+        )
     return await AuthService(db).google_login(body)
