@@ -47,11 +47,11 @@ export default function Login({ updateIsLogin }: LoginProps) {
 					Sign in to your account
 				</h2>
 				<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
-					To test, login using email address:{" "}
-					<span className="font-bold">developer@rms.com</span>
+					To test, seed demo accounts then login with{" "}
+					<span className="font-bold">demo.developer@rms.example</span>
 				</h3>
 				<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
-					password: <span className="font-bold">Developer</span>
+					password: <span className="font-bold">DemoPass1!</span>
 				</h3>
 			</div>
 			<div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">

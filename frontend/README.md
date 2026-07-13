@@ -75,7 +75,10 @@ npm start
 ```sh
 npm run lint       # ESLint
 npm run format     # Prettier
+npm run test:e2e   # Playwright (API must be on :8000; builds/starts UI via config)
 ```
+
+Requires a running backend (`uvicorn app.main:app --port 8000`). CI starts both automatically.
 
 ### Docker
 
