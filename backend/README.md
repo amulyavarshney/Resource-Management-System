@@ -147,6 +147,8 @@ docker compose up --build
 # Swagger: http://localhost:8000/swagger (development mode only)
 ```
 
+The container entrypoint runs `alembic upgrade head` before starting uvicorn.
+
 For the full stack including the Next.js UI, use the root `docker-compose.yml`.
 
 ## Environment Variables

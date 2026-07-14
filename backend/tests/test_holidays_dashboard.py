@@ -92,8 +92,8 @@ async def test_personal_holiday_self_create(client: AsyncClient):
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_dashboard_overview(client: AsyncClient):
-    token = await _token(client, "dash1@example.com")
+async def test_dashboard_overview(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "dash1@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     resp = await client.get("/api/v1/dashboard/2024/6", headers=headers)
     assert resp.status_code == 200
@@ -106,8 +106,8 @@ async def test_dashboard_overview(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_dashboard_user(client: AsyncClient):
-    token = await _token(client, "dash2@example.com")
+async def test_dashboard_user(client: AsyncClient, db_session):
+    token = await _token_as_admin(client, db_session, "dash2@example.com")
     headers = {"Authorization": f"Bearer {token}"}
     users = (await client.get("/api/v1/user", headers=headers)).json()
     uid = next(u["id"] for u in users if u["email"] == "dash2@example.com")

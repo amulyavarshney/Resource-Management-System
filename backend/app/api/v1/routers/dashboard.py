@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Query
 
-from app.core.deps import AllAuthenticated, DbSession
+from app.core.deps import DbSession, ManagementAndAbove
 from app.models.enums import Department, Region
 from app.schemas.dashboard import DashboardResponse, ProjectDashboardResponse, UserDashboardResponse
 from app.services.dashboard_service import DashboardService
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"], dependencies=[AllAuthenticated])
+router = APIRouter(prefix="/dashboard", tags=["dashboard"], dependencies=[ManagementAndAbove])
 
 # ── Static-prefix routes MUST come before parametric /{year}/{month} routes ──
 

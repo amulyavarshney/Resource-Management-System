@@ -3,12 +3,13 @@ from datetime import date
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import DuplicateEntityException, OperationNotSupportedException
+from app.core.exceptions import OperationNotSupportedException, RecordNotFoundException
 from app.models.enums import LeaveSession, LeaveType
 from app.models.holiday import Holiday
 from app.models.leave import Leave
 from app.schemas.common import MessageResponse
 from app.schemas.leave import LeaveCreate, LeaveResponse
+from app.services.dashboard_service import DashboardService
 from app.utils.enum_utils import parse_by_name_or_description
 
 
@@ -40,7 +41,8 @@ class LeaveService:
         rows = list((await self._db.execute(stmt)).scalars().all())
         return [LeaveResponse.model_validate(r) for r in rows]
 
-    async def create(self, data: LeaveCreate) -> LeaveResponse:
+    async def create(self, data: LeaveCreate, *, bypass_lock: bool = False) -> LeaveResponse:
+        await self._ensure_unlocked(bypass_lock=bypass_lock)
         leave_type = parse_by_name_or_description(LeaveType, data.type)
         leave_session = parse_by_name_or_description(LeaveSession, data.session)
 
@@ -55,31 +57,52 @@ class LeaveService:
             await self._db.refresh(existing)
             return LeaveResponse.model_validate(existing)
 
-        leave = Leave(date=data.date, type=int(leave_type), session=int(leave_session), user_id=data.user_id)
+        leave = Leave(
+            date=data.date,
+            type=int(leave_type),
+            session=int(leave_session),
+            user_id=data.user_id,
+        )
         self._db.add(leave)
         await self._db.flush()
         await self._db.refresh(leave)
         return LeaveResponse.model_validate(leave)
 
-    async def create_bulk(self, leaves: list[LeaveCreate]) -> MessageResponse:
+    async def create_bulk(
+        self, leaves: list[LeaveCreate], *, bypass_lock: bool = False
+    ) -> MessageResponse:
         for data in leaves:
-            await self.create(data)
+            await self.create(data, bypass_lock=bypass_lock)
         return MessageResponse(message="Leaves added successfully.")
 
-    async def delete(self, dt: date, user_id: int) -> MessageResponse:
+    async def delete(
+        self, dt: date, user_id: int, *, bypass_lock: bool = False
+    ) -> MessageResponse:
+        await self._ensure_unlocked(bypass_lock=bypass_lock)
         stmt = select(Leave).where(Leave.date == dt, Leave.user_id == user_id)
         leave = (await self._db.execute(stmt)).scalar_one_or_none()
         if leave is None:
-            from app.core.exceptions import RecordNotFoundException
-            raise RecordNotFoundException(f"Could not find leave for date {dt} and user {user_id}")
+            raise RecordNotFoundException(
+                f"Could not find leave for date {dt} and user {user_id}"
+            )
         await self._db.delete(leave)
         await self._db.flush()
-        return MessageResponse(message=f"Leave on date {dt} for user with userId {user_id} is deleted successfully.")
+        return MessageResponse(
+            message=f"Leave on date {dt} for user with userId {user_id} is deleted successfully."
+        )
 
     async def reset(self) -> MessageResponse:
         await self._db.execute(delete(Leave))
         await self._db.flush()
         return MessageResponse(message="Leaves table reset successfully.")
+
+    async def _ensure_unlocked(self, *, bypass_lock: bool) -> None:
+        if bypass_lock:
+            return
+        if await DashboardService(self._db).get_lock(None, None):
+            raise OperationNotSupportedException(
+                "Timesheet is locked. Contact an administrator to unlock it."
+            )
 
     async def _validate_leave_date(self, dt: date) -> None:
         if dt.weekday() in (5, 6):  # Saturday=5, Sunday=6

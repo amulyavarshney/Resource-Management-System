@@ -68,6 +68,7 @@ def require_self_or_admin(path_param: str = "id"):
 
 
 SelfOrAdmin = require_self_or_admin("id")
+SelfOrAdminUserId = require_self_or_admin("user_id")
 
 
 def require_self(path_param: str = "id"):
@@ -98,3 +99,13 @@ def assert_self_or_admin(payload: dict, target_user_id: int) -> None:
     if str(payload.get("id")) == str(target_user_id):
         return
     assert_admin_or_developer(payload)
+
+
+def assert_management_and_above(payload: dict) -> None:
+    if role_from_payload(payload) not in (
+        Role.Management,
+        Role.Executive,
+        Role.Admin,
+        Role.Developer,
+    ):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
