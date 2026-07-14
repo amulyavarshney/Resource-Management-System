@@ -132,6 +132,14 @@ jobs:
           done
           exit 1
 
+      - name: Seed demo accounts
+        working-directory: backend
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///./e2e.db
+          JWT_SECRET: e2e-secret-key-at-least-32-characters-long
+          APP_ENV: development
+        run: python -m scripts.seed_demo
+
       - name: Build frontend
         working-directory: frontend
         env:

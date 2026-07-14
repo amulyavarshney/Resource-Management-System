@@ -22,23 +22,42 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${DB_SA_PASSWORD:?DB_SA_PASSWORD must be set — no default password is provided}"
+      MSSQL_HOST: db
+      MSSQL_DATABASE: rms
+    volumes:
+      - ./backend/scripts/mssql_ensure_db.sh:/mssql_ensure_db.sh:ro
+    entrypoint: ["/bin/bash", "/mssql_ensure_db.sh"]
+    restart: "no"
+
   api:
     build: ./backend
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: "${DATABASE_URL:?Set DATABASE_URL pointing at host 'db'}"
+      DATABASE_URL: "${DATABASE_URL:?Set DATABASE_URL pointing at host 'db' and database 'rms'}"
       JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set}"
       JWT_ALGORITHM: "${JWT_ALGORITHM:-HS512}"
       JWT_EXPIRE_HOURS: "${JWT_EXPIRE_HOURS:-2}"
+      JWT_REMEMBER_EXPIRE_HOURS: "${JWT_REMEMBER_EXPIRE_HOURS:-336}"
       INTERNAL_AUTH_SECRET: "${INTERNAL_AUTH_SECRET:-}"
+      ALLOW_SELF_REGISTRATION: "${ALLOW_SELF_REGISTRATION:-true}"
+      GOOGLE_DEFAULT_DEPARTMENT: "${GOOGLE_DEFAULT_DEPARTMENT:-1}"
+      GOOGLE_DEFAULT_REGION: "${GOOGLE_DEFAULT_REGION:-1}"
       ALLOWED_ORIGINS: '["http://localhost:3000"]'
       APP_ENV: "${APP_ENV:-production}"
       LOG_LEVEL: "${LOG_LEVEL:-info}"
       RATE_LIMIT_ENABLED: "${RATE_LIMIT_ENABLED:-true}"
     depends_on:
-      db:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
       interval: 30s
@@ -65,6 +84,7 @@ services:
       INTERNAL_AUTH_SECRET: "${INTERNAL_AUTH_SECRET:-}"
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      NEXT_PUBLIC_ALLOW_SELF_REGISTRATION: "${NEXT_PUBLIC_ALLOW_SELF_REGISTRATION:-true}"
     depends_on:
       api:
         condition: service_healthy

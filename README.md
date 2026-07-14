@@ -107,10 +107,14 @@ Full stack (SQL Server + API + Next.js UI) from the repo root:
 
 ```sh
 cp .env.example .env   # fill JWT_SECRET, NEXTAUTH_SECRET, DB_SA_PASSWORD
+                       # DATABASE_URL must use database `rms` (not `master`)
 docker compose up --build
 # UI:  http://localhost:3000
 # API: http://localhost:8000
 ```
+
+Compose runs `db-init` to `CREATE DATABASE rms` after SQL Server is healthy,
+then the API applies Alembic migrations on start.
 
 API + database only: see [backend/README.md § Docker](backend/README.md#docker).
 Frontend image alone: see [frontend/README.md § Docker](frontend/README.md#docker).

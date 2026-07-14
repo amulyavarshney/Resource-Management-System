@@ -12,5 +12,7 @@ build/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-htmlcov/
+.htmlcov/
 .coverage
+*.db
+e2e.db

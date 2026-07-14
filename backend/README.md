@@ -152,13 +152,15 @@ uvicorn app.main:app --reload
 API + SQL Server only (from `backend/`):
 
 ```sh
-cp .env.example .env   # fill in JWT_SECRET at minimum; set DATABASE_URL host to `db`
+cp .env.example .env   # fill in JWT_SECRET + DB_SA_PASSWORD; keep DATABASE_URL host=`db` and database=`rms`
 docker compose up --build
 # API:     http://localhost:8000
 # Swagger: http://localhost:8000/swagger (development mode only)
 ```
 
-The container entrypoint runs `alembic upgrade head` before starting uvicorn.
+A one-shot `db-init` service creates the `rms` database on first boot
+(SQL Server images do not auto-create app databases). The API entrypoint
+then runs `alembic upgrade head` before uvicorn.
 
 For the full stack including the Next.js UI, use the root `docker-compose.yml`.
 
