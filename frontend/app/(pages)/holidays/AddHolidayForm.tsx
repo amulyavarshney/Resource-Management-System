@@ -3,6 +3,7 @@ import { useState } from "react";
 import holidayService, {
 	HolidayBase,
 	HolidayType,
+	HOLIDAY_TYPE_NAMES,
 } from "@/app/api/services/holiday";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
@@ -95,19 +96,16 @@ const AddHolidayForm = ({
 						<select
 							className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							id="type"
-							value={holiday.type}
+							value={Number(holiday.type)}
 							onChange={(e) =>
 								setHoliday({
 									...holiday,
-									type: HolidayType[e.target.value as keyof typeof HolidayType],
+									type: Number(e.target.value) as HolidayType,
 								})
 							}
 						>
-							{Object.keys(HolidayType).map((key) => (
-								<option
-									key={key}
-									value={HolidayType[key as keyof typeof HolidayType]}
-								>
+							{HOLIDAY_TYPE_NAMES.map((key) => (
+								<option key={key} value={HolidayType[key]}>
 									{key}
 								</option>
 							))}

@@ -62,3 +62,13 @@ async def test_metrics_endpoint(client: AsyncClient):
     body = resp.text
     assert "rms_http_requests_total" in body
     assert "rms_http_request_duration_seconds" in body
+
+
+@pytest.mark.asyncio
+async def test_validation_error_problem_shape(client: AsyncClient):
+    resp = await client.post("/api/v1/auth/login", json={"email": "not-an-email"})
+    assert resp.status_code == 422
+    body = resp.json()
+    assert body["title"] == "Validation error"
+    assert body["status"] == 422
+    assert "email" in body["detail"].lower()

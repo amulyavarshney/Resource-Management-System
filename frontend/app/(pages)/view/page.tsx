@@ -73,21 +73,18 @@ export default function Timesheet() {
 					year,
 					month,
 				};
-				const weekData = await weekDataService.getWorkHour(key);
-				const totalHours = Object.values(weekData).reduce(
-					(acc, val) => acc + (val || 0),
-					0
-				);
+				const hours = await weekDataService.getWorkHourArray(key);
+				const totalHours = hours.reduce((acc, val) => acc + val, 0);
 				fetchedRowData.push({
 					project_id: project.id,
 					project_number: project.number,
 					project_title: project.title,
-					week1Hours: weekData.week1,
-					week2Hours: weekData.week2,
-					week3Hours: weekData.week3,
-					week4Hours: weekData.week4,
-					week5Hours: weekData.week5 ?? 0,
-					totalHours: totalHours,
+					week1Hours: hours[0],
+					week2Hours: hours[1],
+					week3Hours: hours[2],
+					week4Hours: hours[3],
+					week5Hours: hours[4],
+					totalHours,
 				});
 			}
 

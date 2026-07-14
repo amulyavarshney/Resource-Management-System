@@ -18,56 +18,46 @@ export function getClassName(
 		const type = holidays.find(
 			(holiday) => new Date(holiday.date).toDateString() === date.toDateString()
 		)?.type;
-		if (type)
-			switch (HolidayType[type as unknown as keyof typeof HolidayType]) {
-				case HolidayType.Compulsory:
-					return "text-white rounded-full bg-yellow-400 hover:bg-yellow-600"; // Yellow for Casual
-				case HolidayType.Festival:
-					return "text-white rounded-full bg-purple-400 hover:bg-purple-600"; // Purple for Planned
-				default:
-					return "";
-			}
+		switch (Number(type)) {
+			case HolidayType.Compulsory:
+				return "text-white rounded-full bg-yellow-400 hover:bg-yellow-600";
+			case HolidayType.Festival:
+				return "text-white rounded-full bg-purple-400 hover:bg-purple-600";
+			default:
+				return "";
+		}
 	} else if (isLeave) {
 		const leave = savedLeaves.find(
 			(leave) => new Date(leave.date).toDateString() === date.toDateString()
 		);
 		let className = "text-white rounded-full shadow-md ";
-		if (leave?.type)
-			switch (LeaveType[leave.type as unknown as keyof typeof LeaveType]) {
-				case LeaveType.Casual:
-					className += "bg-pink-400 hover:bg-pink-600 "; // Pink for Casual
-					break;
-				case LeaveType.Planned:
-					className += "bg-green-400 hover:bg-green-600 "; // Green for Planned
-					break;
-				case LeaveType.Sick:
-					className += "bg-orange-400 hover:bg-orange-600 "; // Orange for Sick
-					break;
-				case LeaveType.Unplanned:
-					className += "bg-red-400 hover:bg-red-600 "; // Red for UnPlanned
-					break;
-				default:
-					break;
-			}
-		if (leave?.session)
-			switch (
-				LeaveSession[leave.session as unknown as keyof typeof LeaveSession]
-			) {
-				case LeaveSession.FullDay:
-					className += "border-2 border-gray-800 dark:border-gray-200"; // consider whole cell
-					break;
-				case LeaveSession.HalfDay:
-					className += "border-2 border-gray-800 dark:border-gray-200 border-dashed"; // consider half region
-					break;
-				// case LeaveSession.FirstHalf:
-				// 	className += "border-2 border-black border-dashed"; // consider top half region
-				// 	break;
-				// case LeaveSession.SecondHalf:
-				// 	className += "border-2 border-black border-dashed"; // consider bottom half region
-				// 	break;
-				default:
-					break;
-			}
+		switch (Number(leave?.type)) {
+			case LeaveType.Casual:
+				className += "bg-pink-400 hover:bg-pink-600 ";
+				break;
+			case LeaveType.Planned:
+				className += "bg-green-400 hover:bg-green-600 ";
+				break;
+			case LeaveType.Sick:
+				className += "bg-orange-400 hover:bg-orange-600 ";
+				break;
+			case LeaveType.Unplanned:
+				className += "bg-red-400 hover:bg-red-600 ";
+				break;
+			default:
+				break;
+		}
+		switch (Number(leave?.session)) {
+			case LeaveSession.FullDay:
+				className += "border-2 border-gray-800 dark:border-gray-200";
+				break;
+			case LeaveSession.HalfDay:
+				className +=
+					"border-2 border-gray-800 dark:border-gray-200 border-dashed";
+				break;
+			default:
+				break;
+		}
 		return className;
 	}
 	return isWeekend ? "font-medium text-red-600 dark:text-red-400" : "";

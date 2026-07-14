@@ -25,11 +25,14 @@ export default function Dashboard() {
 	const { year, month } = useDate();
 	const { search } = useSearch();
 
-	function toLowerCase(input: number | string): number | string {
+	function toLowerCase(input: unknown): number | string {
 		if (typeof input === "string") {
 			return input.toLowerCase();
 		}
-		return input;
+		if (typeof input === "number") {
+			return input;
+		}
+		return String(input ?? "").toLowerCase();
 	}
 
 	const loadAndSortProjectDashboard = async () => {

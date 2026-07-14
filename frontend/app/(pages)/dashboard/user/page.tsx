@@ -30,13 +30,14 @@ export default function Dashboard() {
 	const { year, month } = useDate();
 	const { search } = useSearch();
 
-	function toLowerCase(
-		input: boolean | number | string
-	): boolean | number | string {
+	function toLowerCase(input: unknown): boolean | number | string {
 		if (typeof input === "string") {
 			return input.toLowerCase();
 		}
-		return input;
+		if (typeof input === "boolean" || typeof input === "number") {
+			return input;
+		}
+		return String(input ?? "").toLowerCase();
 	}
 
 	const loadAndSortUserDashboard = async () => {
@@ -69,7 +70,7 @@ export default function Dashboard() {
 			total.week2Hours += data.total_week2_hours;
 			total.week3Hours += data.total_week3_hours;
 			total.week4Hours += data.total_week4_hours;
-			total.week5Hours += data.total_week5_hours;
+			total.week5Hours += data.total_week5_hours ?? 0;
 			total.totalHours += data.totalHours;
 		});
 		setTotals(total);

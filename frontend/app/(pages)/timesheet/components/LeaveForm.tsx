@@ -6,6 +6,10 @@ import leaveService, {
 	Leave,
 	LeaveType,
 	LeaveSession,
+	LEAVE_TYPE_NAMES,
+	LEAVE_TYPE_LABELS,
+	LEAVE_SESSION_NAMES,
+	LEAVE_SESSION_LABELS,
 } from "@/app/api/services/leave";
 
 export default function LeaveForm({ onClose }: { onClose: () => void }) {
@@ -115,24 +119,23 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 							<select
 								id="type"
 								key={leave.type}
-								value={Object.keys(LeaveType).find(
-									(key) =>
-										LeaveType[key as keyof typeof LeaveType] ===
-										leave.type
-								)}
+								value={
+									LEAVE_TYPE_NAMES.find(
+										(key) => LeaveType[key] === Number(leave.type)
+									) ?? ""
+								}
 								onChange={(e) =>
 									setLeave({
 										...leave,
-										type:
-											LeaveType[e.target.value as keyof typeof LeaveType],
+										type: LeaveType[e.target.value as keyof typeof LeaveType],
 									})
 								}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							>
 								<option value="">Select Leave Type</option>
-								{Object.entries(LeaveType).map(([key, value]) => (
+								{LEAVE_TYPE_NAMES.map((key) => (
 									<option key={key} value={key}>
-										{value}
+										{LEAVE_TYPE_LABELS[LeaveType[key]]}
 									</option>
 								))}
 							</select>
@@ -147,11 +150,11 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 							<select
 								id="session"
 								key={leave.session}
-								value={Object.keys(LeaveSession).find(
-									(key) =>
-										LeaveSession[key as keyof typeof LeaveSession] ===
-										leave.session
-								)}
+								value={
+									LEAVE_SESSION_NAMES.find(
+										(key) => LeaveSession[key] === Number(leave.session)
+									) ?? ""
+								}
 								onChange={(e) =>
 									setLeave({
 										...leave,
@@ -162,9 +165,9 @@ export default function LeaveForm({ onClose }: { onClose: () => void }) {
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							>
 								<option value="">Select Session</option>
-								{Object.entries(LeaveSession).map(([key, value]) => (
+								{LEAVE_SESSION_NAMES.map((key) => (
 									<option key={key} value={key}>
-										{value}
+										{LEAVE_SESSION_LABELS[LeaveSession[key]]}
 									</option>
 								))}
 							</select>

@@ -105,7 +105,7 @@ const DashboardReport = ({ year, month }: ExportFileProps) => {
 				weekTotal.week2 += total_week2_hours;
 				weekTotal.week3 += total_week3_hours;
 				weekTotal.week4 += total_week4_hours;
-				weekTotal.week5 += total_week5_hours;
+				weekTotal.week5 += total_week5_hours ?? 0;
 			}
 
 			const header: Header = {

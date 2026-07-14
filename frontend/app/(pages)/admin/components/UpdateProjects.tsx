@@ -50,7 +50,15 @@ export default function UpdateProjects() {
 				.reduce((acc, value) => acc | Region[value as keyof typeof Region], 0);
 			selectedProject.region = region;
 			selectedProject.id = selectedProjectId;
-			setProject(selectedProject);
+			setProject({
+				id: selectedProject.id,
+				number: selectedProject.number,
+				title: selectedProject.title,
+				business: selectedProject.business,
+				department: selectedProject.department,
+				region: selectedProject.region,
+				description: selectedProject.description,
+			});
 		}
 	};
 
@@ -108,7 +116,7 @@ export default function UpdateProjects() {
 								type="text"
 								name="number"
 								placeholder="Project Number"
-								value={project.number}
+								value={project.number ?? ""}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -119,7 +127,7 @@ export default function UpdateProjects() {
 								type="text"
 								name="title"
 								placeholder="Project Title"
-								value={project.title}
+								value={project.title ?? ""}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -130,7 +138,7 @@ export default function UpdateProjects() {
 								type="text"
 								name="business"
 								placeholder="Business"
-								value={project.business}
+								value={project.business ?? ""}
 								onChange={handleChange}
 								className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 							/>
@@ -207,7 +215,7 @@ export default function UpdateProjects() {
 							Project Description
 							<textarea
 								placeholder="Project Description"
-								value={project.description}
+								value={project.description ?? ""}
 								onChange={(e) =>
 									setProject({ ...project, description: e.target.value })
 								}

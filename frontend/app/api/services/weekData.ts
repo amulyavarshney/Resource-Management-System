@@ -1,12 +1,8 @@
 import http from "./httpInstance";
+import type { ApiWeekData, ApiWeekDataUpdate } from "../generated";
 
-export type WeekData = {
-	week1: number;
-	week2: number;
-	week3: number;
-	week4: number;
-	week5?: number;
-};
+/** Hours payload — matches OpenAPI WeekDataUpdate / WeekDataResponse weeks. */
+export type WeekData = ApiWeekDataUpdate;
 
 export type WeekDataKey = {
 	user_id: number;
@@ -16,60 +12,58 @@ export type WeekDataKey = {
 };
 
 export type TimesheetRow = {
-    project_id: number;
-    project_number: string;
-    project_title: string;
-    week1Hours: number;
-    week2Hours: number;
-    week3Hours: number;
-    week4Hours: number;
-    week5Hours?: number;
-    totalHours: number;
+	project_id: number;
+	project_number: string;
+	project_title: string;
+	week1Hours: number;
+	week2Hours: number;
+	week3Hours: number;
+	week4Hours: number;
+	week5Hours?: number;
+	totalHours: number;
+};
+
+function isAxiosNotFound(error: unknown): boolean {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"response" in error &&
+		(error as { response?: { status?: number } }).response?.status === 404
+	);
 }
 
 class WeekDataService {
-	async getWorkHours() {
-		try {
-			const response = await http.get<WeekData[]>("/weekData");
-			return response.data;
-		} catch (error) {
-			console.error("Error while fetching all work hours", error);
-			throw error;
-		}
-	}
-
-	async getWorkHoursByYearAndMonth(year: number, month: number) {
-		try {
-			const response = await http.get<WeekData[]>(`/weekData/${year}/${month}`);
-			return response.data;
-		} catch (error) {
-			console.error(
-				`Error while fetching week data for ${month}, ${year}`,
-				error
-			);
-			return {
-				week1: 0,
-				week2: 0,
-				week3: 0,
-				week4: 0,
-				week5: 0,
-			};
-		}
-	}
-
-	async getWorkHour(key: WeekDataKey) {
-		const endPointPath = this.constructEndPoint(key);
-		const response = await http.get<WeekData>(endPointPath);
+	async getWorkHours(): Promise<ApiWeekData[]> {
+		const response = await http.get<ApiWeekData[]>("/weekData");
 		return response.data;
 	}
 
-	async getWorkHourArray(key: WeekDataKey) {
+	async getWorkHoursByYearAndMonth(
+		year: number,
+		month: number
+	): Promise<ApiWeekData[]> {
+		const response = await http.get<ApiWeekData[]>(
+			`/weekData/${year}/${month}`
+		);
+		return response.data;
+	}
+
+	async getWorkHour(key: WeekDataKey): Promise<ApiWeekData> {
+		const response = await http.get<ApiWeekData>(this.constructEndPoint(key));
+		return response.data;
+	}
+
+	async getWorkHourArray(key: WeekDataKey): Promise<number[]> {
 		try {
-			const endPointPath = this.constructEndPoint(key);
-			const response = await http.get<WeekData>(endPointPath);
-			response.data.week5 ??= 0;
-			return this.objectToArray(response.data);
+			const response = await http.get<ApiWeekData>(this.constructEndPoint(key));
+			const data = response.data;
+			data.week5 ??= 0;
+			return this.objectToArray(data);
 		} catch (error) {
+			// Missing row is normal for a new project/month — treat as zeros.
+			if (isAxiosNotFound(error)) {
+				return [0, 0, 0, 0, 0];
+			}
 			console.error(
 				`Error while fetching work hour for key ${JSON.stringify(key)}`,
 				error
@@ -78,40 +72,36 @@ class WeekDataService {
 		}
 	}
 
-	async addWorkHour(key: WeekDataKey, workHour: WeekData) {
-		try {
-			const endPointPath = this.constructEndPoint(key);
-			const response = await http.put<WeekData>(endPointPath, workHour);
-			return response.data;
-		} catch (error) {
-			console.error(
-				`Error while adding work hour for key ${JSON.stringify(key)}`,
-				error
-			);
-			throw error;
-		}
+	async addWorkHour(
+		key: WeekDataKey,
+		workHour: WeekData
+	): Promise<ApiWeekData> {
+		const response = await http.put<ApiWeekData>(
+			this.constructEndPoint(key),
+			workHour
+		);
+		return response.data;
 	}
 
-	async removeWorkHour(key: WeekDataKey) {
-		try {
-			const endPointPath = this.constructEndPoint(key);
-			const response = await http.delete<WeekData>(endPointPath);
-			return response.data;
-		} catch (error) {
-			console.error(
-				`Error while removing work hour for key ${JSON.stringify(key)}`,
-				error
-			);
-			throw error;
-		}
+	async removeWorkHour(key: WeekDataKey): Promise<ApiWeekData> {
+		const response = await http.delete<ApiWeekData>(
+			this.constructEndPoint(key)
+		);
+		return response.data;
 	}
 
 	private constructEndPoint(key: WeekDataKey) {
 		return `/weekData/${key.user_id}/${key.project_id}/${key.year}/${key.month}`;
 	}
 
-	private objectToArray(obj: WeekData): number[] {
-		return Object.values(obj);
+	private objectToArray(obj: ApiWeekData): number[] {
+		return [
+			obj.week1 ?? 0,
+			obj.week2 ?? 0,
+			obj.week3 ?? 0,
+			obj.week4 ?? 0,
+			obj.week5 ?? 0,
+		];
 	}
 }
 

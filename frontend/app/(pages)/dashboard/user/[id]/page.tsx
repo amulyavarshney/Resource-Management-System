@@ -115,7 +115,7 @@ const UserDetail = ({ params }: { params: { id: number } }) => {
 					<div className="flex-1 border-b border-gray-300 dark:border-gray-600"></div>
 				</div>
 				<div className="px-6 flex flex-wrap justify-center">
-					{data?.projects.map((value, index) => (
+					{(data?.projects ?? []).map((value, index) => (
 						<div
 							key={index}
 							className="m-4 bg-gray-200 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 shadow-md rounded-lg overflow-hidden max-w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl"

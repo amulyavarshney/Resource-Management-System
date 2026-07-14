@@ -47,25 +47,33 @@ export default function ConsolidatedReport({ year, month }: ExportFileProps) {
 					total_work_hours,
 					users: projectUsers,
 				} = projectData;
-				for (const user of projectUsers) {
+				for (const user of projectUsers ?? []) {
 					const {
 						is_external,
-						week1_hours,
-						week2_hours,
-						week3_hours,
-						week4_hours,
-						week5_hours,
+						week1_hours = 0,
+						week2_hours = 0,
+						week3_hours = 0,
+						week4_hours = 0,
+						week5_hours = 0,
 					} = user;
 					const fullName = userService.getFullName(user);
 					let extHours = 0,
 						intHours = 0;
 					if (is_external) {
 						extHours =
-							week1_hours + week2_hours + week3_hours + week4_hours + week5_hours;
+							(week1_hours ?? 0) +
+							(week2_hours ?? 0) +
+							(week3_hours ?? 0) +
+							(week4_hours ?? 0) +
+							(week5_hours ?? 0);
 						totalExtHours += extHours;
 					} else {
 						intHours =
-							week1_hours + week2_hours + week3_hours + week4_hours + week5_hours;
+							(week1_hours ?? 0) +
+							(week2_hours ?? 0) +
+							(week3_hours ?? 0) +
+							(week4_hours ?? 0) +
+							(week5_hours ?? 0);
 						totalIntHours += intHours;
 					}
 					consolidatedReport.push({

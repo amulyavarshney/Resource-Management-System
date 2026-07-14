@@ -7,6 +7,24 @@ export const runtime = "nodejs";
 const MAX_RECIPIENTS = 5;
 const MAX_ATTACHMENTS = 3;
 const MAX_ATTACHMENT_CHARS = 8_000_000; // ~6MB base64
+const MAIL_RATE_LIMIT_WINDOW_MS = 60_000;
+const MAIL_RATE_LIMIT_MAX = 5;
+
+/** Per-process sliding window keyed by authenticated email. */
+const mailHits = new Map<string, number[]>();
+
+function allowMail(email: string): boolean {
+	const now = Date.now();
+	const windowStart = now - MAIL_RATE_LIMIT_WINDOW_MS;
+	const recent = (mailHits.get(email) ?? []).filter((t) => t > windowStart);
+	if (recent.length >= MAIL_RATE_LIMIT_MAX) {
+		mailHits.set(email, recent);
+		return false;
+	}
+	recent.push(now);
+	mailHits.set(email, recent);
+	return true;
+}
 
 type MailBody = {
 	subject: string;
@@ -42,6 +60,13 @@ export async function POST(req: NextRequest) {
 	const sessionEmail = session?.user?.email?.trim().toLowerCase();
 	if (!session?.user || !sessionEmail) {
 		return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+	}
+
+	if (!allowMail(sessionEmail)) {
+		return NextResponse.json(
+			{ detail: "Too many mail requests. Try again shortly." },
+			{ status: 429 }
+		);
 	}
 
 	const cfg = esbConfig();

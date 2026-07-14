@@ -2,11 +2,17 @@ import dashboardService, { UserDashboardViewModel } from "./dashboard";
 import { Project } from "./project";
 import userService, { User } from "./user";
 
-export function toLowerCase(input: number | string): number | string {
+export function toLowerCase(input: number | string | boolean | unknown): number | string {
+	if (typeof input === "boolean") {
+		return input ? "true" : "false";
+	}
 	if (typeof input === "string") {
 		return input.toLowerCase();
 	}
-	return input;
+	if (typeof input === "number") {
+		return input;
+	}
+	return String(input ?? "").toLowerCase();
 }
 
 /** Local calendar date as YYYY-MM-DD for FastAPI `date` query/path params. */
@@ -22,8 +28,16 @@ export function sortProjects(
 	sortConfig: { column: string; isAscending: boolean }
 ) {
 	return projects.sort((a, b) => {
-		const aValue = toLowerCase(a[sortConfig.column]);
-		const bValue = toLowerCase(b[sortConfig.column]);
+		const aValue = toLowerCase(
+			(a as Record<string, string | number | null | undefined>)[sortConfig.column] as
+				| string
+				| number
+		);
+		const bValue = toLowerCase(
+			(b as Record<string, string | number | null | undefined>)[sortConfig.column] as
+				| string
+				| number
+		);
 		return sortConfig.isAscending
 			? aValue < bValue
 				? -1

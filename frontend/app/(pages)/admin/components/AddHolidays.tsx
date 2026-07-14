@@ -3,6 +3,7 @@ import ImportFromExcel, { AddField } from "./ImportFromExcel";
 import holidayService, {
 	HolidayBase,
 	HolidayType,
+	HOLIDAY_TYPE_NAMES,
 } from "@/app/api/services/holiday";
 import { useSession } from "next-auth/react";
 
@@ -55,20 +56,17 @@ export default function AddHolidays() {
 					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Type
 						<select
-							value={holiday.type}
+							value={Number(holiday.type)}
 							onChange={(e) =>
 								setHoliday({
 									...holiday,
-									type: HolidayType[e.target.value as keyof typeof HolidayType],
+									type: Number(e.target.value) as HolidayType,
 								})
 							}
 							className="mt-1 block w-full py-2 px-3 sm:text-sm border border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-gray-300 dark:focus:border-gray-300"
 						>
-							{Object.keys(HolidayType).map((key) => (
-								<option
-									value={HolidayType[key as keyof typeof HolidayType]}
-									key={key}
-								>
+							{HOLIDAY_TYPE_NAMES.map((key) => (
+								<option value={HolidayType[key]} key={key}>
 									{key}
 								</option>
 							))}

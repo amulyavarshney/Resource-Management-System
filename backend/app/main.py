@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -149,6 +150,16 @@ async def handle_domain_invariant(request: Request, exc: DomainInvariantExceptio
 @app.exception_handler(ValueError)
 async def handle_value_error(request: Request, exc: ValueError) -> JSONResponse:
     return _problem(status.HTTP_422_UNPROCESSABLE_ENTITY, "Validation error", str(exc))
+
+
+@app.exception_handler(RequestValidationError)
+async def handle_request_validation(request: Request, exc: RequestValidationError) -> JSONResponse:
+    errors = exc.errors()
+    detail = "; ".join(
+        f"{'.'.join(str(loc) for loc in err.get('loc', ()))}: {err.get('msg', 'invalid')}"
+        for err in errors
+    ) or "Request validation failed"
+    return _problem(status.HTTP_422_UNPROCESSABLE_ENTITY, "Validation error", detail)
 
 
 @app.exception_handler(Exception)

@@ -85,7 +85,7 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 					<div className="flex-1 border-b border-gray-300 dark:border-gray-600"></div>
 				</div>
 				<div className="px-3 flex flex-wrap justify-around">
-					{data?.users.map((value, index) => (
+					{(data?.users ?? []).map((value, index) => (
 						<div
 							key={index}
 							className="m-2 sm:m-4 bg-gray-200 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 shadow-lg rounded-lg overflow-hidden relative"
@@ -140,11 +140,11 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 									<div className="flex-col">
 										<div className="flex flex-col items-center justify-center w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-500 to-gray-150 border border-gray-400 dark:border-gray-600 rounded sm:rounded-full shadow-lg">
 											<div className="font-bold text-md">
-												{value.week1_hours +
-													value.week2_hours +
-													value.week3_hours +
-													value.week4_hours +
-													value.week5_hours}
+												{(value.week1_hours ?? 0) +
+													(value.week2_hours ?? 0) +
+													(value.week3_hours ?? 0) +
+													(value.week4_hours ?? 0) +
+													(value.week5_hours ?? 0)}
 											</div>
 										</div>
 										<div className="mt-1 text-xs text-center">Total</div>
