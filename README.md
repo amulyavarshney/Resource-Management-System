@@ -126,7 +126,8 @@ auto-created via `create_all`.
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`) runs backend ruff + pytest,
-frontend lint + build, and Playwright e2e against a SQLite-backed API.
+frontend lint + build, Playwright e2e against a SQLite-backed API, and an
+Alembic + API smoke job against Postgres (`asyncpg`).
 
 ## Contributing
 

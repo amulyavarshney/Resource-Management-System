@@ -5,6 +5,7 @@ export const apiBase =
 
 export const DEMO = {
 	employee: { email: "demo.employee@rms.example", password: "DemoPass1!" },
+	manager: { email: "demo.manager@rms.example", password: "DemoPass1!" },
 	admin: { email: "demo.admin@rms.example", password: "DemoPass1!" },
 } as const;
 
