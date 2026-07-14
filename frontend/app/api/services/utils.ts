@@ -9,6 +9,14 @@ export function toLowerCase(input: number | string): number | string {
 	return input;
 }
 
+/** Local calendar date as YYYY-MM-DD for FastAPI `date` query/path params. */
+export function toApiDate(date: Date): string {
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, "0");
+	const d = String(date.getDate()).padStart(2, "0");
+	return `${y}-${m}-${d}`;
+}
+
 export function sortProjects(
 	projects: Project[],
 	sortConfig: { column: string; isAscending: boolean }

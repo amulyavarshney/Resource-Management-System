@@ -18,8 +18,7 @@ async def _register_and_login(client: AsyncClient, email: str, role: int = 0) ->
     })
     token = (await client.post("/api/v1/auth/login",
                                json={"email": email, "password": "SecureP@ss1"})).json()
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
+    uid = (await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})).json()["id"]
     return token, uid
 
 
@@ -37,8 +36,7 @@ async def test_registration_ignores_client_supplied_role(client: AsyncClient):
 
     token = (await client.post("/api/v1/auth/login",
                                json={"email": "evil@example.com", "password": "SecureP@ss1"})).json()
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-    user = next(u for u in users if u["email"] == "evil@example.com")
+    user = (await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})).json()
     assert user["role"] == 0  # Employee, not Admin
 
 
@@ -104,14 +102,16 @@ async def test_cannot_change_another_users_password_without_admin(client: AsyncC
 
 @pytest.mark.asyncio
 async def test_admin_can_reset_another_users_password_without_old_password(client: AsyncClient, db_session):
-    admin_token, _ = await _register_and_login(client, "resetadmin@example.com")
+    admin_token, admin_uid = await _register_and_login(client, "resetadmin@example.com")
     _, target_id = await _register_and_login(client, "lockedout@example.com")
 
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {admin_token}"})).json()
-    admin_uid = next(u["id"] for u in users if u["email"] == "resetadmin@example.com")
     await promote_to_role(db_session, admin_uid, role=3)
-    admin_token = (await client.post("/api/v1/auth/login",
-                                     json={"email": "resetadmin@example.com", "password": "SecureP@ss1"})).json()
+    admin_token = (
+        await client.post(
+            "/api/v1/auth/login",
+            json={"email": "resetadmin@example.com", "password": "SecureP@ss1"},
+        )
+    ).json()
     headers = {"Authorization": f"Bearer {admin_token}"}
 
     resp = await client.patch(
@@ -121,8 +121,10 @@ async def test_admin_can_reset_another_users_password_without_old_password(clien
     )
     assert resp.status_code == 200
 
-    resp = await client.post("/api/v1/auth/login",
-                             json={"email": "lockedout@example.com", "password": "AdminSetThis1!"})
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "lockedout@example.com", "password": "AdminSetThis1!"},
+    )
     assert resp.status_code == 200
 
 
@@ -219,10 +221,10 @@ async def test_google_login_creates_user_with_defaults(client: AsyncClient):
     token = resp.json()
     assert isinstance(token, str) and len(token) > 20
 
-    users = (
-        await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})
+    created = (
+        await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})
     ).json()
-    created = next(u for u in users if u["email"] == "new.google@example.com")
+    assert created["email"] == "new.google@example.com"
     assert created["first_name"] == "New"
     assert created["last_name"] == "User"
     assert created["role"] == 0  # Employee
@@ -258,10 +260,9 @@ async def test_google_login_links_existing_user(client: AsyncClient):
     )
     assert resp.status_code == 200
     token = resp.json()
-    users = (
-        await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})
+    linked = (
+        await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})
     ).json()
-    linked = next(u for u in users if u["email"] == "linked.google@example.com")
     # Existing profile fields are preserved (not overwritten by Google defaults)
     assert linked["first_name"] == "Existing"
     assert linked["department"] == 2

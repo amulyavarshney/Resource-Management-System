@@ -35,8 +35,7 @@ async def test_favourites_crud(client: AsyncClient, db_session: AsyncSession):
     assert resp.json()["project_ids"] == []
 
     # Need admin to create a project for a realistic id — use promote
-    users = (await client.get("/api/v1/user", headers=headers)).json()
-    uid = next(u["id"] for u in users if u["email"] == "fav@example.com")
+    uid = (await client.get("/api/v1/user/me", headers=headers)).json()["id"]
     await promote_to_role(db_session, uid, role=3)
     token = (
         await client.post(

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.core.deps import (
     AdminOrDeveloper,
@@ -9,6 +9,7 @@ from app.core.deps import (
     SelfOrAdminUserId,
     role_from_payload,
 )
+from app.core.rate_limit import limiter
 from app.models.enums import Role
 from app.schemas.common import MessageResponse
 from app.schemas.week_data import WeekDataResponse, WeekDataUpdate
@@ -101,5 +102,6 @@ async def delete(
 
 
 @router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
-async def reset(db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def reset(request: Request, db: DbSession) -> MessageResponse:
     return await WeekDataService(db).reset()

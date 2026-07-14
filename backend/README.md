@@ -224,8 +224,8 @@ flowchart TB
 
 | Dependency (`app/core/deps.py`) | Allowed roles | Used on |
 |---|---|---|
-| `AllAuthenticated` | Employee, Management, Executive, Admin, Developer | Own timesheet/leave/holiday reads, profile, preferences |
-| `ManagementAndAbove` | Management, Executive, Admin, Developer | `/dashboard/*`, bulk weekData/leave list reads, `POST /lock` |
+| `AllAuthenticated` | Employee, Management, Executive, Admin, Developer | Own timesheet/leave/holiday reads, profile (`/user/me`, self `GET/PATCH /user/{id}`), preferences, managers list |
+| `ManagementAndAbove` | Management, Executive, Admin, Developer | `/dashboard/*`, bulk weekData/leave list reads, user directory lists, `POST /lock` |
 | `AdminOrDeveloper` | Admin, Developer | `POST /user`, `*/import`, `*/reset`, `DELETE /user/{id}`, `DELETE /project/{id}`, company holiday writes |
 | `SelfOrAdmin` / `SelfOrAdminUserId` | Caller's own id, or Admin/Developer | WeekData/leave/personal-holiday by `user_id`, `PATCH /user/{id}` |
 | `SelfOnly` | Caller's own `id` only — no admin override | `PATCH /user/{id}/removePassword` |
@@ -249,7 +249,7 @@ Some routes additionally require Admin/Developer (or Management+) — see above.
 | Router | Prefix | Auth |
 |--------|--------|------|
 | Auth | `/auth` | Public (`/register` can be disabled via `ALLOW_SELF_REGISTRATION`) |
-| Users | `/user` | Required (some routes Admin/Developer, or self-only) |
+| Users | `/user` | Required (`GET ""` / period lists: Management+; `GET /{id}`: self-or-admin; managers + `/me`: any authenticated) |
 | Projects | `/project` | Required (create/update/import/delete/reset: Admin/Developer) |
 | WeekData | `/weekData` | Required (self-or-admin for keyed routes; bulk list: Management+; reset: Admin/Developer) |
 | Dashboard | `/dashboard` | Management+ |

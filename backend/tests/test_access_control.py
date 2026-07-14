@@ -23,8 +23,7 @@ async def _register(client: AsyncClient, email: str) -> tuple[str, int]:
     token = (
         await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
     ).json()
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
+    uid = (await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})).json()["id"]
     return token, uid
 
 
@@ -34,11 +33,6 @@ async def test_weekdata_idor_blocked(client: AsyncClient, db_session: AsyncSessi
     attacker_token, _ = await _register(client, "attacker@example.com")
 
     # Victim (as admin) creates a project, then writes week data for self
-    users = (
-        await client.get(
-            "/api/v1/user", headers={"Authorization": f"Bearer {victim_token}"}
-        )
-    ).json()
     await promote_to_role(db_session, victim_uid, role=3)
     victim_token = (
         await client.post(
@@ -189,3 +183,23 @@ async def test_personal_holiday_read_idor_blocked(client: AsyncClient, db_sessio
     # Unscoped personal list is admin-only
     resp = await client.get("/api/v1/holiday/personal", headers=attacker_headers)
     assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_user_directory_idor_blocked(client: AsyncClient):
+    victim_token, victim_uid = await _register(client, "udirvictim@example.com")
+    attacker_token, _ = await _register(client, "udirattacker@example.com")
+    attacker_headers = {"Authorization": f"Bearer {attacker_token}"}
+
+    resp = await client.get("/api/v1/user", headers=attacker_headers)
+    assert resp.status_code == 403
+
+    resp = await client.get(f"/api/v1/user/{victim_uid}", headers=attacker_headers)
+    assert resp.status_code == 403
+
+    # Self profile remains readable
+    me = await client.get(
+        "/api/v1/user/me", headers={"Authorization": f"Bearer {victim_token}"}
+    )
+    assert me.status_code == 200
+    assert me.json()["id"] == victim_uid

@@ -1,6 +1,7 @@
 import { toast } from "react-hot-toast";
 import http from "./httpInstance";
 import { Region } from "@/nextauth";
+import { toApiDate } from "./utils";
 
 export enum HolidayType {
 	Compulsory = "Compulsory",
@@ -129,7 +130,7 @@ class HolidayService {
 
 	async getHoliday(date: Date, userId?: number, region?: Region) {
 		try {
-			const formattedDate = date.toDateString();
+			const formattedDate = toApiDate(date);
 			const response = await http.get<Holiday>(
 				`/holiday?date=${formattedDate}&${userId ? `user_id=${userId}&` : ""}${
 					region ? `region=${region}&` : ""
@@ -175,7 +176,7 @@ class HolidayService {
 
 	async updateHoliday(date: Date, holiday: Holiday, region?: Region) {
 		try {
-			const formattedDate = date.toDateString();
+			const formattedDate = toApiDate(date);
 			const response = await http.patch<Holiday[]>(
 				`/holiday?date=${formattedDate}&${
 					region ? `region=${region}&` : ""
@@ -191,7 +192,7 @@ class HolidayService {
 
 	async updateHolidayWithUserId(date: Date, userId: number, holiday: Holiday) {
 		try {
-			const formattedDate = date.toDateString();
+			const formattedDate = toApiDate(date);
 			const response = await http.patch<Holiday[]>(
 				`/holiday/${userId}?date=${formattedDate}&`.replace(/[?&]$/, ""),
 				holiday
@@ -242,7 +243,7 @@ class HolidayService {
 
 	async removeHoliday(date: Date, userId?: number, region?: Region) {
 		try {
-			const formattedDate = date.toDateString();
+			const formattedDate = toApiDate(date);
 			const response = await http.delete<Holiday>(
 				`/holiday/?date=${encodeURIComponent(formattedDate)}&${
 					userId ? `user_id=${encodeURIComponent(userId)}&` : ""

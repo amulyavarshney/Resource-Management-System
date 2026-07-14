@@ -14,8 +14,7 @@ async def _setup(client: AsyncClient, db_session: AsyncSession, email: str) -> t
     })
     token = (await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})).json()
     headers = {"Authorization": f"Bearer {token}"}
-    users = (await client.get("/api/v1/user", headers=headers)).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
+    uid = (await client.get("/api/v1/user/me", headers=headers)).json()["id"]
     await promote_to_role(db_session, uid, role=3)
     token = (await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})).json()
     headers = {"Authorization": f"Bearer {token}"}

@@ -20,8 +20,7 @@ async def _token(client: AsyncClient, email: str, role: int = 3) -> tuple[str, i
     })
     token = (await client.post("/api/v1/auth/login",
                                json={"email": email, "password": "SecureP@ss1"})).json()
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
+    uid = (await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})).json()["id"]
     return token, uid
 
 

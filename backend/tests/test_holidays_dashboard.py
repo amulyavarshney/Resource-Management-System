@@ -16,8 +16,7 @@ async def _token(client: AsyncClient, email: str, role: int = 3) -> str:
 
 async def _token_as_admin(client: AsyncClient, db_session, email: str) -> str:
     token = await _token(client, email)
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
+    uid = (await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})).json()["id"]
     await promote_to_role(db_session, uid, role=3)  # Admin
     return (await client.post("/api/v1/auth/login",
                               json={"email": email, "password": "SecureP@ss1"})).json()
@@ -79,8 +78,7 @@ async def test_holiday_delete(client: AsyncClient, db_session):
 async def test_personal_holiday_self_create(client: AsyncClient):
     token = await _token(client, "holpersonal@example.com")
     headers = {"Authorization": f"Bearer {token}"}
-    users = (await client.get("/api/v1/user", headers=headers)).json()
-    uid = next(u["id"] for u in users if u["email"] == "holpersonal@example.com")
+    uid = (await client.get("/api/v1/user/me", headers=headers)).json()["id"]
 
     resp = await client.post("/api/v1/holiday", headers=headers,
                              json={"date": "2024-09-01", "name": "My Day Off",
@@ -109,8 +107,7 @@ async def test_dashboard_overview(client: AsyncClient, db_session):
 async def test_dashboard_user(client: AsyncClient, db_session):
     token = await _token_as_admin(client, db_session, "dash2@example.com")
     headers = {"Authorization": f"Bearer {token}"}
-    users = (await client.get("/api/v1/user", headers=headers)).json()
-    uid = next(u["id"] for u in users if u["email"] == "dash2@example.com")
+    uid = (await client.get("/api/v1/user/me", headers=headers)).json()["id"]
 
     resp = await client.get(f"/api/v1/dashboard/user/{uid}", headers=headers)
     assert resp.status_code == 200

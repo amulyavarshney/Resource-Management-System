@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Query, UploadFile
+from fastapi import APIRouter, Query, Request, UploadFile
 
 from app.core.deps import AdminOrDeveloper, AllAuthenticated, DbSession
+from app.core.rate_limit import limiter
 from app.models.enums import Department, Region
 from app.schemas.common import MessageResponse
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
@@ -40,7 +41,8 @@ async def create_project(body: ProjectCreate, db: DbSession) -> ProjectResponse:
 
 
 @router.post("/import", response_model=MessageResponse, status_code=201, dependencies=[AdminOrDeveloper])
-async def import_projects(excelFile: UploadFile, db: DbSession) -> MessageResponse:
+@limiter.limit("10/minute")
+async def import_projects(request: Request, excelFile: UploadFile, db: DbSession) -> MessageResponse:
     return await ProjectService(db).import_from_excel(excelFile)
 
 
@@ -59,5 +61,6 @@ async def delete_project(
 
 
 @router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
-async def reset_projects(db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def reset_projects(request: Request, db: DbSession) -> MessageResponse:
     return await ProjectService(db).reset()

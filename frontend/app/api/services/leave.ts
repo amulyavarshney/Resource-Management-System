@@ -1,5 +1,6 @@
 import { toast } from "react-hot-toast";
 import http from "./httpInstance";
+import { toApiDate } from "./utils";
 
 export enum LeaveType {
 	Casual = "Casual Leave",
@@ -78,7 +79,7 @@ class LeaveService {
 
 	async removeLeave(date: Date, userId: Number) {
 		try {
-			const formattedDate = date.toDateString();
+			const formattedDate = toApiDate(date);
 			const response = await http.delete<Leave>(
 				`/leave/${userId}?date=${formattedDate}`
 			);

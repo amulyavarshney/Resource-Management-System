@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 
 from app.core.deps import (
     AdminOrDeveloper,
@@ -12,6 +12,7 @@ from app.core.deps import (
     assert_self_or_admin,
     role_from_payload,
 )
+from app.core.rate_limit import limiter
 from app.models.enums import Role
 from app.schemas.common import MessageResponse
 from app.schemas.leave import LeaveCreate, LeaveResponse
@@ -57,7 +58,8 @@ async def create_bulk(body: list[LeaveCreate], db: DbSession, payload: CurrentUs
 
 
 @router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
-async def reset(db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def reset(request: Request, db: DbSession) -> MessageResponse:
     return await LeaveService(db).reset()
 
 

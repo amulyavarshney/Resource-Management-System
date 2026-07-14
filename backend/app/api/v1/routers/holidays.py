@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Query, UploadFile
+from fastapi import APIRouter, Query, Request, UploadFile
 
 from app.core.deps import (
     AdminOrDeveloper,
@@ -11,6 +11,7 @@ from app.core.deps import (
     assert_self_or_admin,
     require_self_or_admin,
 )
+from app.core.rate_limit import limiter
 from app.models.enums import Region
 from app.schemas.common import MessageResponse
 from app.schemas.holiday import HolidayCreate, HolidayResponse, HolidayUpdate
@@ -94,12 +95,16 @@ async def create(body: HolidayCreate, db: DbSession, payload: CurrentUser) -> Ho
 
 
 @router.post("/importHolidays", response_model=MessageResponse, status_code=201, dependencies=[AdminOrDeveloper])
-async def import_holidays(excelFile: UploadFile, db: DbSession) -> MessageResponse:
+@limiter.limit("10/minute")
+async def import_holidays(request: Request, excelFile: UploadFile, db: DbSession) -> MessageResponse:
     return await HolidayService(db).import_company_from_excel(excelFile)
 
 
 @router.post("/importPersonalHolidays", response_model=MessageResponse, status_code=201, dependencies=[AdminOrDeveloper])
-async def import_personal_holidays(excelFile: UploadFile, db: DbSession) -> MessageResponse:
+@limiter.limit("10/minute")
+async def import_personal_holidays(
+    request: Request, excelFile: UploadFile, db: DbSession
+) -> MessageResponse:
     return await HolidayService(db).import_personal_from_excel(excelFile)
 
 
@@ -139,15 +144,18 @@ async def delete(
 
 
 @router.delete("/resetHolidays", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
-async def reset_holidays(db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def reset_holidays(request: Request, db: DbSession) -> MessageResponse:
     return await HolidayService(db).reset_company()
 
 
 @router.delete("/resetPersonalHolidays", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
-async def reset_personal_holidays(db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def reset_personal_holidays(request: Request, db: DbSession) -> MessageResponse:
     return await HolidayService(db).reset_personal()
 
 
 @router.delete("/reset", response_model=MessageResponse, dependencies=[AdminOrDeveloper])
-async def reset_all(db: DbSession) -> MessageResponse:
+@limiter.limit("5/minute")
+async def reset_all(request: Request, db: DbSession) -> MessageResponse:
     return await HolidayService(db).reset_all()

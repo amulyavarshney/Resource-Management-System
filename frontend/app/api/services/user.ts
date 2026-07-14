@@ -127,6 +127,19 @@ class UserService {
 		}
 	}
 
+	async getMe(backendToken?: string) {
+		try {
+			const headers = backendToken
+				? { Authorization: `Bearer ${backendToken}` }
+				: undefined;
+			const response = await http.get<User>("/user/me", { headers });
+			return response.data;
+		} catch (error) {
+			console.error("Error while fetching current user", error);
+			throw error;
+		}
+	}
+
 	async getUserByEmpId(empId: number) {
 		try {
 			const allUsers = await this.getUsers();
@@ -141,12 +154,9 @@ class UserService {
 
 	async getUserByEmail(email: string, backendToken?: string) {
 		try {
-			const headers = backendToken
-				? { Authorization: `Bearer ${backendToken}` }
-				: undefined;
-			const response = await http.get<User[]>("/user", { headers });
-			const user = response.data.find((u) => u.email === email);
-			if (user) return user;
+			// Prefer /me — the JWT identifies the caller; listing /user is Management+.
+			const me = await this.getMe(backendToken);
+			if (me.email.toLowerCase() === email.toLowerCase()) return me;
 			throw new Error(`User with email ${email} not found`);
 		} catch (error) {
 			console.error(`Error while fetching User with email ${email}`, error);

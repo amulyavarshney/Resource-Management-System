@@ -18,8 +18,7 @@ async def _auth(client: AsyncClient, email="user@example.com", role=0) -> tuple[
     })
     resp = await client.post("/api/v1/auth/login", json={"email": email, "password": "SecureP@ss1"})
     token = resp.json()
-    users = (await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})).json()
-    uid = next(u["id"] for u in users if u["email"] == email)
+    uid = (await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})).json()["id"]
     return token, uid
 
 
@@ -42,9 +41,9 @@ async def test_get_users_requires_auth(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_user_response_is_snake_case(client: AsyncClient):
     token, _ = await _auth(client, "camel@example.com")
-    resp = await client.get("/api/v1/user", headers={"Authorization": f"Bearer {token}"})
+    resp = await client.get("/api/v1/user/me", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200
-    user = resp.json()[0]
+    user = resp.json()
     # Must have snake_case keys
     assert "first_name" in user
     assert "last_name" in user
