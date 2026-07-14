@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer
+from sqlalchemy import ForeignKey, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -6,6 +6,9 @@ from app.db.base import Base
 
 class WeekData(Base):
     __tablename__ = "WeekData"
+    __table_args__ = (
+        Index("ix_WeekData_user_year_month", "user_id", "year", "month"),
+    )
 
     year: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     month: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)

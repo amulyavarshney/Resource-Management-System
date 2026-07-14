@@ -20,6 +20,7 @@ from app.core.exceptions import (
     RecordNotFoundException,
 )
 from app.core.logging import configure_logging, get_logger
+from app.core.metrics import metrics_middleware, metrics_response
 from app.core.rate_limit import limiter
 
 _settings = get_settings()
@@ -64,6 +65,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.middleware("http")(metrics_middleware)
 
 
 @app.middleware("http")
@@ -185,3 +187,8 @@ async def health_ready() -> dict[str, Any]:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"status": "error", "db": "unavailable"},
         )
+
+
+@app.get("/metrics", tags=["metrics"], include_in_schema=False)
+async def metrics():
+    return metrics_response()

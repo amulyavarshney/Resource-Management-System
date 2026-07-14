@@ -115,6 +115,15 @@ docker compose up --build
 API + database only: see [backend/README.md § Docker](backend/README.md#docker).
 Frontend image alone: see [frontend/README.md § Docker](frontend/README.md#docker).
 
+Production Docker runs `alembic upgrade head` before starting the API
+(`backend/entrypoint.sh`). Keep `APP_ENV=production` so tables are not
+auto-created via `create_all`.
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs backend ruff + pytest,
+frontend lint + build, and Playwright e2e against a SQLite-backed API.
+
 ## Contributing
 
 Contributions are very welcome, whether that's a bug fix, a new feature, or

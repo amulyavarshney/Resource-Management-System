@@ -34,15 +34,18 @@ frontend/
 │   │   ├── admin/                   # Admin panel
 │   │   │   └── users-with-unfilled-timesheet/
 │   │   └── holidays/                # Holiday list
-│   ├── auth/                        # Public auth pages (login, register, reset)
+│   ├── auth/                        # Public auth pages (login, register)
 │   ├── api/
 │   │   ├── auth/[...nextauth]/      # NextAuth route handler
-│   │   ├── mail/                    # Email report service
-│   │   └── services/                # Typed Axios API clients
+│   │   ├── mail/                    # Server-side ESB mail proxy
+│   │   ├── services/                # Typed Axios API clients
+│   │   └── generated/               # OpenAPI-generated types
 │   ├── components/                  # Shared UI components
 │   └── contexts/                    # React Context providers
+├── e2e/                             # Playwright smoke tests
 ├── public/                          # Static assets (SVGs, images)
 ├── next.config.js                   # Next.js config + security headers
+├── playwright.config.ts
 ├── tailwind.config.js
 ├── tsconfig.json
 └── package.json

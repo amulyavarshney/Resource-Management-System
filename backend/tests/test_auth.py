@@ -52,3 +52,13 @@ async def test_health_live(client: AsyncClient):
     resp = await client.get("/health/live")
     assert resp.status_code == 200
     assert resp.json()["status"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_metrics_endpoint(client: AsyncClient):
+    await client.get("/api/v1/auth/login")  # counted (422); health paths are excluded
+    resp = await client.get("/metrics")
+    assert resp.status_code == 200
+    body = resp.text
+    assert "rms_http_requests_total" in body
+    assert "rms_http_request_duration_seconds" in body

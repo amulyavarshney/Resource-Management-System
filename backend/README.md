@@ -44,8 +44,10 @@ erDiagram
     User ||--o{ WeekData : logs
     User ||--o{ Leave : takes
     User ||--o{ PersonalHoliday : has
+    User ||--o{ UserFavourite : favourites
     User }o--o{ User : "reports to (parent_id)"
     Project ||--o{ WeekData : "logged against"
+    Project ||--o{ UserFavourite : "favourited as"
 
     User {
         int id PK
@@ -96,6 +98,15 @@ erDiagram
         string name
         int type
         bool show
+    }
+    TimesheetLock {
+        int department PK "0 = unspecified"
+        int region PK "0 = unspecified"
+        bool is_locked
+    }
+    UserFavourite {
+        int user_id PK, FK
+        int project_id PK
     }
 ```
 
@@ -213,10 +224,10 @@ flowchart TB
 
 | Dependency (`app/core/deps.py`) | Allowed roles | Used on |
 |---|---|---|
-| `AllAuthenticated` | Employee, Management, Executive, Admin, Developer | Most reads (timesheets, dashboards, holidays, own profile) |
-| `ManagementAndAbove` | Management, Executive, Admin, Developer | `POST /lock` (company-wide timesheet lock) |
-| `AdminOrDeveloper` | Admin, Developer | `POST /user`, `*/import`, `*/reset`, `DELETE /user/{id}`, `DELETE /project/{id}` |
-| `SelfOrAdmin` | Caller's own `id`, or Admin/Developer | `PATCH /user/{id}`, `PATCH /user/{id}/changePassword` |
+| `AllAuthenticated` | Employee, Management, Executive, Admin, Developer | Own timesheet/leave/holiday reads, profile, preferences |
+| `ManagementAndAbove` | Management, Executive, Admin, Developer | `/dashboard/*`, bulk weekData/leave list reads, `POST /lock` |
+| `AdminOrDeveloper` | Admin, Developer | `POST /user`, `*/import`, `*/reset`, `DELETE /user/{id}`, `DELETE /project/{id}`, company holiday writes |
+| `SelfOrAdmin` / `SelfOrAdminUserId` | Caller's own id, or Admin/Developer | WeekData/leave/personal-holiday by `user_id`, `PATCH /user/{id}` |
 | `SelfOnly` | Caller's own `id` only — no admin override | `PATCH /user/{id}/removePassword` |
 
 `SelfOnly` has no admin override by design: nulling someone *else's*
@@ -227,6 +238,9 @@ sign-in) — it's always forced to `Employee` server-side; only an
 already-authenticated Admin/Developer can set a different role via
 `PATCH /user/{id}`.
 
+Timesheet/leave **writes** are also rejected when the global timesheet lock
+is on (Admin/Developer may bypass).
+
 ## API Reference
 
 All routes are prefixed `/api/v1/`. Protected routes require `Authorization: Bearer <token>`.
@@ -234,16 +248,17 @@ Some routes additionally require Admin/Developer (or Management+) — see above.
 
 | Router | Prefix | Auth |
 |--------|--------|------|
-| Auth | `/auth` | Public |
+| Auth | `/auth` | Public (`/register` can be disabled via `ALLOW_SELF_REGISTRATION`) |
 | Users | `/user` | Required (some routes Admin/Developer, or self-only) |
-| Projects | `/project` | Required (import/delete/reset: Admin/Developer) |
-| WeekData | `/weekdata` | Required (reset: Admin/Developer) |
-| Dashboard | `/dashboard` | Required |
-| Holidays | `/holiday` | Required (import/reset: Admin/Developer) |
-| Leaves | `/leave` | Required (reset: Admin/Developer) |
-| Lock | `/lock` | Required (set lock: Management/Executive/Admin/Developer) |
+| Projects | `/project` | Required (create/update/import/delete/reset: Admin/Developer) |
+| WeekData | `/weekData` | Required (self-or-admin for keyed routes; bulk list: Management+; reset: Admin/Developer) |
+| Dashboard | `/dashboard` | Management+ |
+| Holidays | `/holiday` | Required (personal by `user_id`: self-or-admin; company write/import/reset: Admin/Developer) |
+| Leaves | `/leave` | Required (self-or-admin for user-scoped routes; bulk list: Management+; reset: Admin/Developer) |
+| Lock | `/lock` | Required (set lock: Management+) |
 | Preferences | `/preferences` | Required (favourites for the current user) |
 | Health | `/health/live`, `/health/ready` | Public |
+| Metrics | `/metrics` | Public (Prometheus scrape) |
 
 Full interactive docs at `/swagger` in development mode.
 
