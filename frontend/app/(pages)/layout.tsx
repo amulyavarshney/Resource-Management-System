@@ -1,16 +1,22 @@
 "use client";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Loading from "../components/Loading";
 import Navbar from "../components/Navbar";
-import Unauthorized from "../components/Unauthorized";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+	const router = useRouter();
 	const { status } = useSession();
 
-	if (status === "loading") {
+	useEffect(() => {
+		if (status === "unauthenticated") {
+			router.replace("/auth");
+		}
+	}, [status, router]);
+
+	if (status === "loading" || status === "unauthenticated") {
 		return <Loading />;
-	} else if (status == "unauthenticated") {
-		return <Unauthorized />;
 	}
 
 	return (

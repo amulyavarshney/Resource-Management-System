@@ -15,6 +15,14 @@ const e2eUser = {
 	parent_id: 0,
 };
 
+async function loginAsE2E(page: import("@playwright/test").Page) {
+	await page.goto("/auth");
+	await page.locator("#email").fill(e2eUser.email);
+	await page.locator("#password").fill(e2eUser.password);
+	await page.getByRole("button", { name: "Sign in", exact: true }).click();
+	await expect(page).toHaveURL(/\/home/, { timeout: 30_000 });
+}
+
 test.describe("auth + timesheet smoke", () => {
 	test.beforeAll(async ({ request }) => {
 		const register = await request.post(`${apiBase}/auth/register`, {
@@ -38,17 +46,23 @@ test.describe("auth + timesheet smoke", () => {
 		await expect(page).toHaveURL(/\/auth/);
 	});
 
-	test("credentials login reaches home and timesheet", async ({ page }) => {
-		await page.goto("/auth");
-		await page.locator("#email").fill(e2eUser.email);
-		await page.locator("#password").fill(e2eUser.password);
-		await page.getByRole("button", { name: "Sign in", exact: true }).click();
+	test("unauthenticated protected routes redirect to auth", async ({ page }) => {
+		await page.goto("/timesheet");
+		await expect(page).toHaveURL(/\/auth/, { timeout: 15_000 });
+	});
 
-		await expect(page).toHaveURL(/\/home/, { timeout: 30_000 });
+	test("credentials login reaches home and timesheet", async ({ page }) => {
+		await loginAsE2E(page);
 
 		await page.goto("/timesheet");
 		await expect(page).toHaveURL(/\/timesheet/);
 		// Page should not show Unauthorized for Employee
 		await expect(page.getByText(/unauthorized/i)).toHaveCount(0);
+	});
+
+	test("employee is denied dashboard UI", async ({ page }) => {
+		await loginAsE2E(page);
+		await page.goto("/dashboard");
+		await expect(page.getByText(/unauthorized/i)).toBeVisible({ timeout: 15_000 });
 	});
 });
