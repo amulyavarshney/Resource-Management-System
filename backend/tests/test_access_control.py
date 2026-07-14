@@ -157,3 +157,35 @@ async def test_weekdata_blocked_when_locked(client: AsyncClient, db_session: Asy
     )
     assert resp.status_code == 405
     assert "locked" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_personal_holiday_read_idor_blocked(client: AsyncClient, db_session: AsyncSession):
+    victim_token, victim_uid = await _register(client, "phvictim@example.com")
+    attacker_token, _ = await _register(client, "phattacker@example.com")
+
+    await client.post(
+        "/api/v1/holiday",
+        headers={"Authorization": f"Bearer {victim_token}"},
+        json={
+            "date": "2024-10-10",
+            "name": "Private Day",
+            "type": 1,
+            "user_id": victim_uid,
+        },
+    )
+
+    attacker_headers = {"Authorization": f"Bearer {attacker_token}"}
+    resp = await client.get(
+        f"/api/v1/holiday/personal?user_id={victim_uid}", headers=attacker_headers
+    )
+    assert resp.status_code == 403
+
+    resp = await client.get(
+        f"/api/v1/holiday/2024?user_id={victim_uid}", headers=attacker_headers
+    )
+    assert resp.status_code == 403
+
+    # Unscoped personal list is admin-only
+    resp = await client.get("/api/v1/holiday/personal", headers=attacker_headers)
+    assert resp.status_code == 403

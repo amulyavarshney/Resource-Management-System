@@ -4,6 +4,10 @@ import { authOptions } from "@/app/api/auth/options";
 
 export const runtime = "nodejs";
 
+const MAX_RECIPIENTS = 5;
+const MAX_ATTACHMENTS = 3;
+const MAX_ATTACHMENT_CHARS = 8_000_000; // ~6MB base64
+
 type MailBody = {
 	subject: string;
 	messageBody: string;
@@ -15,25 +19,28 @@ type MailBody = {
 };
 
 function esbConfig() {
-	// Prefer server-only names; fall back to legacy NEXT_PUBLIC_* during migration.
+	// Server-only env vars — never fall back to NEXT_PUBLIC_* (would risk
+	// baking secrets into the browser bundle if misconfigured).
 	return {
-		url: process.env.ESB_API_URL || process.env.NEXT_PUBLIC_ESB_API_URL,
-		subKey: process.env.ESB_SUB_KEY || process.env.NEXT_PUBLIC_ESB_SUB_KEY,
-		from: process.env.ESB_MAIL_FROM || process.env.NEXT_PUBLIC_ESB_MAIL_FROM,
-		sender: process.env.ESB_MAIL_SENDER || process.env.NEXT_PUBLIC_ESB_MAIL_SENDER,
-		replyTo: process.env.ESB_MAIL_REPLYTO || process.env.NEXT_PUBLIC_ESB_MAIL_REPLYTO,
-		positiveUrl:
-			process.env.ESB_CALLBACK_POSITIVE_URL ||
-			process.env.NEXT_PUBLIC_ESB_CALLBACK_POSITIVE_URL,
-		negativeUrl:
-			process.env.ESB_CALLBACK_NEGATIVE_URL ||
-			process.env.NEXT_PUBLIC_ESB_CALLBACK_NEGATIVE_URL,
+		url: process.env.ESB_API_URL,
+		subKey: process.env.ESB_SUB_KEY,
+		from: process.env.ESB_MAIL_FROM,
+		sender: process.env.ESB_MAIL_SENDER,
+		replyTo: process.env.ESB_MAIL_REPLYTO,
+		positiveUrl: process.env.ESB_CALLBACK_POSITIVE_URL,
+		negativeUrl: process.env.ESB_CALLBACK_NEGATIVE_URL,
 	};
+}
+
+function normalizeEmails(emails: string[] | undefined): string[] {
+	if (!emails?.length) return [];
+	return emails.map((e) => e.trim().toLowerCase()).filter(Boolean);
 }
 
 export async function POST(req: NextRequest) {
 	const session = await getServerSession(authOptions);
-	if (!session?.user) {
+	const sessionEmail = session?.user?.email?.trim().toLowerCase();
+	if (!session?.user || !sessionEmail) {
 		return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
 	}
 
@@ -59,19 +66,50 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
+	const recipients = normalizeEmails(body.recipients);
+	const cc = normalizeEmails(body.cc);
+	const bcc = normalizeEmails(body.bcc);
+
+	if (recipients.length === 0 || recipients.length > MAX_RECIPIENTS) {
+		return NextResponse.json(
+			{ detail: `recipients must contain 1–${MAX_RECIPIENTS} addresses` },
+			{ status: 400 }
+		);
+	}
+
+	// Open-relay prevention: only the signed-in user may be mailed.
+	const allTargets = [...recipients, ...cc, ...bcc];
+	if (allTargets.some((email) => email !== sessionEmail)) {
+		return NextResponse.json(
+			{ detail: "Mail may only be sent to the authenticated user" },
+			{ status: 403 }
+		);
+	}
+
+	const attachments = body.attachments ?? [];
+	if (attachments.length > MAX_ATTACHMENTS) {
+		return NextResponse.json(
+			{ detail: `At most ${MAX_ATTACHMENTS} attachments are allowed` },
+			{ status: 400 }
+		);
+	}
+	if (attachments.some((a) => a.length > MAX_ATTACHMENT_CHARS)) {
+		return NextResponse.json({ detail: "Attachment too large" }, { status: 400 });
+	}
+
 	const payload = {
 		Subject: body.subject,
 		MessageBody: body.messageBody,
 		Priority: body.priority ?? "Normal",
-		Recipients: body.recipients,
-		CC: body.cc ?? [],
-		BCC: body.bcc ?? [],
+		Recipients: recipients,
+		CC: cc,
+		BCC: bcc,
 		From: cfg.from,
 		Sender: cfg.sender,
 		ReplyTo: cfg.replyTo,
 		ErrorReportDetails: false,
 		SaveAttachmentsExternal: false,
-		Attachments: body.attachments ?? [],
+		Attachments: attachments,
 		Callback: {
 			positiveMethod: "Post",
 			positiveUrl: cfg.positiveUrl,

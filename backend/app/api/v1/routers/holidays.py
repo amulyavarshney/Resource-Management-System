@@ -28,9 +28,15 @@ async def get_all_company(db: DbSession, region: Region | None = Query(default=N
 @router.get("/personal", response_model=list[HolidayResponse])
 async def get_all_personal(
     db: DbSession,
+    payload: CurrentUser,
     user_id: int | None = Query(default=None),
     region: Region | None = Query(default=None),
 ) -> list[HolidayResponse]:
+    if user_id is not None:
+        assert_self_or_admin(payload, user_id)
+    else:
+        # Listing everyone else's personal holidays is management/admin only.
+        assert_admin_or_developer(payload)
     phs = await HolidayService(db).get_all_personal(user_id, region)
     return [HolidayResponse(date=ph.date, name=ph.name, type=ph.type, user_id=ph.user_id, show=ph.show) for ph in phs]
 
@@ -40,9 +46,12 @@ async def get_by_month(
     year: int,
     month: int,
     db: DbSession,
+    payload: CurrentUser,
     user_id: int | None = Query(default=None),
     region: Region | None = Query(default=None),
 ) -> list[HolidayResponse]:
+    if user_id is not None:
+        assert_self_or_admin(payload, user_id)
     holidays = await HolidayService(db).get_by_month(year, month, user_id, region)
     return [HolidayResponse(date=h.date, name=h.name, type=h.type, region=h.region) for h in holidays]
 
@@ -51,9 +60,12 @@ async def get_by_month(
 async def get_by_year(
     year: int,
     db: DbSession,
+    payload: CurrentUser,
     user_id: int | None = Query(default=None),
     region: Region | None = Query(default=None),
 ) -> list[HolidayResponse]:
+    if user_id is not None:
+        assert_self_or_admin(payload, user_id)
     holidays = await HolidayService(db).get_by_year(year, user_id, region)
     return [HolidayResponse(date=h.date, name=h.name, type=h.type, region=h.region) for h in holidays]
 
@@ -62,9 +74,12 @@ async def get_by_year(
 async def get_one(
     date: date,
     db: DbSession,
+    payload: CurrentUser,
     user_id: int | None = Query(default=None),
     region: Region | None = Query(default=None),
 ) -> HolidayResponse:
+    if user_id is not None:
+        assert_self_or_admin(payload, user_id)
     return await HolidayService(db).get_one(date, user_id, region)
 
 

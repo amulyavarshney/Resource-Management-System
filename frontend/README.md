@@ -119,10 +119,12 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `GOOGLE_CLIENT_ID` | No | Google OAuth client ID — omit to disable "Sign in with Google" |
 | `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
 | `INTERNAL_AUTH_SECRET` | Only if using Google sign-in | Shared secret with the backend's `INTERNAL_AUTH_SECRET`, used for the server-to-server `POST /auth/google` exchange. Server-side only — never exposed to the browser. |
-| `ESB_API_URL` | Only if sending mail | ESB mail API URL (server-side; used by `POST /api/mail`) |
-| `ESB_SUB_KEY` | Only if sending mail | ESB subscription key (server-side only — never `NEXT_PUBLIC_*`) |
+| `ESB_API_URL` | Only if sending mail | ESB mail API URL (server-side only; used by `POST /api/mail`) |
+| `ESB_SUB_KEY` | Only if sending mail | ESB subscription key (**never** `NEXT_PUBLIC_*`) |
 | `ESB_MAIL_FROM` / `ESB_MAIL_SENDER` / `ESB_MAIL_REPLYTO` | Only if sending mail | Envelope fields for outbound mail |
 | `ESB_CALLBACK_POSITIVE_URL` / `ESB_CALLBACK_NEGATIVE_URL` | Only if sending mail | ESB callback URLs |
+
+`POST /api/mail` only allows sending to the authenticated user's own email address (no open relay).
 
 ## Authentication
 
