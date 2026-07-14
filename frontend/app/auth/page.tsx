@@ -6,6 +6,9 @@ import Loading from "@/app/components/Loading";
 import Login from "./Login";
 import Register from "./Register";
 
+const allowSelfRegistration =
+	process.env.NEXT_PUBLIC_ALLOW_SELF_REGISTRATION !== "false";
+
 export default function Auth() {
 	const router = useRouter();
 	const [isLogin, setIsLogin] = useState<boolean>(true);
@@ -21,13 +24,24 @@ export default function Auth() {
 		}
 	}, [status, router]);
 
+	useEffect(() => {
+		if (!allowSelfRegistration) {
+			setIsLogin(true);
+		}
+	}, []);
+
 	if (status === "loading" || status === "authenticated") {
 		return <Loading />;
 	}
 
-	return isLogin ? (
-		<Login updateIsLogin={updateIsLogin} />
-	) : (
-		<Register updateIsLogin={updateIsLogin} />
+	if (!isLogin && allowSelfRegistration) {
+		return <Register updateIsLogin={updateIsLogin} />;
+	}
+
+	return (
+		<Login
+			updateIsLogin={updateIsLogin}
+			allowSelfRegistration={allowSelfRegistration}
+		/>
 	);
 }

@@ -28,14 +28,21 @@ export const authOptions: NextAuthOptions = {
 					type: "password",
 					placeholder: "Password",
 				},
+				rememberMe: { label: "Remember Me", type: "text" },
 			},
 			async authorize(credentials) {
 				if (!credentials) {
 					throw new Error("Enter the fields");
 				}
 
+				const rememberMe = credentials.rememberMe === "true";
+
 				// 1. Authenticate against the backend — receive a JWT string
-				const backendToken = await authService.login(credentials);
+				const backendToken = await authService.login({
+					email: credentials.email,
+					password: credentials.password,
+					remember: rememberMe,
+				});
 				if (!backendToken) return null;
 
 				// 2. Fetch the user profile using that token (passed via authService internally)
@@ -43,7 +50,12 @@ export const authOptions: NextAuthOptions = {
 					credentials.email,
 					backendToken
 				);
-				return { ...user, name: userService.getFullName(user), backendToken } as any;
+				return {
+					...user,
+					name: userService.getFullName(user),
+					backendToken,
+					rememberMe,
+				} as any;
 			},
 		}),
 		GoogleProvider({
@@ -84,6 +96,10 @@ export const authOptions: NextAuthOptions = {
 				// Carry the backend JWT in the NextAuth JWT so the axios
 				// interceptor can attach it to every API request.
 				token.backendToken = (user as any).backendToken;
+				const rememberMe = Boolean((user as any).rememberMe);
+				token.rememberMe = rememberMe;
+				const maxAgeSec = rememberMe ? 60 * 60 * 24 * 14 : 60 * 60 * 2;
+				token.exp = Math.floor(Date.now() / 1000) + maxAgeSec;
 			}
 			return token;
 		},
@@ -101,7 +117,8 @@ export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,
 	session: {
 		strategy: "jwt",
-		maxAge: 60 * 60 * 2, // 2 hours — matches backend JWT expiry
+		// Upper bound; per-login lifetime is set via token.exp in the jwt callback.
+		maxAge: 60 * 60 * 24 * 14,
 	},
 	debug: process.env.NODE_ENV === "development",
 	theme: {

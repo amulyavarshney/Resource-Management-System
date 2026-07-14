@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     log_level: str = "info"
     # Disable in automated tests via RATE_LIMIT_ENABLED=false (see tests/conftest.py).
     rate_limit_enabled: bool = True
+    # When false, POST /auth/register returns 403 (invite/admin-only deployments).
+    allow_self_registration: bool = True
+    # JWT lifetime when login is requested with remember=true (hours).
+    jwt_remember_expire_hours: int = 24 * 14
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

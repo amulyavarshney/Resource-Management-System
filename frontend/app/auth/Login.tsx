@@ -5,10 +5,17 @@ import toast from "react-hot-toast";
 
 type LoginProps = {
 	updateIsLogin: () => void;
+	allowSelfRegistration?: boolean;
 };
 
-export default function Login({ updateIsLogin }: LoginProps) {
+const showDemoHints = process.env.NODE_ENV === "development";
+
+export default function Login({
+	updateIsLogin,
+	allowSelfRegistration = true,
+}: LoginProps) {
 	const [credentials, setCredentials] = useState({ email: "", password: "" });
+	const [rememberMe, setRememberMe] = useState(false);
 
 	const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		setCredentials((prev) => ({
@@ -19,15 +26,17 @@ export default function Login({ updateIsLogin }: LoginProps) {
 
 	const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		await signIn("credentials", { ...credentials, redirect: false }).then(
-			(callback) => {
-				if (callback?.error) {
-					toast.error(callback.error);
-				} else if (callback?.ok) {
-					toast.success("Logged in successfully!");
-				}
+		await signIn("credentials", {
+			...credentials,
+			rememberMe: rememberMe ? "true" : "false",
+			redirect: false,
+		}).then((callback) => {
+			if (callback?.error) {
+				toast.error(callback.error);
+			} else if (callback?.ok) {
+				toast.success("Logged in successfully!");
 			}
-		);
+		});
 	};
 
 	return (
@@ -43,13 +52,17 @@ export default function Login({ updateIsLogin }: LoginProps) {
 				<h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-gray-100">
 					Sign in to your account
 				</h2>
-				<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
-					To test, seed demo accounts then login with{" "}
-					<span className="font-bold">demo.developer@rms.example</span>
-				</h3>
-				<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
-					password: <span className="font-bold">DemoPass1!</span>
-				</h3>
+				{showDemoHints && (
+					<>
+						<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
+							To test, seed demo accounts then login with{" "}
+							<span className="font-bold">demo.developer@rms.example</span>
+						</h3>
+						<h3 className="text-center text-sm text-gray-900 dark:text-gray-100">
+							password: <span className="font-bold">DemoPass1!</span>
+						</h3>
+					</>
+				)}
 			</div>
 			<div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
 				<form
@@ -103,8 +116,11 @@ export default function Login({ updateIsLogin }: LoginProps) {
 					<div className="flex items-center justify-between text-sm">
 						<div className="flex items-center gap-1">
 							<input
+								id="remember"
 								type="checkbox"
-								className=" border border-gray-900 dark:border-gray-100 leading-loose"
+								checked={rememberMe}
+								onChange={(e) => setRememberMe(e.target.checked)}
+								className="border border-gray-900 dark:border-gray-100 leading-loose"
 							/>
 							<label
 								htmlFor="remember"
@@ -134,17 +150,19 @@ export default function Login({ updateIsLogin }: LoginProps) {
 					</button>
 				</div>
 
-				<div className="mt-10 text-center text-sm text-gray-500">
-					<div className="h-0 my-2 border border-solid border-gray-300 dark:border-gray-600" />
-					Not a member?
-					<button
-						type="button"
-						className="px-3 font-semibold leading-6 text-indigo-600 hover:text-indigo-500 cursor-pointer"
-						onClick={updateIsLogin}
-					>
-						Register Now
-					</button>
-				</div>
+				{allowSelfRegistration && (
+					<div className="mt-10 text-center text-sm text-gray-500">
+						<div className="h-0 my-2 border border-solid border-gray-300 dark:border-gray-600" />
+						Not a member?
+						<button
+							type="button"
+							className="px-3 font-semibold leading-6 text-indigo-600 hover:text-indigo-500 cursor-pointer"
+							onClick={updateIsLogin}
+						>
+							Register Now
+						</button>
+					</div>
+				)}
 			</div>
 		</div>
 	);

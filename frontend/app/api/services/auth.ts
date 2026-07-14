@@ -2,12 +2,12 @@ import http from "./httpInstance";
 import { UserCreateViewModel } from "./user";
 
 class AuthService {
-	async login(user: Record<"email" | "password", string>) {
-		let credentials: { email: string; password?: string } = {
+	async login(user: Record<"email" | "password", string> & { remember?: boolean }) {
+		const credentials: { email: string; password?: string; remember?: boolean } = {
 			email: user.email,
+			remember: Boolean(user.remember),
 		};
-		if (user.password)
-			credentials = { ...credentials, password: user.password };
+		if (user.password) credentials.password = user.password;
 
 		try {
 			const response = await http.post<string>("/auth/login", credentials);

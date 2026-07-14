@@ -36,7 +36,11 @@ class AuthService:
         return MessageResponse(message="User registered successfully.")
 
     async def login(self, data: LoginRequest) -> str:
-        stmt = select(User).where(User.email == data.email)
+        today = date.today()
+        stmt = select(User).where(
+            User.email == data.email,
+            (User.date_deleted.is_(None)) | (User.date_deleted > today),
+        )
         user = (await self._db.execute(stmt)).scalar_one_or_none()
         if user is None:
             raise LoginFailedException()
@@ -44,7 +48,13 @@ class AuthService:
         if not verify_password(data.password, user.password_hash, user.password_salt):
             raise LoginFailedException()
 
-        return create_access_token(user.id, user.email, user.role_name)
+        settings = get_settings()
+        expire_hours = (
+            settings.jwt_remember_expire_hours if data.remember else settings.jwt_expire_hours
+        )
+        return create_access_token(
+            user.id, user.email, user.role_name, expire_hours=expire_hours
+        )
 
     async def google_login(self, data: GoogleLoginRequest) -> str:
         """Issue an app JWT for a Google-verified identity.

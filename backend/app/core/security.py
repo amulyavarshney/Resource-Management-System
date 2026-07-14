@@ -36,8 +36,11 @@ def verify_password(raw_password: str | None, password_hash: bytes | None, passw
     return hmac.compare_digest(computed, password_hash)
 
 
-def create_access_token(user_id: int, email: str, role: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(hours=_settings.jwt_expire_hours)
+def create_access_token(
+    user_id: int, email: str, role: str, *, expire_hours: int | None = None
+) -> str:
+    hours = expire_hours if expire_hours is not None else _settings.jwt_expire_hours
+    expire = datetime.now(timezone.utc) + timedelta(hours=hours)
     payload = {
         "id": user_id,
         "email": email,

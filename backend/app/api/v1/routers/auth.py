@@ -21,6 +21,12 @@ async def login(request: Request, body: LoginRequest, db: DbSession) -> str:
 @router.post("/register", response_model=MessageResponse)
 @limiter.limit("5/minute")
 async def register(request: Request, body: UserCreate, db: DbSession) -> MessageResponse:
+    settings = get_settings()
+    if not settings.allow_self_registration:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Self-registration is disabled",
+        )
     return await AuthService(db).register(body)
 
 

@@ -1,4 +1,6 @@
 export default function Unauthorized() {
+	const supportUrl = process.env.NEXT_PUBLIC_CONTACT_SUPPORT;
+
 	return (
 		<>
 			<div className="h-screen place-items-center bg-white dark:bg-gray-900 px-6 py-24 sm:py-32 lg:px-8">
@@ -17,12 +19,14 @@ export default function Unauthorized() {
 						>
 							Go back home
 						</a>
-						<a
-							href={process.env.CONTACT_SUPPORT}
-							className="text-sm font-semibold text-gray-900 dark:text-gray-100"
-						>
-							Contact support <span aria-hidden="true">&rarr;</span>
-						</a>
+						{supportUrl ? (
+							<a
+								href={supportUrl}
+								className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+							>
+								Contact support <span aria-hidden="true">&rarr;</span>
+							</a>
+						) : null}
 					</div>
 				</div>
 			</div>

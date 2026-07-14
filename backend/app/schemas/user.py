@@ -11,6 +11,7 @@ _PASSWORD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str | None = None
+    remember: bool = False
 
 
 class GoogleLoginRequest(BaseModel):

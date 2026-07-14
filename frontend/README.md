@@ -112,6 +112,8 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `NEXT_PUBLIC_FRONTEND_URL` | Yes | Public base URL of this app |
 | `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL for the **browser** (e.g. `http://localhost:8000/api/v1`) |
 | `BACKEND_API_URL` | No | Server-side API base URL (Docker internal hostname). Falls back to `NEXT_PUBLIC_BACKEND_API` |
+| `NEXT_PUBLIC_ALLOW_SELF_REGISTRATION` | No | Set `false` to hide Register and match backend `ALLOW_SELF_REGISTRATION=false` |
+| `NEXT_PUBLIC_CONTACT_SUPPORT` | No | Support link on Unauthorized pages (e.g. `mailto:…`); hidden when unset |
 | `NEXT_PUBLIC_MAX_HOURS` | No | Default work hours per day (default `8`) |
 | `NEXT_PUBLIC_FETCH_LOCK_INTERVAL` | No | Timesheet lock poll interval in ms (default `60000`) |
 | `GOOGLE_CLIENT_ID` | No | Google OAuth client ID — omit to disable "Sign in with Google" |
