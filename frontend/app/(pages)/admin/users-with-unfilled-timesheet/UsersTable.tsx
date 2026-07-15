@@ -62,7 +62,7 @@ export default function UsersTable({
 				{users.map((data) => (
 					<tr key={data.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
 						<td className="p-2 font-semibold text-blue-700 dark:text-blue-300 whitespace-nowrap border">
-							<Link href={`/dashboard/user/${data.user_id}`}>
+							<Link href={`/dashboard/user/detail?id=${data.user_id}`}>
 								{dashboardService.getFullName(data)}
 							</Link>
 						</td>

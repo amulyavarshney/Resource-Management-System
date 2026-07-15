@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import CardSettings from "./components/CardSettings";
 import CardProfile from "./components/CardProfile";
 import userService, { User } from "@/app/api/services/user";

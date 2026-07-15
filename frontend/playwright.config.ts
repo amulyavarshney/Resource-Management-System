@@ -31,15 +31,9 @@ export default defineConfig({
 				reuseExistingServer: !process.env.CI,
 				timeout: 120_000,
 				env: {
-					NEXTAUTH_URL: baseURL,
-					NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? "e2e-secret-not-for-production",
 					NEXT_PUBLIC_FRONTEND_URL: baseURL,
 					NEXT_PUBLIC_BACKEND_API:
 						process.env.NEXT_PUBLIC_BACKEND_API ?? "http://127.0.0.1:8000/api/v1",
-					BACKEND_API_URL:
-						process.env.BACKEND_API_URL ??
-						process.env.NEXT_PUBLIC_BACKEND_API ??
-						"http://127.0.0.1:8000/api/v1",
 				},
 		  },
 });

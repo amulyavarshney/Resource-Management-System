@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useDate } from "@/app/contexts/DateContext";
 import { useSearch } from "@/app/contexts/SearchContext";

@@ -2,7 +2,7 @@ FROM python:3.11-slim AS base
 
 WORKDIR /app
 
-# System deps for pyodbc (SQL Server) — remove if using PostgreSQL/MySQL
+# System deps for pyodbc (SQL Server). For Postgres-only (Render), use Dockerfile.render.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gnupg \
@@ -18,7 +18,7 @@ FROM base AS builder
 
 COPY pyproject.toml .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir .
+    && pip install --no-cache-dir ".[mssql]"
 
 # ── Runtime ──────────────────────────────────────────────────────────────────
 FROM base AS runtime

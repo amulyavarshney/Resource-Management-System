@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { Role } from "@/nextauth.d";
 import packageInfo from "@/package.json";
 import Navigator from "./Navigator";
@@ -15,7 +15,8 @@ export type NavItem = {
 const { name, version } = packageInfo;
 
 export default function Navbar() {
-	const path = usePathname();
+	const rawPath = usePathname() ?? "";
+	const path = rawPath.replace(/\/$/, "") || "/";
 	const { data: session } = useSession();
 
 	const navigation: NavItem[] = [

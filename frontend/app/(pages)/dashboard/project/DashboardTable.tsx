@@ -66,7 +66,7 @@ const DashboardTable = ({
 							{data.project_number}
 						</td>
 						<td className="px-3 py-2 text-left font-semibold text-blue-500 whitespace-nowrap border dark:border-gray-600">
-							<Link href={`project/${data.project_id}`}>{data.project_title}</Link>
+							<Link href={`/dashboard/project/detail?id=${data.project_id}`}>{data.project_title}</Link>
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">{data.total_int_users}</td>
 						<td className="px-3 py-2 border dark:border-gray-600">{data.total_ext_users}</td>

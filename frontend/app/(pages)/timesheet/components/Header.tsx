@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 import { useSearch } from "@/app/contexts/SearchContext";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import SearchBox from "@/app/components/SearchBox";
 import weeksList from "@/app/api/services/weeksList";
 import LeaveComponent from "./LeaveComponent";

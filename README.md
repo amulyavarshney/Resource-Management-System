@@ -6,7 +6,7 @@
 [![Open issues](https://img.shields.io/github/issues/amulyavarshney/Resource-Management-System)](https://github.com/amulyavarshney/Resource-Management-System/issues)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-A full-stack web application for tracking project progress and managing employee resources. It covers timesheet entry, leave and holiday management, interactive dashboards, and admin controls — all secured behind JWT-based authentication, with role-based access and Google sign-in built in.
+A full-stack web application for tracking project progress and managing employee resources. It covers timesheet entry, leave and holiday management, interactive dashboards, and admin controls — all secured behind JWT-based authentication and role-based access.
 
 If this project is useful to you, **star it** ⭐ — it helps others find it and lets you know when new features land. Found a rough edge? **Fork it**, fix it, and open a pull request; see [Contributing](#contributing) below.
 
@@ -27,38 +27,28 @@ this README stays focused on the big picture.
 ```mermaid
 flowchart LR
     subgraph Browser
-        UI[Next.js UI<br/>React components]
-    end
-
-    subgraph "Next.js Server (frontend)"
-        NextAuth["NextAuth.js<br/>Credentials + Google providers"]
-        Axios["Axios client<br/>attaches JWT to every request"]
+        UI[Next.js static UI<br/>React + client JWT auth]
+        Axios["Axios client<br/>Bearer JWT on every request"]
     end
 
     subgraph "FastAPI Server (backend)"
-        Routers["API routers<br/>auth · user · project · weekData<br/>dashboard · holiday · leave · lock"]
+        Routers["API routers<br/>auth · user · project · weekData<br/>dashboard · holiday · leave · lock · mail"]
         Deps["Dependencies<br/>JWT decode · role checks · self-or-admin"]
         Services["Services<br/>business logic"]
     end
 
-    DB[("SQL Server / PostgreSQL / MySQL")]
-    Google[("Google OAuth")]
+    DB[("PostgreSQL / SQL Server / MySQL")]
 
-    UI -->|"sign in"| NextAuth
+    UI -->|"sign in"| Axios
     UI -->|"page data"| Axios
-    NextAuth -->|"POST /auth/login or /auth/google<br/>(+ INTERNAL_AUTH_SECRET for Google)"| Routers
-    NextAuth <-.->|"OAuth consent"| Google
-    Axios -->|"Bearer JWT"| Routers
+    Axios -->|"POST /auth/login · Bearer JWT"| Routers
     Routers --> Deps
     Deps --> Services
     Services -->|"SQLAlchemy (async)"| DB
 ```
 
-Both servers run independently — the frontend never talks to the database
-directly, and the backend never talks to Google directly. The Next.js
-server is the only thing trusted to hold `INTERNAL_AUTH_SECRET`, so Google
-identities are always verified server-side before being exchanged for an
-app JWT.
+The static frontend talks only to the API. JWT tokens are stored in the browser
+(localStorage when “Remember me” is checked, otherwise sessionStorage).
 
 For the request/response and login-sequence diagrams, see
 [backend/README.md](backend/README.md#authentication-flow); for the
@@ -75,7 +65,7 @@ frontend's page map, see [frontend/README.md](frontend/README.md#pages).
 | Database | SQL Server / PostgreSQL / MySQL |
 | Frontend | Next.js 14 (App Router), React 18, TypeScript 5 |
 | Styling | Tailwind CSS 3 |
-| Auth | JWT Bearer (backend) · NextAuth.js 4 (frontend) |
+| Auth | JWT Bearer (backend) · client session storage (frontend) |
 | Containerisation | Docker |
 
 Full dependency lists: [backend/README.md](backend/README.md#technology) ·
@@ -90,7 +80,6 @@ Full dependency lists: [backend/README.md](backend/README.md#technology) ·
 - **Admin panel** — full CRUD for users, projects and holidays; bulk import from Excel; lock/unlock timesheets; consolidated reporting
 - **User profiles** — update personal details, change or remove password
 - **Role-based access** — Employee · Management · Executive · Admin · Developer
-- **Google sign-in** — alongside email/password, via NextAuth
 
 ## Getting Started
 
@@ -106,7 +95,7 @@ Full dependency lists: [backend/README.md](backend/README.md#technology) ·
 Full stack (SQL Server + API + Next.js UI) from the repo root:
 
 ```sh
-cp .env.example .env   # fill JWT_SECRET, NEXTAUTH_SECRET, DB_SA_PASSWORD
+cp .env.example .env   # fill JWT_SECRET, DB_SA_PASSWORD
                        # DATABASE_URL must use database `rms` (not `master`)
 docker compose up --build
 # UI:  http://localhost:3000
@@ -122,6 +111,31 @@ Frontend image alone: see [frontend/README.md § Docker](frontend/README.md#dock
 Production Docker runs `alembic upgrade head` before starting the API
 (`backend/entrypoint.sh`). Keep `APP_ENV=production` so tables are not
 auto-created via `create_all`.
+
+## Production deploy
+
+| Piece | Host |
+|-------|------|
+| Backend API | [Render](https://render.com) via [`render.yaml`](render.yaml) |
+| Frontend | https://amulyavarshney.github.io (static export) |
+
+### Backend (Render)
+
+1. In Render: **New → Blueprint** and select this repository (uses `render.yaml`).
+2. After the service is live, note the URL (e.g. `https://rms-api.onrender.com`).
+3. Optionally set ESB mail env vars in the Render dashboard.
+4. Ensure `ALLOWED_ORIGINS` includes `https://amulyavarshney.github.io`.
+
+### Frontend (GitHub Pages)
+
+1. Create (or use) the user site repo [`amulyavarshney/amulyavarshney.github.io`](https://github.com/amulyavarshney/amulyavarshney.github.io).
+2. In this repo’s **Settings → Secrets and variables → Actions**, add:
+   - `NEXT_PUBLIC_BACKEND_API` — e.g. `https://rms-api.onrender.com/api/v1`
+   - `PAGES_DEPLOY_TOKEN` — a PAT with `contents:write` on `amulyavarshney.github.io`
+3. Push to `main` (or run **Actions → Deploy GitHub Pages → Run workflow**).
+4. Site: https://amulyavarshney.github.io
+
+Auth is client-side JWT (browser storage). There is no Next.js server on Pages.
 
 ## CI
 

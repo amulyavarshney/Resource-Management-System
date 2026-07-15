@@ -142,6 +142,32 @@
         }
       }
     },
+    "/api/v1/user/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get Me",
+        "operationId": "get_me_api_v1_user_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/user": {
       "get": {
         "tags": [
@@ -3992,6 +4018,52 @@
         }
       }
     },
+    "/api/v1/mail": {
+      "post": {
+        "tags": [
+          "mail"
+        ],
+        "summary": "Send Mail",
+        "operationId": "send_mail_api_v1_mail_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MailSendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/health/live": {
       "get": {
         "tags": [
@@ -4462,6 +4534,11 @@
               }
             ],
             "title": "Password"
+          },
+          "remember": {
+            "type": "boolean",
+            "title": "Remember",
+            "default": false
           }
         },
         "type": "object",
@@ -4469,6 +4546,63 @@
           "email"
         ],
         "title": "LoginRequest"
+      },
+      "MailSendRequest": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Subject"
+          },
+          "messageBody": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Messagebody"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "Normal"
+          },
+          "recipients": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Recipients"
+          },
+          "cc": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cc"
+          },
+          "bcc": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Bcc"
+          },
+          "attachments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Attachments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject",
+          "messageBody",
+          "recipients"
+        ],
+        "title": "MailSendRequest"
       },
       "MessageResponse": {
         "properties": {

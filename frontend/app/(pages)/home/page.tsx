@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { Role } from "@/nextauth.d";
 import HolidaysThisMonth from "./HolidaysThisMonth";
 import packageInfo from "@/package.json";

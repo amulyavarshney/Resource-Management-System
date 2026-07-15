@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useDate } from "@/app/contexts/DateContext";
 import { Role } from "@/nextauth.d";
 import toast from "react-hot-toast";

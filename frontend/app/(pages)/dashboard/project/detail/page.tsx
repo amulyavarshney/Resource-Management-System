@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useDate } from "@/app/contexts/DateContext";
 import { Role } from "@/nextauth.d";
 import Link from "next/link";
@@ -11,28 +12,34 @@ import dashboardService, {
 } from "@/app/api/services/dashboard";
 import userService from "@/app/api/services/user";
 
-const ProjectDetail = ({ params }: { params: { id: number } }) => {
+function ProjectDetailInner() {
+	const searchParams = useSearchParams();
+	const id = Number(searchParams.get("id"));
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState<ProjectDashboardViewModel>();
 	const { year, month } = useDate();
 
 	useEffect(() => {
+		if (!Number.isFinite(id) || id <= 0) {
+			setLoading(false);
+			return;
+		}
 		const fetchData = async () => {
-			const res = await dashboardService.getProjectDashboardById(
-				year,
-				month,
-				params.id
-			);
+			const res = await dashboardService.getProjectDashboardById(year, month, id);
 			setData(res);
 			setLoading(false);
 		};
 
 		fetchData();
-	}, [year, month, params.id]);
+	}, [year, month, id]);
 
 	if (loading) {
 		return <Loading />;
+	}
+
+	if (!Number.isFinite(id) || id <= 0) {
+		return <Unauthorized />;
 	}
 
 	if (session?.user?.role === Role.Employee) {
@@ -97,7 +104,7 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 							)}
 							<div className="p-3">
 								<div className="font-bold text-xl text-indigo-500">
-									<Link href={`../user/${value.id}`}>
+									<Link href={`/dashboard/user/detail?id=${value.id}`}>
 										{userService.getFullName(value)}
 									</Link>
 								</div>
@@ -120,7 +127,8 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 										"week5_hours",
 									].map(
 										(week, index) =>
-											(value[week as keyof typeof value] as number | null) !== null && (
+											(value[week as keyof typeof value] as number | null) !==
+												null && (
 												<div key={index}>
 													<div className="flex flex-col items-center justify-center w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-500 to-gray-150 border border-gray-400 dark:border-gray-600 rounded sm:rounded-full shadow-lg">
 														<div className="font-bold text-lg">
@@ -157,6 +165,12 @@ const ProjectDetail = ({ params }: { params: { id: number } }) => {
 			</div>
 		)
 	);
-};
+}
 
-export default ProjectDetail;
+export default function ProjectDetail() {
+	return (
+		<Suspense fallback={<Loading />}>
+			<ProjectDetailInner />
+		</Suspense>
+	);
+}

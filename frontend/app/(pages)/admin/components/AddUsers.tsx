@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { Department, Region, Role, ROLE_NAMES } from "@/nextauth.d";
 import userService, {
 	User,

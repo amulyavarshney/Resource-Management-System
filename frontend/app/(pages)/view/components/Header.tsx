@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import SearchBox from "@/app/components/SearchBox";
 import { useSearch } from "@/app/contexts/SearchContext";
 import YearMonthPicker from "@/app/components/YearMonthPicker";

@@ -3,7 +3,7 @@ import { Week } from "@/app/api/services/weeksList";
 import { TimesheetRow } from "@/app/api/services/weekData";
 import leaveService, { Leave } from "@/app/api/services/leave";
 import { useDate } from "@/app/contexts/DateContext";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import SortImage from "@/app/components/SortImage";
 import { getClassName } from "@/app/components/Legend";
 

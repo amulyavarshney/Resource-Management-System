@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/user/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Me */
+        get: operations["get_me_api_v1_user_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/user": {
         parameters: {
             query?: never;
@@ -872,6 +889,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/mail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Mail */
+        post: operations["send_mail_api_v1_mail_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health/live": {
         parameters: {
             query?: never;
@@ -1068,6 +1102,31 @@ export interface components {
             email: string;
             /** Password */
             password?: string | null;
+            /**
+             * Remember
+             * @default false
+             */
+            remember: boolean;
+        };
+        /** MailSendRequest */
+        MailSendRequest: {
+            /** Subject */
+            subject: string;
+            /** Messagebody */
+            messageBody: string;
+            /**
+             * Priority
+             * @default Normal
+             */
+            priority: string;
+            /** Recipients */
+            recipients: string[];
+            /** Cc */
+            cc?: string[];
+            /** Bcc */
+            bcc?: string[];
+            /** Attachments */
+            attachments?: string[];
         };
         /** MessageResponse */
         MessageResponse: {
@@ -1480,6 +1539,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_me_api_v1_user_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
         };
@@ -3511,6 +3590,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FavouritesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_mail_api_v1_mail_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MailSendRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
                 };
             };
             /** @description Validation Error */

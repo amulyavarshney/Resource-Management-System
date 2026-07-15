@@ -14,7 +14,7 @@ import userService, {
 import ChangePassword from "./ChangePassword";
 import RemovePassword from "./RemovePassword";
 import { sortUsers } from "@/app/api/services/utils";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 
 type CardSettingsProps = {
 	user: User;

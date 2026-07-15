@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import SelectMenu from "@/app/components/SelectMenu";
 import holidayService, { Holiday } from "@/app/api/services/holiday";
 import weeksList from "@/app/api/services/weeksList";

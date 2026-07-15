@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { signOut } from "@/app/contexts/AuthContext";
 import { NavItem } from "./Navbar";
 import UserPopover from "./UserPopover";
 
@@ -11,7 +12,6 @@ type NavigatorProps = {
 };
 
 export default function Navigator({ navigation }: NavigatorProps) {
-	const router = useRouter();
 	const pathname = usePathname();
 	const [isNavVisible, setNavVisible] = useState<boolean>(false);
 	const [isDropdown, setDropdown] = useState<boolean>(false);
@@ -33,11 +33,11 @@ export default function Navigator({ navigation }: NavigatorProps) {
 
 	return (
 		<div className="flex">
-			{pathname === "/profile" ? (
+			{pathname === "/profile" || pathname === "/profile/" ? (
 				<button
 					className="invisible sm:visible absolute top-4 right-0 text-indigo-600 hover:text-indigo-800 dark:text-white dark:hover:text-gray-200 px-3 py-2 text-sm font-medium cursor-pointer"
 					onClick={() => {
-						router.push("/api/auth/signout");
+						void signOut({ callbackUrl: "/auth" });
 					}}
 				>
 					Sign Out
@@ -83,7 +83,7 @@ export default function Navigator({ navigation }: NavigatorProps) {
 							<button
 								className="text-indigo-600 hover:text-indigo-800 dark:text-white dark:hover:text-gray-200 text-sm font-medium cursor-pointer"
 								onClick={() => {
-									router.push("/api/auth/signout");
+									void signOut({ callbackUrl: "/auth" });
 								}}
 							>
 								Sign Out
@@ -126,7 +126,7 @@ export default function Navigator({ navigation }: NavigatorProps) {
 							<button
 								className="text-indigo-600 hover:text-indigo-800 dark:text-white dark:hover:text-gray-200 text-sm font-medium cursor-pointer"
 								onClick={() => {
-									router.push("/api/auth/signout");
+									void signOut({ callbackUrl: "/auth" });
 								}}
 							>
 								Sign Out

@@ -10,7 +10,7 @@ Next.js 14 web application for the Resource Management System. Provides the comp
 | React | 18.3 |
 | TypeScript | 5.1 |
 | Tailwind CSS | 3.3 |
-| NextAuth.js | 4.22 |
+| Client JWT auth | — |
 | Axios | 1.4 |
 | react-hot-toast | 2.4 |
 | xlsx-js-style | 1.2 |
@@ -28,16 +28,16 @@ frontend/
 │   │   ├── timesheet/               # Timesheet entry
 │   │   ├── view/                    # View past timesheets
 │   │   ├── dashboard/               # Analytics dashboards
-│   │   │   ├── project/[id]/
-│   │   │   └── user/[id]/
+│   │   │   ├── project/detail/
+│   │   │   └── user/detail/
 │   │   ├── profile/                 # User profile and settings
 │   │   ├── admin/                   # Admin panel
 │   │   │   └── users-with-unfilled-timesheet/
 │   │   └── holidays/                # Holiday list
 │   ├── auth/                        # Public auth pages (login, register)
 │   ├── api/
-│   │   ├── auth/[...nextauth]/      # NextAuth route handler
-│   │   ├── mail/                    # Server-side ESB mail proxy
+│   │   ├── services/                # Axios API clients
+│   │   └── generated/               # OpenAPI TypeScript types
 │   │   ├── services/                # Typed Axios API clients
 │   │   └── generated/               # OpenAPI-generated types
 │   ├── components/                  # Shared UI components
@@ -95,11 +95,7 @@ docker build -t rms-frontend \
   --build-arg NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000 \
   .
 
-docker run --rm -p 3000:3000 \
-  -e NEXTAUTH_URL=http://localhost:3000 \
-  -e NEXTAUTH_SECRET=replace-me \
-  -e BACKEND_API_URL=http://host.docker.internal:8000/api/v1 \
-  rms-frontend
+docker run --rm -p 3000:3000 rms-frontend
 ```
 
 For API + DB + UI together, use the root `docker-compose.yml`.
@@ -110,53 +106,35 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXTAUTH_URL` | Yes | Canonical URL of this app (e.g. `http://localhost:3000`) |
-| `NEXTAUTH_SECRET` | Yes | Secret for signing NextAuth JWTs — generate with `openssl rand -base64 32` |
 | `NEXT_PUBLIC_FRONTEND_URL` | Yes | Public base URL of this app |
 | `NEXT_PUBLIC_BACKEND_API` | Yes | Backend API base URL for the **browser** (e.g. `http://localhost:8000/api/v1`) |
-| `BACKEND_API_URL` | No | Server-side API base URL (Docker internal hostname). Falls back to `NEXT_PUBLIC_BACKEND_API` |
 | `NEXT_PUBLIC_ALLOW_SELF_REGISTRATION` | No | Set `false` to hide Register and match backend `ALLOW_SELF_REGISTRATION=false` |
 | `NEXT_PUBLIC_CONTACT_SUPPORT` | No | Support link on Unauthorized pages (e.g. `mailto:…`); hidden when unset |
 | `NEXT_PUBLIC_MAX_HOURS` | No | Default work hours per day (default `8`) |
 | `NEXT_PUBLIC_FETCH_LOCK_INTERVAL` | No | Timesheet lock poll interval in ms (default `60000`) |
-| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID — omit to disable "Sign in with Google" |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
-| `INTERNAL_AUTH_SECRET` | Only if using Google sign-in | Shared secret with the backend's `INTERNAL_AUTH_SECRET`, used for the server-to-server `POST /auth/google` exchange. Server-side only — never exposed to the browser. |
-| `ESB_API_URL` | Only if sending mail | ESB mail API URL (server-side only; used by `POST /api/mail`) |
-| `ESB_SUB_KEY` | Only if sending mail | ESB subscription key (**never** `NEXT_PUBLIC_*`) |
-| `ESB_MAIL_FROM` / `ESB_MAIL_SENDER` / `ESB_MAIL_REPLYTO` | Only if sending mail | Envelope fields for outbound mail |
-| `ESB_CALLBACK_POSITIVE_URL` / `ESB_CALLBACK_NEGATIVE_URL` | Only if sending mail | ESB callback URLs |
 
-`POST /api/mail` only allows sending to the authenticated user's own email address (no open relay).
+Mail is sent via the backend `POST /api/v1/mail` endpoint (ESB env vars on the API host).
 
 ## Authentication
 
-Authentication is handled by [NextAuth.js](https://next-auth.js.org/) with two providers:
+Auth is **client-side JWT** (no NextAuth / no Next.js API routes):
 
-- **Credentials** — calls `POST /api/v1/auth/login` on the backend. On success the JWT from the backend is stored in the NextAuth session and attached to every subsequent API request via Axios.
-- **Google** — NextAuth's built-in Google provider verifies the identity, then the Next.js server (never the browser) exchanges it for a backend JWT via `POST /api/v1/auth/google`, authenticated with a shared `INTERNAL_AUTH_SECRET` header. New Google sign-ins are created as `Employee`-role accounts; if the email matches an existing account, it's linked.
+1. Login calls `POST /api/v1/auth/login` and stores the token + profile in `localStorage` (Remember me) or `sessionStorage`.
+2. Axios attaches `Authorization: Bearer <token>` from storage on every request.
+3. Mail goes to `POST /api/v1/mail` on the backend (ESB secrets stay on Render).
 
-Self-registration (`/auth`, "Register Now") always creates an `Employee`-role account — there is no client-controllable way to self-serve into a privileged role. Password resets go through an Admin (no self-service "forgot password" flow).
-
-The session token carries: `id`, `email`, `role`, `department`, `region`, `empId`, `firstName`, `lastName`, `parentId`, `workHoursPerDay`.
-
-For the full login sequence (Credentials and Google, including the
-`INTERNAL_AUTH_SECRET` exchange), see
-[backend/README.md](../backend/README.md#authentication-flow). The
-frontend-specific half of the picture — how a page gets from render to an
-authenticated backend call — looks like this:
+Self-registration always creates an `Employee` account. Password resets go through an Admin.
 
 ```mermaid
 flowchart TD
-    A["Page component renders<br/>(e.g. /timesheet)"] --> B["calls a service in<br/>app/api/services/*.ts"]
-    B --> C["httpInstance.ts request interceptor"]
-    C --> D{"typeof window<br/>!== 'undefined'?"}
-    D -- "yes (browser)" --> E["getSession() from next-auth/react"]
-    E --> F["read session.user.backendToken"]
-    F --> G["set Authorization: Bearer &lt;token&gt;"]
-    G --> H["axios sends request to<br/>NEXT_PUBLIC_BACKEND_API"]
-    D -- "no (server render)" --> H
+    A["Page component renders"] --> B["app/api/services/*.ts"]
+    B --> C["httpInstance interceptor"]
+    C --> D["read token from browser storage"]
+    D --> E["Authorization: Bearer token"]
+    E --> F["NEXT_PUBLIC_BACKEND_API"]
 ```
+
+For GitHub Pages static export, set `STATIC_EXPORT=true` (see root README deploy section).
 
 Every service file wraps one backend resource, so a component never talks
 to Axios directly — it calls e.g. `weekDataService.getWorkHours(...)`,
@@ -216,7 +194,8 @@ convenience).
 | `/dashboard/project` | Management, Executive, Admin, Developer | Per-project dashboards |
 | `/dashboard/project/[id]` | Management, Executive, Admin, Developer | Single project detail with user breakdown |
 | `/dashboard/user` | Management, Executive, Admin, Developer | Per-user dashboards |
-| `/dashboard/user/[id]` | Management, Executive, Admin, Developer | Single user detail with project breakdown |
+| `/dashboard/user/detail?id=` | Management, Executive, Admin, Developer | Single user detail with project breakdown |
+| `/dashboard/project/detail?id=` | Management, Executive, Admin, Developer | Single project detail with user breakdown |
 | `/holidays` | All roles | Holiday calendar for the year |
 | `/profile` | All roles | Edit profile details and password |
 | `/admin` | Admin, Developer | User/project/holiday management, Excel import, timesheet lock |
@@ -227,7 +206,7 @@ Global state uses React Context — no external state library.
 
 | Context | Hook | State |
 |---------|------|-------|
-| `AuthContext` | (wraps NextAuth `SessionProvider`) | Session |
+| `AuthContext` | `useSession()` | Client JWT session (browser storage) |
 | `DateContext` | `useDate()` | `year`, `month` — current selected period |
 | `SearchContext` | `useSearch()` | `search` — table filter string |
 | `SettingsContext` | `useSettings()` | `showFavourites` — toggle favourite projects only |
@@ -249,7 +228,7 @@ All backend calls go through typed Axios clients in `app/api/services/`. Each fi
 | `dashboard.ts` | `dashboardService` | `getDashboard`, `getProjectDashboard`, `getProjectDashboardById`, `getUserDashboard`, `getUsersWithUnfilledTimesheet` |
 | `lock.ts` | `lockService` | `getLock`, `setLock` |
 | `userPreferences.ts` | `userPreferencesService` | `getFavourites`, `addFavourite`, `removeFavourite`, `replaceFavourites` |
-| `mail.ts` | `mailService` | `send` (via `/api/mail` proxy) |
+| `mail.ts` | `mailService` | `send` (via backend `/mail`) |
 | `weeksList.ts` | `weeksList` | `getWeeksInMonth`, `getMonthName`, `getDayName` |
 | `utils.ts` | helpers | `sortProjects`, `sortUsers` |
 

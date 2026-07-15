@@ -1,4 +1,4 @@
-import axios from "axios";
+import http from "./httpInstance";
 
 export type MailSendRequest = {
 	subject: string;
@@ -11,10 +11,7 @@ export type MailSendRequest = {
 };
 
 class MailService {
-	/**
-	 * Send mail via the Next.js `/api/mail` proxy so ESB credentials stay
-	 * server-side (never NEXT_PUBLIC_* in the browser bundle).
-	 */
+	/** Send mail via the backend ESB proxy (credentials stay on the API host). */
 	async send(
 		subject: string,
 		messageBody: string,
@@ -34,7 +31,7 @@ class MailService {
 			attachments,
 		};
 
-		await axios.post("/api/mail", body);
+		await http.post("/mail", body);
 	}
 }
 

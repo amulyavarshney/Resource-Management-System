@@ -200,5 +200,10 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Vim temporary swap files
-*.swp
+# Claude / local agent junk
+.claude/
+
+# Local SQLite / Playwright artifacts
+backend/e2e.db
+frontend/test-results/
+frontend/playwright-report/

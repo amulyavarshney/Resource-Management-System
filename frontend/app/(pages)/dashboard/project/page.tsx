@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useDate } from "@/app/contexts/DateContext";
 import { useSearch } from "@/app/contexts/SearchContext";
 import { Role } from "@/nextauth.d";

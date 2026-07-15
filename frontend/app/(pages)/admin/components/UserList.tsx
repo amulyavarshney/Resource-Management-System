@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import dashboardService, {
 	UserDashboardViewModel,
 } from "@/app/api/services/dashboard";

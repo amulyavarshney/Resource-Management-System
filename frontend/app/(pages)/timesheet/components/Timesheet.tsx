@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import lockService from "@/app/api/services/lock";

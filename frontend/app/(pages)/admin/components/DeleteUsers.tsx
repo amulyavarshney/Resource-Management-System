@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import toast from "react-hot-toast";
 import userService, { User } from "@/app/api/services/user";
 import { sortUsers } from "@/app/api/services/utils";

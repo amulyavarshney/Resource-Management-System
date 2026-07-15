@@ -111,7 +111,7 @@ const DashboardTable = ({
 				{userData.map((data) => (
 					<tr key={data.user_id} className="text-center whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
 						<td className="px-3 py-2 text-left font-semibold text-blue-500 whitespace-nowrap border dark:border-gray-600">
-							<Link href={`user/${data.user_id}`}>{dashboardService.getFullName(data)}</Link>
+							<Link href={`/dashboard/user/detail?id=${data.user_id}`}>{dashboardService.getFullName(data)}</Link>
 						</td>
 						<td className="px-3 py-2 border dark:border-gray-600">
 							{data.is_external ? "EXT" : "FTE"}

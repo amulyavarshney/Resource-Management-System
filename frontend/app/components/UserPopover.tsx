@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 
 export default function UserPopover() {

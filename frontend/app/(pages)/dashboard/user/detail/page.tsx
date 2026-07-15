@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useDate } from "@/app/contexts/DateContext";
 import { Role } from "@/nextauth.d";
 import Link from "next/link";
@@ -12,7 +13,9 @@ import dashboardService, {
 } from "@/app/api/services/dashboard";
 import weeksList, { Week } from "@/app/api/services/weeksList";
 
-const UserDetail = ({ params }: { params: { id: number } }) => {
+function UserDetailInner() {
+	const searchParams = useSearchParams();
+	const id = Number(searchParams.get("id"));
 	const { data: session } = useSession();
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState<UserDashboardViewModel>();
@@ -36,24 +39,28 @@ const UserDetail = ({ params }: { params: { id: number } }) => {
 			}
 		};
 		loadWeeks();
-	}, [year, month]);
+	}, [year, month, session?.user.id]);
 
 	useEffect(() => {
+		if (!Number.isFinite(id) || id <= 0) {
+			setLoading(false);
+			return;
+		}
 		const fetchData = async () => {
-			const res = await dashboardService.getUserDashboardById(
-				year,
-				month,
-				params.id
-			);
+			const res = await dashboardService.getUserDashboardById(year, month, id);
 			setData(res);
 			setLoading(false);
 		};
 
 		fetchData();
-	}, [year, month, params.id]);
+	}, [year, month, id]);
 
 	if (loading) {
 		return <Loading />;
+	}
+
+	if (!Number.isFinite(id) || id <= 0) {
+		return <Unauthorized />;
 	}
 
 	if (session?.user?.role === Role.Employee) {
@@ -125,7 +132,9 @@ const UserDetail = ({ params }: { params: { id: number } }) => {
 									{value.number}
 								</div>
 								<div className="font-bold text-xl text-indigo-500">
-									<Link href={`../project/${value.id}`}>{value.title}</Link>
+									<Link href={`/dashboard/project/detail?id=${value.id}`}>
+										{value.title}
+									</Link>
 								</div>
 								<div className="flex justify-center py-2">
 									<div className="flex-col">
@@ -144,6 +153,12 @@ const UserDetail = ({ params }: { params: { id: number } }) => {
 			</div>
 		)
 	);
-};
+}
 
-export default UserDetail;
+export default function UserDetail() {
+	return (
+		<Suspense fallback={<Loading />}>
+			<UserDetailInner />
+		</Suspense>
+	);
+}

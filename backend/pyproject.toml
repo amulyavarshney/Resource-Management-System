@@ -11,10 +11,7 @@ dependencies = [
     "fastapi[standard]>=0.115",
     "uvicorn[standard]>=0.30",
     "sqlalchemy[asyncio]>=2.0",
-    "aiomysql>=0.2",            # MySQL
-    "asyncpg>=0.29",            # PostgreSQL (optional dialect; use postgresql+asyncpg://)
-    "pyodbc>=5.1",              # SQL Server via ODBC
-    "aioodbc>=0.5",             # async SQL Server
+    "asyncpg>=0.29",            # PostgreSQL (Render default)
     "alembic>=1.13",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
@@ -24,10 +21,17 @@ dependencies = [
     "structlog>=24.1",
     "slowapi>=0.1",             # rate limiting
     "prometheus-client>=0.20",  # /metrics scrape endpoint
-    "httpx>=0.27",              # for health checks / tests
+    "httpx>=0.27",              # health checks, mail proxy, tests
 ]
 
 [project.optional-dependencies]
+mssql = [
+    "pyodbc>=5.1",
+    "aioodbc>=0.5",
+]
+mysql = [
+    "aiomysql>=0.2",
+]
 dev = [
     "pytest>=8",
     "pytest-asyncio>=0.23",

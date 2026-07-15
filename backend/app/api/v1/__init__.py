@@ -6,6 +6,7 @@ from app.api.v1.routers import (
     holidays,
     leaves,
     lock,
+    mail,
     preferences,
     projects,
     users,
@@ -23,3 +24,4 @@ router.include_router(holidays.router)
 router.include_router(leaves.router)
 router.include_router(lock.router)
 router.include_router(preferences.router)
+router.include_router(mail.router)

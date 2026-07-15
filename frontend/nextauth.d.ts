@@ -23,25 +23,3 @@ export enum Role {
 export const ROLE_NAMES = Object.keys(Role).filter((key) =>
 	Number.isNaN(Number(key))
 ) as Array<keyof typeof Role>;
-
-declare module "next-auth" {
-	interface User {
-		id: number;
-		department: Department;
-		region: Region;
-		role: Role;
-	}
-
-	interface Session extends DefaultSession {
-		user: User;
-	}
-}
-
-declare module "next-auth/jwt" {
-	interface JWT {
-		id: number;
-		department: Department;
-		region: Region;
-		role: Role;
-	}
-}

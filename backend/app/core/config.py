@@ -13,8 +13,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS512"
     jwt_expire_hours: int = 2
 
-    # Shared secret with the Next.js server, used to authenticate the
-    # server-to-server POST /auth/google exchange (see AuthService.google_login).
+    # Optional: server-to-server Google exchange (not used by the static Pages UI).
     internal_auth_secret: str = ""
 
     # Defaults applied when a first-time Google sign-in creates a user.
@@ -23,7 +22,11 @@ class Settings(BaseSettings):
     google_default_region: int = 1
 
     # Accept either a JSON array or a comma-separated string from the env file
-    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    allowed_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://amulyavarshney.github.io",
+    ]
 
     app_env: str = "development"
     log_level: str = "info"
@@ -33,6 +36,27 @@ class Settings(BaseSettings):
     allow_self_registration: bool = True
     # JWT lifetime when login is requested with remember=true (hours).
     jwt_remember_expire_hours: int = 24 * 14
+
+    # ESB mail proxy (optional — POST /api/v1/mail returns 503 when unset)
+    esb_api_url: str = ""
+    esb_sub_key: str = ""
+    esb_mail_from: str = ""
+    esb_mail_sender: str = ""
+    esb_mail_replyto: str = ""
+    esb_callback_positive_url: str = ""
+    esb_callback_negative_url: str = ""
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: Any) -> Any:
+        """Render/Heroku often provide postgres:// — SQLAlchemy needs asyncpg."""
+        if not isinstance(v, str):
+            return v
+        if v.startswith("postgres://"):
+            return "postgresql+asyncpg://" + v[len("postgres://") :]
+        if v.startswith("postgresql://") and "+asyncpg" not in v:
+            return "postgresql+asyncpg://" + v[len("postgresql://") :]
+        return v
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

@@ -5,7 +5,7 @@ import holidayService, {
 	HolidayType,
 	HOLIDAY_TYPE_NAMES,
 } from "@/app/api/services/holiday";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 
 export default function AddHolidays() {
 	const { data: session } = useSession();

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useDate } from "@/app/contexts/DateContext";
 import { Role } from "@/nextauth.d";
 import Unauthorized from "@/app/components/Unauthorized";

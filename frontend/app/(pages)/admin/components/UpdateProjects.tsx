@@ -1,5 +1,5 @@
 import { useState, useEffect, ChangeEvent } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { Department, Region } from "@/nextauth.d";
 import toast from "react-hot-toast";
 import projectService, {

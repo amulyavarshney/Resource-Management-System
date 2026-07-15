@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import LeaveForm from "./LeaveForm";
 import leaveService, { Leave } from "@/app/api/services/leave";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/app/contexts/AuthContext";
 import { useWeeks } from "@/app/contexts/WeeksContext";
 import { getClassName } from "@/app/components/Legend";
 
