@@ -123,7 +123,7 @@ auto-created via `create_all`.
 
 1. In Render: **New → Blueprint** and select this repository (uses `render.yaml`).
 2. After the service is live, note the URL (e.g. `https://rms-api.onrender.com`).
-3. Optionally set ESB mail env vars in the Render dashboard.
+3. Optionally set SMTP mail env vars (`SMTP_HOST`, `SMTP_FROM`, …) in the Render dashboard.
 4. Ensure `ALLOWED_ORIGINS` includes `https://amulyavarshney.github.io`.
 
 ### Frontend (GitHub Pages)

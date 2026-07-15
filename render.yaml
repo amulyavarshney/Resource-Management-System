@@ -42,18 +42,22 @@ services:
         value: '["https://amulyavarshney.github.io","http://localhost:3000"]'
       - key: UVICORN_WORKERS
         value: "2"
-      # Optional ESB mail — set in the Render dashboard if needed
-      - key: ESB_API_URL
+      # Optional SMTP — set in the Render dashboard if timesheet mail is needed
+      - key: SMTP_HOST
         sync: false
-      - key: ESB_SUB_KEY
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
         sync: false
-      - key: ESB_MAIL_FROM
+      - key: SMTP_PASSWORD
         sync: false
-      - key: ESB_MAIL_SENDER
+      - key: SMTP_FROM
         sync: false
-      - key: ESB_MAIL_REPLYTO
+      - key: SMTP_FROM_NAME
+        value: Resource Management System
+      - key: SMTP_REPLY_TO
         sync: false
-      - key: ESB_CALLBACK_POSITIVE_URL
-        sync: false
-      - key: ESB_CALLBACK_NEGATIVE_URL
-        sync: false
+      - key: SMTP_STARTTLS
+        value: "true"
+      - key: SMTP_SSL
+        value: "false"

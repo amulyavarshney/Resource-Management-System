@@ -179,6 +179,15 @@ For the full stack including the Next.js UI, use the root `docker-compose.yml`.
 | `APP_ENV` | No | `development` | `development` enables Swagger UI |
 | `LOG_LEVEL` | No | `info` | structlog level |
 | `RATE_LIMIT_ENABLED` | No | `true` | Rate-limit `/auth/login` (10/min), `/auth/register` (5/min), `/auth/google` (30/min) |
+| `ALLOW_SELF_REGISTRATION` | No | `true` | When `false`, `POST /auth/register` returns 403 |
+| `SMTP_HOST` | Only if sending mail | — | SMTP server hostname (`POST /api/v1/mail` returns 503 when unset) |
+| `SMTP_PORT` | No | `587` | SMTP port (`465` with `SMTP_SSL=true` for implicit TLS) |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | Usually yes | — | SMTP auth credentials |
+| `SMTP_FROM` | Only if sending mail | — | Envelope/from address |
+| `SMTP_FROM_NAME` | No | `Resource Management System` | Display name on From |
+| `SMTP_REPLY_TO` | No | — | Optional Reply-To header |
+| `SMTP_STARTTLS` | No | `true` | STARTTLS (typical for port 587) |
+| `SMTP_SSL` | No | `false` | Implicit TLS (typical for port 465; set `SMTP_STARTTLS=false`) |
 
 ## Database Migrations
 

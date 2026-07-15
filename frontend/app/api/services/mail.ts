@@ -11,7 +11,7 @@ export type MailSendRequest = {
 };
 
 class MailService {
-	/** Send mail via the backend ESB proxy (credentials stay on the API host). */
+	/** Send mail via the backend SMTP endpoint (credentials stay on the API host). */
 	async send(
 		subject: string,
 		messageBody: string,

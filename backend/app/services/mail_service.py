@@ -1,4 +1,9 @@
-import httpx
+import base64
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import aiosmtplib
 
 from app.core.config import Settings
 from app.core.exceptions import DomainInvariantException, OperationNotSupportedException
@@ -12,8 +17,11 @@ class MailService:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
+    def _configured(self) -> bool:
+        return bool(self._settings.smtp_host and self._settings.smtp_from)
+
     async def send(self, body: MailSendRequest, session_email: str) -> None:
-        if not self._settings.esb_api_url or not self._settings.esb_sub_key:
+        if not self._configured():
             raise OperationNotSupportedException("Mail service is not configured")
 
         session_email = session_email.strip().lower()
@@ -33,43 +41,52 @@ class MailService:
         if any(len(a) > MAX_ATTACHMENT_CHARS for a in body.attachments):
             raise DomainInvariantException("Attachment too large")
 
-        payload = {
-            "Subject": body.subject,
-            "MessageBody": body.message_body,
-            "Priority": body.priority or "Normal",
-            "Recipients": recipients,
-            "CC": cc,
-            "BCC": bcc,
-            "From": self._settings.esb_mail_from,
-            "Sender": self._settings.esb_mail_sender,
-            "ReplyTo": self._settings.esb_mail_replyto,
-            "ErrorReportDetails": False,
-            "SaveAttachmentsExternal": False,
-            "Attachments": body.attachments,
-            "Callback": {
-                "positiveMethod": "Post",
-                "positiveUrl": self._settings.esb_callback_positive_url,
-                "positiveHeaders": [],
-                "negativeMethod": "Get",
-                "negativeUrl": self._settings.esb_callback_negative_url,
-                "negativeHeaders": [],
-            },
-        }
+        message = MIMEMultipart("mixed")
+        from_addr = self._settings.smtp_from
+        from_name = self._settings.smtp_from_name.strip()
+        message["From"] = f"{from_name} <{from_addr}>" if from_name else from_addr
+        message["To"] = ", ".join(recipients)
+        if cc:
+            message["Cc"] = ", ".join(cc)
+        message["Subject"] = body.subject
+        if self._settings.smtp_reply_to:
+            message["Reply-To"] = self._settings.smtp_reply_to
 
+        # Timesheet mail bodies are HTML
+        message.attach(MIMEText(body.message_body, "html", "utf-8"))
+
+        for index, raw in enumerate(body.attachments):
+            data = raw
+            if "," in data and data.lower().startswith("data:"):
+                data = data.split(",", 1)[1]
+            try:
+                payload = base64.b64decode(data, validate=False)
+            except Exception as exc:
+                raise DomainInvariantException("Invalid attachment encoding") from exc
+            part = MIMEApplication(
+                payload,
+                Name=f"attachment-{index + 1}.xlsx",
+            )
+            part["Content-Disposition"] = (
+                f'attachment; filename="attachment-{index + 1}.xlsx"'
+            )
+            message.attach(part)
+
+        envelope_to = list(dict.fromkeys([*recipients, *cc, *bcc]))
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    self._settings.esb_api_url,
-                    headers={
-                        "Content-Type": "application/json",
-                        "Cache-Control": "no-cache",
-                        "EsbApi-Subscription-Key": self._settings.esb_sub_key,
-                    },
-                    json=payload,
-                )
-        except httpx.HTTPError as exc:
+            await aiosmtplib.send(
+                message,
+                hostname=self._settings.smtp_host,
+                port=self._settings.smtp_port,
+                username=self._settings.smtp_username or None,
+                password=self._settings.smtp_password or None,
+                sender=from_addr,
+                recipients=envelope_to,
+                start_tls=self._settings.smtp_starttls,
+                use_tls=self._settings.smtp_ssl,
+                timeout=30.0,
+            )
+        except aiosmtplib.SMTPException as exc:
             raise OperationNotSupportedException("Failed to send mail") from exc
-
-        if response.status_code >= 400:
-            detail = response.text or "ESB mail request failed"
-            raise OperationNotSupportedException(detail)
+        except OSError as exc:
+            raise OperationNotSupportedException("Failed to send mail") from exc

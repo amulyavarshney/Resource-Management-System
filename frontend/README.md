@@ -113,7 +113,7 @@ Create `.env.local` for local overrides (not committed). The committed `.env.dev
 | `NEXT_PUBLIC_MAX_HOURS` | No | Default work hours per day (default `8`) |
 | `NEXT_PUBLIC_FETCH_LOCK_INTERVAL` | No | Timesheet lock poll interval in ms (default `60000`) |
 
-Mail is sent via the backend `POST /api/v1/mail` endpoint (ESB env vars on the API host).
+Mail is sent via the backend `POST /api/v1/mail` endpoint (SMTP env vars on the API host).
 
 ## Authentication
 
@@ -121,7 +121,7 @@ Auth is **client-side JWT** (no NextAuth / no Next.js API routes):
 
 1. Login calls `POST /api/v1/auth/login` and stores the token + profile in `localStorage` (Remember me) or `sessionStorage`.
 2. Axios attaches `Authorization: Bearer <token>` from storage on every request.
-3. Mail goes to `POST /api/v1/mail` on the backend (ESB secrets stay on Render).
+3. Mail goes to `POST /api/v1/mail` on the backend (SMTP credentials stay on Render).
 
 Self-registration always creates an `Employee` account. Password resets go through an Admin.
 

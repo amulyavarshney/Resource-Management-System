@@ -37,14 +37,17 @@ class Settings(BaseSettings):
     # JWT lifetime when login is requested with remember=true (hours).
     jwt_remember_expire_hours: int = 24 * 14
 
-    # ESB mail proxy (optional — POST /api/v1/mail returns 503 when unset)
-    esb_api_url: str = ""
-    esb_sub_key: str = ""
-    esb_mail_from: str = ""
-    esb_mail_sender: str = ""
-    esb_mail_replyto: str = ""
-    esb_callback_positive_url: str = ""
-    esb_callback_negative_url: str = ""
+    # SMTP mail (optional — POST /api/v1/mail returns 503 when host/from unset)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_from_name: str = "Resource Management System"
+    smtp_reply_to: str = ""
+    # STARTTLS on 587 (default). For implicit SSL (465) set SMTP_SSL=true and SMTP_STARTTLS=false.
+    smtp_starttls: bool = True
+    smtp_ssl: bool = False
 
     @field_validator("database_url", mode="before")
     @classmethod

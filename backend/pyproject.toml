@@ -21,7 +21,8 @@ dependencies = [
     "structlog>=24.1",
     "slowapi>=0.1",             # rate limiting
     "prometheus-client>=0.20",  # /metrics scrape endpoint
-    "httpx>=0.27",              # health checks, mail proxy, tests
+    "httpx>=0.27",              # health checks / tests
+    "aiosmtplib>=3.0",          # SMTP mail (POST /api/v1/mail)
 ]
 
 [project.optional-dependencies]
