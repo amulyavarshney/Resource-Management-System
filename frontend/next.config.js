@@ -2,6 +2,7 @@
 
 const isDev = process.env.NODE_ENV === "development";
 const isStaticExport = process.env.STATIC_EXPORT === "true";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 const backendApi =
 	process.env.NEXT_PUBLIC_BACKEND_API ?? "http://localhost:8000/api/v1";
 const backendOrigin = backendApi.replace(/\/api.*$/, "");
@@ -27,6 +28,7 @@ const nextConfig = {
 				output: "export",
 				images: { unoptimized: true },
 				trailingSlash: true,
+				...(basePath ? { basePath, assetPrefix: basePath } : {}),
 			}
 		: {
 				output: "standalone",

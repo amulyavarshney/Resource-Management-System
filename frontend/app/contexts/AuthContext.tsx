@@ -105,7 +105,10 @@ export async function signOut(options?: {
 	clearAuth();
 	window.dispatchEvent(new Event("rms-auth-changed"));
 	if (options?.redirect !== false) {
-		window.location.href = options?.callbackUrl ?? "/auth";
+		const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+		const target = options?.callbackUrl ?? "/auth";
+		const path = target.startsWith("/") ? target : `/${target}`;
+		window.location.href = `${base}${path}`;
 	}
 }
 

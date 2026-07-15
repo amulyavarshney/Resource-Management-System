@@ -117,7 +117,7 @@ auto-created via `create_all`.
 | Piece | Host |
 |-------|------|
 | Backend API | [Render](https://render.com) via [`render.yaml`](render.yaml) |
-| Frontend | https://amulyavarshney.github.io (static export) |
+| Frontend | https://amulyavarshney.github.io/Resource-Management-System/ (static export) |
 
 ### Backend (Render)
 
@@ -128,12 +128,13 @@ auto-created via `create_all`.
 
 ### Frontend (GitHub Pages)
 
-1. Create (or use) the user site repo [`amulyavarshney/amulyavarshney.github.io`](https://github.com/amulyavarshney/amulyavarshney.github.io).
-2. In this repo’s **Settings → Secrets and variables → Actions**, add:
+Same approach as VitalPlan: **same-repo** Pages with the built-in `GITHUB_TOKEN` (no PAT).
+
+1. Repo **Settings → Pages → Build and deployment → Source**: **GitHub Actions**.
+2. **Settings → Secrets and variables → Actions → Variables** (or Secrets), set:
    - `NEXT_PUBLIC_BACKEND_API` — e.g. `https://rms-api.onrender.com/api/v1`
-   - `PAGES_DEPLOY_TOKEN` — a PAT with `contents:write` on `amulyavarshney.github.io`
-3. Push to `main` (or run **Actions → Deploy GitHub Pages → Run workflow**).
-4. Site: https://amulyavarshney.github.io
+3. Push to `main`, or **Actions → Deploy GitHub Pages → Run workflow** (optional `api_url` input).
+4. Site: https://amulyavarshney.github.io/Resource-Management-System/
 
 Auth is client-side JWT (browser storage). There is no Next.js server on Pages.
 

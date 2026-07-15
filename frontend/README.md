@@ -134,7 +134,9 @@ flowchart TD
     E --> F["NEXT_PUBLIC_BACKEND_API"]
 ```
 
-For GitHub Pages static export, set `STATIC_EXPORT=true` (see root README deploy section).
+For GitHub Pages static export, set `STATIC_EXPORT=true` and
+`NEXT_PUBLIC_BASE_PATH=/Resource-Management-System` (see root README deploy section).
+Site: https://amulyavarshney.github.io/Resource-Management-System/
 
 Every service file wraps one backend resource, so a component never talks
 to Axios directly — it calls e.g. `weekDataService.getWorkHours(...)`,
